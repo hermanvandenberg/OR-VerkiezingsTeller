@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.supabase.co; connect-src https://*.supabase.co https://cdn.jsdelivr.net; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Inloggen · OR-VerkiezingsTeller</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="css/stijl.css">
+</head>
+<body>
+  <main class="wrap heel-smal">
+    <div class="brand">
+      <img class="logo" alt="" hidden>
+      <div><strong>OR-VerkiezingsTeller</strong><small>Voor de kiescommissie en de beheerder</small></div>
+    </div>
+
+    <p class="notitie">Wil je stemmen? Gebruik dan de persoonlijke link uit je uitnodigingsmail. Deze pagina is alleen voor de kiescommissie.</p>
+
+    <!-- Inloggen -->
+    <form id="v-inloggen" class="kaart" novalidate>
+      <h1>Inloggen</h1>
+      <label class="veld" for="li-email">E-mailadres<input id="li-email" type="email" autocomplete="username" required></label>
+      <label class="veld" for="li-ww">Wachtwoord<input id="li-ww" type="password" autocomplete="current-password" required></label>
+      <div class="rij"><button class="knop" type="submit">Inloggen</button></div>
+      <p class="fout" role="alert" hidden></p>
+      <p class="hint"><a href="#registreren">Account aanmaken</a> (alleen na uitnodiging) · <a href="#vergeten">Wachtwoord vergeten</a></p>
+    </form>
+
+    <!-- Registreren -->
+    <form id="v-registreren" class="kaart" novalidate hidden>
+      <h1>Account aanmaken</h1>
+      <p class="hint">Dit kan alleen met het e-mailadres waarop de beheerder je heeft uitgenodigd.</p>
+      <label class="veld" for="re-email">E-mailadres<input id="re-email" type="email" autocomplete="username" required></label>
+      <label class="veld" for="re-ww">Wachtwoord <span class="uitleg">minimaal 12 tekens</span><input id="re-ww" type="password" autocomplete="new-password" minlength="12" required></label>
+      <label class="veld" for="re-ww2">Wachtwoord nog een keer<input id="re-ww2" type="password" autocomplete="new-password" required></label>
+      <div class="rij"><button class="knop" type="submit">Account aanmaken</button></div>
+      <p class="fout" role="alert" hidden></p>
+      <p class="melding-ok" role="status" hidden></p>
+      <p class="hint"><a href="#inloggen">Terug naar inloggen</a></p>
+    </form>
+
+    <!-- Wachtwoord vergeten -->
+    <form id="v-vergeten" class="kaart" novalidate hidden>
+      <h1>Wachtwoord vergeten</h1>
+      <label class="veld" for="ve-email">E-mailadres<input id="ve-email" type="email" autocomplete="username" required></label>
+      <div class="rij"><button class="knop" type="submit">Stuur herstelmail</button></div>
+      <p class="melding-ok" role="status" hidden></p>
+      <p class="hint"><a href="#inloggen">Terug naar inloggen</a></p>
+    </form>
+
+    <!-- Nieuw wachtwoord na herstelmail -->
+    <form id="v-nieuw" class="kaart" novalidate hidden>
+      <h1>Nieuw wachtwoord</h1>
+      <label class="veld" for="nw-ww">Nieuw wachtwoord <span class="uitleg">minimaal 12 tekens</span><input id="nw-ww" type="password" autocomplete="new-password" minlength="12" required></label>
+      <div class="rij"><button class="knop" type="submit">Opslaan</button></div>
+      <p class="fout" role="alert" hidden></p>
+    </form>
+
+    <!-- Tweestapsverificatie instellen -->
+    <form id="v-mfa-instellen" class="kaart" novalidate hidden>
+      <h1>Tweestapsverificatie instellen</h1>
+      <p>Scan deze code met een authenticator-app op je telefoon, bijvoorbeeld Microsoft Authenticator of Google Authenticator. Vul daarna de 6 cijfers in.</p>
+      <img id="mfa-qr" class="qr" alt="QR-code voor je authenticator-app">
+      <p class="hint">Lukt scannen niet? Voer deze sleutel handmatig in: <span id="mfa-sleutel" class="mono"></span></p>
+      <label class="veld" for="mfa-code1">Code uit de app<input id="mfa-code1" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required></label>
+      <div class="rij"><button class="knop" type="submit">Bevestigen</button></div>
+      <p class="fout" role="alert" hidden></p>
+    </form>
+
+    <!-- Tweestapsverificatie code -->
+    <form id="v-mfa-code" class="kaart" novalidate hidden>
+      <h1>Code uit je app</h1>
+      <p>Open je authenticator-app en vul de 6 cijfers in.</p>
+      <label class="veld" for="mfa-code2">Code<input id="mfa-code2" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required></label>
+      <div class="rij"><button class="knop" type="submit">Inloggen</button><button class="knop licht" type="button" id="mfa-annuleer">Annuleren</button></div>
+      <p class="fout" role="alert" hidden></p>
+    </form>
+  </main>
+  <script type="module" src="js/inloggen.js"></script>
+</body>
+</html>
