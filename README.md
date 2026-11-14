@@ -8,7 +8,7 @@ Digitaal stemmen voor (tussentijdse) OR-verkiezingen. Iedere collega krijgt een 
 |---|---|---|
 | `stem.html#<link>` | Iedere collega | Kandidaattegels naast elkaar, onthouden, naam en e-mail, bevestigingsvenster |
 | `index.html` | Commissie en beheerder | Inloggen, account aanmaken (alleen na uitnodiging), tweestapsverificatie |
-| `dashboard.html` | Kiescommissie | Opkomst, uitslag (na sluiting of live), meldingen, stemmers tonen, logboek |
+| `dashboard.html` | Kiescommissie | Opkomst, uitslag (na sluiting of live), meldingen, logboek |
 | `beheer.html` | Alleen de beheerder | Verkiezing, data en tijden, herinneringen, kandidaten met foto, e-maillijst, versturen, commissie, logo |
 
 De website zelf staat op GitHub Pages. Stemmen, accounts en logboek staan in **Supabase** (database met inlog), omdat GitHub Pages zelf niets kan opslaan.
@@ -22,20 +22,17 @@ De website zelf staat op GitHub Pages. Stemmen, accounts en logboek staan in **S
 - **Logboek**: elke handeling van beheerder en commissie wordt vastgelegd en kan niet worden aangepast.
 - **Alleen uitgenodigde adressen** kunnen een account maken. Inloggen kan alleen met tweestapsverificatie (code-app op de telefoon). De sessie stopt als je de browser sluit.
 - **Rollen**: alleen de beheerder kan verkiezingen inrichten, lijsten inladen en commissieleden uitnodigen. Commissieleden kunnen kijken en meldingen afhandelen. De kiezerslijst is alleen voor de beheerder zichtbaar.
-- **Vast na de start**: starttijd, stemgeheim, zichtbaarheid van de uitslag en kandidaten. Het eindmoment kan nog verlengd worden (en dat staat in het logboek).
+- **Vast na de start**: starttijd, zichtbaarheid van de uitslag en kandidaten. Het eindmoment kan nog verlengd worden (en dat staat in het logboek).
 
 ### Stemgeheim
 
-Per verkiezing kies je:
+De stemming is volledig anoniem. Een stem wordt opgeslagen zonder naam, e-mailadres of tijdstip; bij de kiezer wordt alleen bijgehouden *dat* die gestemd heeft. Niemand, ook de beheerder niet, kan terugzien wie op wie heeft gestemd.
 
-- **Anoniem, tonen mogelijk** (standaard). De koppeling stemmer-keuze wordt bewaard, maar is pas zichtbaar als twee commissieleden akkoord geven. Ieder akkoord en iedere keer bekijken staat in het logboek. De stempagina vertelt dit aan de kiezer.
-- **Volledig geheim.** De koppeling wordt nooit opgeslagen. Stemmers tonen kan dan niet.
-
-De WOR vraagt dat het kiesreglement een geheime stemming waarborgt. Check jullie kiesreglement voordat je "tonen mogelijk" gebruikt.
+Eén uitzondering, alleen zolang het duurt: een stem met een afwijkend e-mailadres wordt apart gezet tot de commissie besluit. Tot dat moment weet de database bij welke melding die stem hoort (de commissie ziet de keuze niet). Zodra de commissie goed- of afkeurt, wordt die verwijzing gewist.
 
 ### Eerlijk over de grenzen
 
-- Wie het Supabase-project beheert (eigenaar van het account), kan technisch gezien in de database kijken. Bij "volledig geheim" valt daar niets te koppelen.
+- Wie het Supabase-project beheert, kan technisch gezien in de database kijken, maar vindt daar geen koppeling tussen kiezer en keuze.
 - Bij **Word-afdruk samenvoegen** heeft de beheerder een lijst met alle links in handen. Wie die lijst heeft, kan namens anderen stemmen. Verwijder de lijst na gebruik en ook de verzonden mails uit "Verzonden items". Bij **Outlook automatisch** ziet niemand de links.
 - Bij "uitslag live" kan iemand die de tussenstand vaak ververst en weet wie net gestemd heeft, iets afleiden. Kies daarom bij voorkeur "pas na sluiting".
 
@@ -63,7 +60,7 @@ Ga naar `.../index.html#registreren`, maak een account met het adres uit stap 1,
 
 ### 6. In het beheerscherm
 1. **Huisstijl en website**: vul de naam van de OR en het websiteadres in en upload het logo (PNG, JPG of WebP).
-2. **Verkiezing**: titel, toelichting, start en einde (datum en tijd), stemgeheim, wanneer de uitslag zichtbaar is, verzendwijze en herinneringsmomenten.
+2. **Verkiezing**: titel, toelichting, start en einde (datum en tijd), wanneer de uitslag zichtbaar is, verzendwijze en herinneringsmomenten.
 3. **Kandidaten**: naam, functie, tekst en foto.
 4. **E-maillijst**: sleep een Excel- of CSV-bestand erin (ook een export van Outlook-contactpersonen), of plak adressen uit Outlook. Je ziet eerst hoeveel geldig, dubbel en ongeldig zijn.
 5. **Kiescommissie**: vul naam en e-mail in (max. 5) en stuur ze de registratielink die eronder staat.

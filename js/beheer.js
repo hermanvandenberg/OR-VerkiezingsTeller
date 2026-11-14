@@ -65,13 +65,12 @@ function vulFormulier(v) {
   $("#v-toelichting").value = v?.toelichting ?? "";
   $("#v-start").value = naarLokaal(v?.start_at);
   $("#v-eind").value = naarLokaal(v?.eind_at);
-  $("#v-stemgeheim").value = v?.stemgeheim ?? "tonen_mogelijk";
   $("#v-uitslag").value = v?.uitslag_zichtbaar ?? "na_sluiting";
   $("#v-verzend").value = v?.verzendwijze ?? "samenvoegen";
   $("#herinneringen").replaceChildren(...(v?.herinneringen ?? []).map((h) => herinneringRij(naarLokaal(h))));
 
   const vast = begonnen();
-  for (const id of ["#v-start", "#v-stemgeheim", "#v-uitslag"]) $(id).disabled = !!vast;
+  for (const id of ["#v-start", "#v-uitslag"]) $(id).disabled = !!vast;
   $("#verkiezing-weg").hidden = !v || vast;
 
   const status = $("#verkiezing-status");
@@ -112,7 +111,6 @@ $("#verkiezing-form").addEventListener("submit", async (e) => {
     toelichting: $("#v-toelichting").value.trim() || null,
     start_at: vanLokaal($("#v-start").value),
     eind_at: vanLokaal($("#v-eind").value),
-    stemgeheim: $("#v-stemgeheim").value,
     uitslag_zichtbaar: $("#v-uitslag").value,
     verzendwijze: $("#v-verzend").value,
     herinneringen: $$("#herinneringen input").map((i) => vanLokaal(i.value)).filter(Boolean).sort(),
@@ -122,7 +120,7 @@ $("#verkiezing-form").addEventListener("submit", async (e) => {
   if (new Date(rij.eind_at) <= new Date(rij.start_at)) return toonFout("Het eindmoment moet na de start liggen.");
   const buiten = rij.herinneringen.filter((h) => h <= rij.start_at || h >= rij.eind_at);
   if (buiten.length) return toonFout("Herinneringen moeten tussen de start en het eindmoment liggen.");
-  if (begonnen()) { delete rij.start_at; delete rij.stemgeheim; delete rij.uitslag_zichtbaar; }
+  if (begonnen()) { delete rij.start_at; delete rij.uitslag_zichtbaar; }
 
   const { data, error } = huidig
     ? await db.from("verkiezingen").update(rij).eq("id", huidig.id).select().single()

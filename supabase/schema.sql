@@ -48,8 +48,6 @@ create table public.verkiezingen (
   toelichting       text,
   start_at          timestamptz not null,
   eind_at           timestamptz not null,
-  stemgeheim        text not null default 'tonen_mogelijk'
-                    check (stemgeheim in ('tonen_mogelijk', 'volledig_geheim')),
   uitslag_zichtbaar text not null default 'na_sluiting'
                     check (uitslag_zichtbaar in ('na_sluiting', 'live')),
   verzendwijze      text not null default 'samenvoegen'
@@ -80,21 +78,14 @@ create table public.kiezers (
   unique (verkiezing_id, email)
 );
 
--- Stemmen bevatten bewust geen tijdstip en geen kiezer.
+-- Stemmen zijn volledig anoniem: geen tijdstip en geen verwijzing naar de kiezer.
+-- Nergens wordt opgeslagen wie op wie heeft gestemd.
 create table public.stemmen (
   id            uuid primary key default gen_random_uuid(),
   verkiezing_id uuid not null references public.verkiezingen (id) on delete cascade,
   kandidaat_id  uuid references public.kandidaten (id),   -- leeg = onthouden
   status        text not null default 'geldig'
                 check (status in ('geldig', 'apart', 'afgekeurd'))
-);
-
--- Alleen gevuld als de verkiezing "tonen_mogelijk" is.
-create table public.stem_koppeling (
-  stem_id  uuid primary key references public.stemmen (id) on delete cascade,
-  kiezer_id uuid not null references public.kiezers (id) on delete cascade,
-  ingevulde_naam  text,
-  ingevulde_email text
 );
 
 create table public.meldingen (
@@ -121,14 +112,6 @@ create table public.logboek (
   actie         text not null,
   details       jsonb,
   verkiezing_id uuid
-);
-
-create table public.toon_akkoorden (
-  verkiezing_id uuid not null references public.verkiezingen (id) on delete cascade,
-  user_id       uuid not null,
-  naam          text not null,
-  at            timestamptz not null default now(),
-  primary key (verkiezing_id, user_id)
 );
 
 create table public.mail_wachtrij (
@@ -297,7 +280,6 @@ begin
     'eind_at', v.eind_at,
     'status', private.status_van(v),
     'al_gestemd', k.gestemd,
-    'stemgeheim', v.stemgeheim,
     'organisatie', a.organisatie,
     'logo_url', a.logo_url,
     'kandidaten', coalesce((
@@ -370,11 +352,6 @@ begin
 
   update public.kiezers set gestemd = true where id = k.id;
 
-  if v.stemgeheim = 'tonen_mogelijk' then
-    insert into public.stem_koppeling (stem_id, kiezer_id, ingevulde_naam, ingevulde_email)
-    values (v_stem, k.id, left(v_naam, 200), left(v_email, 200));
-  end if;
-
   if v_status = 'apart' then
     insert into public.meldingen (verkiezing_id, soort, omschrijving, kiezer_id, stem_id, ingevulde_naam, ingevulde_email)
     values (v.id, 'ander_emailadres',
@@ -395,7 +372,6 @@ declare
   v public.verkiezingen;
   v_status text;
   v_zichtbaar boolean;
-  v_akkoorden int;
 begin
   if not public.is_commissie() then
     raise exception 'Geen toegang';
@@ -406,7 +382,6 @@ begin
   end if;
   v_status := private.status_van(v);
   v_zichtbaar := v_status = 'gesloten' or v.uitslag_zichtbaar = 'live';
-  select count(*) into v_akkoorden from public.toon_akkoorden where verkiezing_id = v.id;
 
   return jsonb_build_object(
     'titel', v.titel,
@@ -414,16 +389,12 @@ begin
     'start_at', v.start_at,
     'eind_at', v.eind_at,
     'uitslag_zichtbaar', v.uitslag_zichtbaar,
-    'stemgeheim', v.stemgeheim,
     'kiezers', (select count(*) from public.kiezers where verkiezing_id = v.id),
     'gestemd', (select count(*) from public.kiezers where verkiezing_id = v.id and gestemd),
     'apart', (select count(*) from public.stemmen where verkiezing_id = v.id and status = 'apart'),
     'afgekeurd', (select count(*) from public.stemmen where verkiezing_id = v.id and status = 'afgekeurd'),
     'open_meldingen', (select count(*) from public.meldingen
                        where (verkiezing_id = v.id or verkiezing_id is null) and status = 'open'),
-    'akkoorden', v_akkoorden,
-    'mijn_akkoord', exists (select 1 from public.toon_akkoorden
-                            where verkiezing_id = v.id and user_id = auth.uid()),
     'uitslag', case when v_zichtbaar then (
       select jsonb_agg(r order by r.volgorde)
       from (
@@ -497,48 +468,6 @@ begin
 
   perform private.log('melding ' || p_besluit,
                       jsonb_build_object('melding', p_id, 'soort', m.soort), m.verkiezing_id);
-end $$;
-
-create function public.toon_akkoord(p_verkiezing uuid, p_aan boolean) returns void
-language plpgsql volatile security definer set search_path = '' as $$
-begin
-  if not public.is_commissie() then
-    raise exception 'Geen toegang';
-  end if;
-  if (select stemgeheim from public.verkiezingen where id = p_verkiezing) <> 'tonen_mogelijk' then
-    raise exception 'Bij deze verkiezing is het stemgeheim volledig; stemmers tonen kan niet';
-  end if;
-  if p_aan then
-    insert into public.toon_akkoorden (verkiezing_id, user_id, naam)
-    values (p_verkiezing, auth.uid(), private.mijn_naam())
-    on conflict do nothing;
-  else
-    delete from public.toon_akkoorden where verkiezing_id = p_verkiezing and user_id = auth.uid();
-  end if;
-  perform private.log(case when p_aan then 'akkoord stemmers tonen gegeven'
-                           else 'akkoord stemmers tonen ingetrokken' end, null, p_verkiezing);
-end $$;
-
-create function public.stemmers_lijst(p_verkiezing uuid)
-returns table (naam text, email text, ingevulde_naam text, ingevulde_email text, keuze text, status text)
-language plpgsql volatile security definer set search_path = '' as $$
-begin
-  if not public.is_commissie() then
-    raise exception 'Geen toegang';
-  end if;
-  if (select count(*) from public.toon_akkoorden where verkiezing_id = p_verkiezing) < 2 then
-    raise exception 'Hiervoor is akkoord van twee commissieleden nodig';
-  end if;
-  perform private.log('stemmers en keuzes bekeken', null, p_verkiezing);
-  return query
-    select k.naam, k.email, sk.ingevulde_naam, sk.ingevulde_email,
-           coalesce(c.naam, 'Onthouden'), s.status
-    from public.stem_koppeling sk
-    join public.stemmen s on s.id = sk.stem_id
-    join public.kiezers k on k.id = sk.kiezer_id
-    left join public.kandidaten c on c.id = s.kandidaat_id
-    where s.verkiezing_id = p_verkiezing
-    order by k.naam, k.email;
 end $$;
 
 -- ---------------------------------------------------------------------
@@ -779,9 +708,9 @@ create function private.verkiezing_bewaken() returns trigger
 language plpgsql security definer set search_path = '' as $$
 begin
   if tg_op = 'UPDATE' and old.start_at <= now() then
-    if new.start_at <> old.start_at or new.stemgeheim <> old.stemgeheim
+    if new.start_at <> old.start_at
        or new.uitslag_zichtbaar <> old.uitslag_zichtbaar then
-      raise exception 'Start, stemgeheim en zichtbaarheid van de uitslag liggen vast zodra de stemming is begonnen';
+      raise exception 'Start en zichtbaarheid van de uitslag liggen vast zodra de stemming is begonnen';
     end if;
   end if;
   if tg_op = 'DELETE' then
@@ -793,7 +722,7 @@ begin
   end if;
   perform private.log(case when tg_op = 'INSERT' then 'verkiezing aangemaakt' else 'verkiezing gewijzigd' end,
                       jsonb_build_object('titel', new.titel, 'start', new.start_at, 'eind', new.eind_at,
-                                         'stemgeheim', new.stemgeheim, 'uitslag', new.uitslag_zichtbaar,
+                                         'uitslag', new.uitslag_zichtbaar,
                                          'verzendwijze', new.verzendwijze),
                       new.id);
   return new;
@@ -840,14 +769,12 @@ alter table public.verkiezingen           enable row level security;
 alter table public.kandidaten             enable row level security;
 alter table public.kiezers                enable row level security;
 alter table public.stemmen                enable row level security;
-alter table public.stem_koppeling         enable row level security;
 alter table public.meldingen              enable row level security;
 alter table public.logboek                enable row level security;
-alter table public.toon_akkoorden         enable row level security;
 alter table public.mail_wachtrij          enable row level security;
 alter table public.herinneringen_verwerkt enable row level security;
 
--- Geen policies op stemmen, stem_koppeling en herinneringen_verwerkt:
+-- Geen policies op stemmen en herinneringen_verwerkt:
 -- niemand kan die tabellen rechtstreeks lezen of wijzigen.
 
 create policy "iedereen leest huisstijl" on public.app_instellingen
@@ -884,8 +811,6 @@ create policy "commissie leest meldingen" on public.meldingen
   for select using (public.is_commissie());
 create policy "commissie leest logboek" on public.logboek
   for select using (public.is_commissie());
-create policy "commissie leest akkoorden" on public.toon_akkoorden
-  for select using (public.is_commissie());
 create policy "beheerder leest wachtrij" on public.mail_wachtrij
   for select using (public.is_beheerder());
 
@@ -900,7 +825,6 @@ grant execute on function public.mijn_rol(), public.is_beheerder(), public.is_co
                           public.mijn_account() to authenticated;
 grant execute on function public.dashboard(uuid), public.melding_afhandelen(bigint, text),
                           public.meldingen_lijst(uuid),
-                          public.toon_akkoord(uuid, boolean), public.stemmers_lijst(uuid),
                           public.kiezers_toevoegen(uuid, jsonb), public.kiezer_verwijderen(uuid),
                           public.samenvoeglijst(uuid, text), public.mail_inplannen(uuid, text),
                           public.commissie_uitnodigen(text, text), public.commissie_verwijderen(text)

@@ -81,13 +81,6 @@ async function vernieuw() {
   if (d.afgekeurd) extra.push(`${d.afgekeurd} afgekeurd.`);
   $("#uitslag-extra").textContent = extra.join(" ");
 
-  // Stemmers tonen
-  $("#tonen-kaart").hidden = d.stemgeheim !== "tonen_mogelijk";
-  $("#mijn-akkoord").checked = d.mijn_akkoord;
-  $("#akkoord-stand").textContent = `${d.akkoorden} van de minimaal 2 akkoorden gegeven.`;
-  $("#lijst-tonen").hidden = d.akkoorden < 2;
-  if (d.akkoorden < 2) $("#stemmers").hidden = true;
-
   await Promise.all([laadMeldingen(), laadLogboek()]);
 }
 
@@ -145,27 +138,6 @@ async function laadLogboek() {
       el("td", {}, r.actie, r.details ? el("div", { class: "hint mono", text: Object.entries(r.details).map(([k, v]) => `${k}: ${/^\d{4}-\d\d-\d\dT/.test(v) ? fmtKort(v) : v}`).join(" · ") }) : null))))));
 }
 
-$("#mijn-akkoord").addEventListener("change", async (e) => {
-  const { error } = await db.rpc("toon_akkoord", { p_verkiezing: huidig, p_aan: e.target.checked });
-  if (error) { e.target.checked = !e.target.checked; return toonFout(error); }
-  vernieuw();
-});
-
-$("#lijst-tonen").addEventListener("click", async () => {
-  const { data, error } = await db.rpc("stemmers_lijst", { p_verkiezing: huidig });
-  if (error) return toonFout(error);
-  const tabel = el("table", {},
-    el("thead", {}, el("tr", {}, el("th", { text: "Stemmer" }), el("th", { text: "Ingevuld" }), el("th", { text: "Keuze" }), el("th", { text: "Status" }))),
-    el("tbody", {}, ...data.map((r) => el("tr", {},
-      el("td", {}, r.naam || "", el("div", { class: "hint", text: r.email })),
-      el("td", {}, r.ingevulde_naam || "", el("div", { class: "hint", text: r.ingevulde_email || "" })),
-      el("td", { text: r.keuze }),
-      el("td", { text: r.status })))));
-  $("#stemmers").replaceChildren(data.length ? tabel : el("p", { class: "hint", text: "Nog geen stemmen." }));
-  $("#stemmers").hidden = false;
-  laadLogboek();
-});
-
 $("#uitslag-download").addEventListener("click", () => {
   const d = laatsteData;
   const regels = [csvRegel(["Kandidaat", "Stemmen"]), ...d.uitslag.map((r) => csvRegel([r.naam, r.stemmen])),
@@ -174,7 +146,7 @@ $("#uitslag-download").addEventListener("click", () => {
   download(`uitslag-${d.titel.replace(/[^\w-]+/g, "-")}.csv`, regels.join("\r\n"));
 });
 
-$("#verkiezing").addEventListener("change", (e) => { huidig = e.target.value; $("#stemmers").hidden = true; vernieuw(); });
+$("#verkiezing").addEventListener("change", (e) => { huidig = e.target.value; vernieuw(); });
 $("#uitloggen").addEventListener("click", uitloggen);
 
 (async function start() {

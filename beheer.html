@@ -46,12 +46,6 @@
           <label class="veld" for="v-eind">Stemmen kan tot<input id="v-eind" type="datetime-local" required></label>
         </div>
         <div class="velden">
-          <label class="veld" for="v-stemgeheim">Stemgeheim
-            <select id="v-stemgeheim">
-              <option value="tonen_mogelijk">Anoniem; commissie kan stemmers tonen met 2 akkoorden</option>
-              <option value="volledig_geheim">Volledig geheim; stemmers tonen kan nooit</option>
-            </select>
-          </label>
           <label class="veld" for="v-uitslag">Uitslag zichtbaar voor de commissie
             <select id="v-uitslag">
               <option value="na_sluiting">Pas na sluiting (aanbevolen)</option>
@@ -70,7 +64,7 @@
           <div id="herinneringen" class="stapel krap"></div>
           <div class="rij"><button type="button" class="knop licht klein" id="herinnering-erbij">Herinnering toevoegen</button></div>
         </div>
-        <p class="hint">Start, stemgeheim, zichtbaarheid van de uitslag en de kandidaten liggen vast zodra de stemming begint. Het eindmoment kun je daarna nog verlengen.</p>
+        <p class="hint">Start, zichtbaarheid van de uitslag en de kandidaten liggen vast zodra de stemming begint. Het eindmoment kun je daarna nog verlengen.</p>
         <div class="rij">
           <button type="submit" class="knop">Verkiezing opslaan</button>
           <button type="button" class="knop gevaar" id="verkiezing-weg" hidden>Verwijderen</button>

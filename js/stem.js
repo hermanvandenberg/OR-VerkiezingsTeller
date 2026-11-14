@@ -67,9 +67,7 @@ function toonBiljet(b) {
     volgende.click();
   }));
 
-  $("#geheim-uitleg").textContent = b.stemgeheim === "volledig_geheim"
-    ? "Je stem is geheim. Niemand kan zien op wie jij hebt gestemd."
-    : "Je stem wordt anoniem geteld. Alleen als twee leden van de kiescommissie daar samen akkoord voor geven, kan de commissie inzien wie op wie stemde, bijvoorbeeld bij een controle. Dat wordt altijd vastgelegd.";
+  $("#geheim-uitleg").textContent = "Je stem is geheim. Er wordt nergens opgeslagen op wie jij hebt gestemd; alleen dát je gestemd hebt.";
 
   $("#laden").hidden = true;
   $("#biljet").hidden = false;
