@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://cdn.sheetjs.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co; connect-src https://*.supabase.co https://cdn.jsdelivr.net https://cdn.sheetjs.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Beheer · OR-VerkiezingsTeller</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="css/stijl.css">
+</head>
+<body>
+  <main class="wrap" id="pagina" hidden>
+    <header class="kop">
+      <div class="brand">
+        <img class="logo" alt="" hidden>
+        <div><strong>Beheer</strong><small id="wie"></small></div>
+      </div>
+      <div class="rij">
+        <a href="dashboard.html" class="knop licht klein">Kiescommissie</a>
+        <button class="knop licht klein" id="uitloggen" type="button">Uitloggen</button>
+      </div>
+    </header>
+    <p id="fout" class="fout" role="alert" hidden></p>
+
+    <!-- 1. Verkiezing -->
+    <section class="kaart">
+      <div class="kop">
+        <h2>Verkiezing</h2>
+        <div class="rij">
+          <select id="verkiezing-keuze" aria-label="Kies een verkiezing"></select>
+          <button type="button" class="knop licht klein" id="nieuwe-verkiezing">Nieuwe verkiezing</button>
+        </div>
+      </div>
+      <form id="verkiezing-form" class="stapel" novalidate>
+        <p id="verkiezing-status" class="rij"></p>
+        <div class="velden">
+          <label class="veld" for="v-titel">Titel<input id="v-titel" required placeholder="Tussentijdse OR-verkiezing november 2026"></label>
+        </div>
+        <label class="veld" for="v-toelichting">Toelichting op de stempagina <span class="uitleg">optioneel</span>
+          <textarea id="v-toelichting" placeholder="Er is één zetel vrij in de ondernemingsraad…"></textarea>
+        </label>
+        <div class="velden">
+          <label class="veld" for="v-start">Stemmen kan vanaf<input id="v-start" type="datetime-local" required></label>
+          <label class="veld" for="v-eind">Stemmen kan tot<input id="v-eind" type="datetime-local" required></label>
+        </div>
+        <div class="velden">
+          <label class="veld" for="v-uitslag">Uitslag zichtbaar voor de commissie
+            <select id="v-uitslag">
+              <option value="na_sluiting">Pas na sluiting (aanbevolen)</option>
+              <option value="live">Direct, tijdens de stemming</option>
+            </select>
+          </label>
+          <label class="veld" for="v-verzend">Uitnodigingen versturen via
+            <select id="v-verzend">
+              <option value="samenvoegen">Word-afdruk samenvoegen (zelf versturen)</option>
+              <option value="outlook_automatisch">Outlook automatisch (IT-koppeling nodig)</option>
+            </select>
+          </label>
+        </div>
+        <div class="stapel krap">
+          <span class="veld"><b>Herinneringen</b> <span class="hint">Gaan naar iedereen die nog niet gestemd heeft.</span></span>
+          <div id="herinneringen" class="stapel krap"></div>
+          <div class="rij"><button type="button" class="knop licht klein" id="herinnering-erbij">Herinnering toevoegen</button></div>
+        </div>
+        <p class="hint">Start, zichtbaarheid van de uitslag en de kandidaten liggen vast zodra de stemming begint. Het eindmoment kun je daarna nog verlengen.</p>
+        <div class="rij">
+          <button type="submit" class="knop">Verkiezing opslaan</button>
+          <button type="button" class="knop gevaar" id="verkiezing-weg" hidden>Verwijderen</button>
+          <span id="verkiezing-ok" class="melding-ok" role="status"></span>
+        </div>
+      </form>
+    </section>
+
+    <div id="na-opslaan" class="stapel" hidden>
+      <!-- 2. Kandidaten -->
+      <section class="kaart">
+        <h2>Kandidaten</h2>
+        <div id="kandidaten" class="kolommen"></div>
+        <div class="rij"><button type="button" class="knop licht" id="kandidaat-erbij">Kandidaat toevoegen</button></div>
+      </section>
+
+      <!-- 3. Kiezers -->
+      <section class="kaart">
+        <div class="kop"><h2>E-maillijst</h2><span id="kiezers-aantal" class="chip"></span></div>
+        <div class="kolommen">
+          <div class="stapel krap">
+            <b>Bestand inladen</b>
+            <label class="drop" id="drop" for="lijst-bestand">
+              <span>Sleep een Excel- of CSV-bestand hierheen, of klik om te kiezen.</span>
+              <span class="hint">Werkt ook met een export van Outlook-contactpersonen. De lijst moet een kolom met e-mailadressen hebben; een kolom met namen is handig.</span>
+              <input id="lijst-bestand" type="file" accept=".csv,.txt,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel">
+            </label>
+          </div>
+          <div class="stapel krap">
+            <label class="veld" for="lijst-plak"><b>Of plak adressen uit Outlook</b>
+              <textarea id="lijst-plak" placeholder="Jansen, Piet &lt;p.jansen@bedrijf.nl&gt;; Smit, Ruud &lt;r.smit@bedrijf.nl&gt;"></textarea>
+            </label>
+            <div class="rij"><button type="button" class="knop licht klein" id="plak-lezen">Adressen inlezen</button></div>
+          </div>
+        </div>
+        <div id="voorbeeld" class="stapel krap" hidden>
+          <p class="rij"><span id="vb-geldig" class="chip ok"></span><span id="vb-dubbel" class="chip warn"></span><span id="vb-ongeldig" class="chip rood"></span></p>
+          <details><summary>Bekijk de lijst</summary><div id="vb-tabel" class="tabel"></div></details>
+          <div class="rij">
+            <button type="button" class="knop" id="lijst-toevoegen">Toevoegen aan de verkiezing</button>
+            <button type="button" class="knop licht" id="lijst-annuleren">Annuleren</button>
+          </div>
+        </div>
+        <p id="lijst-ok" class="melding-ok" role="status"></p>
+        <details>
+          <summary>Huidige kiezers bekijken</summary>
+          <div class="stapel krap">
+            <input id="kiezers-zoek" type="search" placeholder="Zoek op naam of e-mail" aria-label="Zoek kiezers">
+            <div id="kiezers" class="tabel"></div>
+          </div>
+        </details>
+      </section>
+
+      <!-- 4. Versturen -->
+      <section class="kaart">
+        <h2>Uitnodigingen en herinneringen</h2>
+        <div id="verzend-samenvoegen" class="stapel krap" hidden>
+          <p>Download de lijst en verstuur hem met <b>Word &gt; Verzendlijsten &gt; Afdruk samenvoegen &gt; E-mailberichten</b> vanuit je eigen Outlook. In de lijst staat voor iedere collega een persoonlijke link in de kolom <code>link</code>.</p>
+          <div class="rij">
+            <button type="button" class="knop" id="dl-uitnodiging">Download uitnodigingslijst</button>
+            <button type="button" class="knop licht" id="dl-herinnering">Download herinneringslijst</button>
+          </div>
+          <p class="notitie warn">Bewaar deze lijsten niet en verwijder de verzonden mails uit je map Verzonden items. Wie de lijst heeft, kan namens collega's stemmen. Met Outlook automatisch zie jij de links nooit.</p>
+          <p id="herinner-todo" class="hint"></p>
+        </div>
+        <div id="verzend-automatisch" class="stapel krap" hidden>
+          <p>Mails gaan vanaf je eigen Outlook-adres, ongeveer 25 per minuut. Herinneringen gaan vanzelf op de ingestelde momenten.</p>
+          <div class="rij">
+            <button type="button" class="knop" id="mail-uitnodiging">Uitnodigingen versturen</button>
+            <button type="button" class="knop licht" id="mail-herinnering">Nu een herinnering versturen</button>
+          </div>
+          <p id="wachtrij" class="rij"></p>
+        </div>
+        <p id="verzend-ok" class="melding-ok" role="status"></p>
+      </section>
+    </div>
+
+    <!-- 5. Kiescommissie -->
+    <section class="kaart">
+      <h2>Kiescommissie</h2>
+      <p class="hint">Maximaal 5 leden. Een uitgenodigd lid maakt zelf een account aan via de link hieronder, met het e-mailadres dat je hier invult, en stelt tweestapsverificatie in.</p>
+      <div id="commissie" class="tabel"></div>
+      <form id="commissie-form" class="velden" novalidate>
+        <label class="veld" for="k-naam">Naam<input id="k-naam" placeholder="Naam commissielid" required></label>
+        <label class="veld" for="k-email">E-mail<input id="k-email" type="email" placeholder="naam@bedrijf.nl" required></label>
+        <div class="rij"><button type="submit" class="knop">Uitnodigen</button></div>
+      </form>
+      <p class="hint">Stuur nieuwe leden deze link: <span id="registreer-link" class="mono"></span> <button type="button" class="knop licht klein" id="kopieer-link">Kopieer</button></p>
+      <p id="commissie-ok" class="melding-ok" role="status"></p>
+    </section>
+
+    <!-- 6. Huisstijl -->
+    <section class="kaart">
+      <h2>Huisstijl en website</h2>
+      <form id="huisstijl-form" class="stapel" novalidate>
+        <div class="velden">
+          <label class="veld" for="h-org">Naam van de OR<input id="h-org" placeholder="Ondernemingsraad"></label>
+          <label class="veld" for="h-site">Adres van deze website <span class="uitleg">nodig voor de stemlinks</span><input id="h-site" type="url" placeholder="https://…github.io/OR-VerkiezingsTeller"></label>
+        </div>
+        <div class="rij">
+          <img id="h-logo-voorbeeld" class="logo-voorbeeld" alt="Huidig logo" hidden>
+          <label class="veld" for="h-logo">Logo <span class="uitleg">PNG, JPG of WebP, max. 5 MB</span><input id="h-logo" type="file" accept="image/png,image/jpeg,image/webp"></label>
+        </div>
+        <div class="rij"><button type="submit" class="knop">Huisstijl opslaan</button><span id="huisstijl-ok" class="melding-ok" role="status"></span></div>
+      </form>
+    </section>
+  </main>
+  <script type="module" src="js/beheer.js"></script>
+</body>
+</html>

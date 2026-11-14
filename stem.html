@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.supabase.co; connect-src https://*.supabase.co https://cdn.jsdelivr.net; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Stemmen · OR-verkiezing</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="css/stijl.css">
+</head>
+<body>
+  <main class="wrap smal">
+    <div class="brand">
+      <img class="logo" alt="" hidden>
+      <div><strong id="titel">OR-verkiezing</strong><small id="sluit"></small></div>
+    </div>
+
+    <p id="laden" class="hint">Je stembiljet wordt geladen…</p>
+
+    <!-- Melding als stemmen niet kan -->
+    <section id="geen-stem" class="kaart" hidden>
+      <h2 id="geen-stem-kop"></h2>
+      <p id="geen-stem-tekst"></p>
+    </section>
+
+    <!-- Het stembiljet -->
+    <form id="biljet" class="kaart" hidden novalidate>
+      <p id="toelichting"></p>
+      <p>Kies één kandidaat voor de vacante zetel. Je kunt ook onthouden.</p>
+      <div id="tegels" class="tegels" role="radiogroup" aria-label="Kandidaten"></div>
+      <button type="button" id="onthouden" class="tegel onthouden" role="radio" aria-checked="false">
+        <span class="vink" aria-hidden="true"></span>
+        <span><b>Onthouden</b> <span class="hint">· ik stem op geen van de kandidaten</span></span>
+      </button>
+      <div class="velden">
+        <label class="veld" for="naam">Je naam
+          <input id="naam" name="naam" autocomplete="name" placeholder="Voor- en achternaam" required>
+        </label>
+        <label class="veld" for="email">Je e-mailadres
+          <input id="email" name="email" type="email" autocomplete="email" placeholder="naam@bedrijf.nl" required>
+        </label>
+      </div>
+      <div class="rij">
+        <button type="submit" id="versturen" class="knop" aria-disabled="true">Stem versturen</button>
+        <span id="bericht" class="hint" role="status">Kies eerst een kandidaat of onthouden.</span>
+      </div>
+      <p id="geheim-uitleg" class="hint"></p>
+    </form>
+
+    <!-- Bedankt -->
+    <section id="bedankt" class="kaart" hidden>
+      <span class="chip ok">Ontvangen</span>
+      <h2>Bedankt, je stem is uitgebracht.</h2>
+      <p>Je koos: <b id="bedankt-keuze"></b></p>
+      <p id="bedankt-apart" class="notitie warn" hidden>Het e-mailadres dat je invulde is anders dan het adres waarop je deze uitnodiging kreeg. De kiescommissie controleert je stem daarom eerst.</p>
+      <p class="hint">Je stemlink werkt nu niet meer. Je kunt dit venster sluiten.</p>
+    </section>
+  </main>
+
+  <dialog id="bevestig" aria-labelledby="bevestig-kop">
+    <div class="venster">
+      <h2 id="bevestig-kop">Klopt je keuze?</h2>
+      <p>Je stemt op</p>
+      <p class="keuze" id="bevestig-keuze"></p>
+      <p class="hint" id="bevestig-gegevens"></p>
+      <p class="hint">Na versturen kun je je stem niet meer wijzigen.</p>
+      <div class="rij">
+        <button type="button" class="knop" id="bevestig-ja">Ja, verstuur mijn stem</button>
+        <button type="button" class="knop licht" id="bevestig-nee">Terug</button>
+      </div>
+      <p id="bevestig-fout" class="fout" role="alert" hidden></p>
+    </div>
+  </dialog>
+
+  <script type="module" src="js/stem.js"></script>
+</body>
+</html>

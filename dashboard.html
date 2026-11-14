@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://*.supabase.co; connect-src https://*.supabase.co https://cdn.jsdelivr.net; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Kiescommissie · OR-VerkiezingsTeller</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="css/stijl.css">
+</head>
+<body>
+  <main class="wrap" hidden id="pagina">
+    <header class="kop">
+      <div class="brand">
+        <img class="logo" alt="" hidden>
+        <div><strong>Kiescommissie</strong><small id="wie"></small></div>
+      </div>
+      <div class="rij">
+        <a href="beheer.html" class="knop licht klein" id="naar-beheer" hidden>Beheer</a>
+        <button class="knop licht klein" id="uitloggen" type="button">Uitloggen</button>
+      </div>
+    </header>
+
+    <div class="rij">
+      <label class="veld" for="verkiezing">Verkiezing
+        <select id="verkiezing"></select>
+      </label>
+    </div>
+
+    <p id="leeg" class="notitie" hidden>Er is nog geen verkiezing aangemaakt. Zodra de beheerder er een klaarzet, zie je hem hier.</p>
+
+    <section id="overzicht" hidden class="stapel">
+      <div class="rij"><span id="status-chip" class="chip"></span><span id="periode" class="hint"></span></div>
+      <div class="cijfers">
+        <div class="cijfer"><b id="c-gestemd">0</b><span id="c-gestemd-van">gestemd</span></div>
+        <div class="cijfer"><b id="c-opkomst">0%</b><span>opkomst</span></div>
+        <div class="cijfer"><b id="c-meldingen">0</b><span>meldingen open</span></div>
+        <div class="cijfer"><b id="c-tijd">–</b><span id="c-tijd-label">tot sluiting</span></div>
+      </div>
+      <div class="balk" aria-hidden="true"><i id="opkomst-balk"></i></div>
+
+      <div class="kolommen">
+        <section class="kaart">
+          <div class="kop"><h2>Uitslag</h2><button type="button" class="knop licht klein" id="uitslag-download" hidden>Uitslag downloaden</button></div>
+          <div id="uitslag-slot" class="slot" hidden>
+            <span class="chip">Vergrendeld</span>
+            <b id="uitslag-slot-tekst"></b>
+            <span class="hint">Zo kan niemand tussenstanden zien of doorgeven.</span>
+          </div>
+          <div id="uitslag" class="uitslag" hidden></div>
+          <p id="uitslag-extra" class="hint"></p>
+        </section>
+
+        <section class="kaart">
+          <h2>Meldingen</h2>
+          <div id="meldingen" class="stapel krap"></div>
+        </section>
+      </div>
+
+
+      <section class="kaart">
+        <h2>Logboek</h2>
+        <p class="hint">Alles wat beheerder en commissie doen, wordt hier vastgelegd. Niemand kan dit logboek aanpassen.</p>
+        <div id="logboek" class="tabel"></div>
+      </section>
+    </section>
+    <p id="fout" class="fout" role="alert" hidden></p>
+  </main>
+  <script type="module" src="js/dashboard.js"></script>
+</body>
+</html>
