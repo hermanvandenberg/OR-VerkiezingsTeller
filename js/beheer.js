@@ -78,7 +78,31 @@ function vulFormulier(v) {
   else if (gesloten()) status.replaceChildren(el("span", { class: "chip", text: "Gesloten" }), el("span", { class: "hint", text: `op ${fmtDatum(v.eind_at)}` }));
   else if (vast) status.replaceChildren(el("span", { class: "chip ok", text: "Stemming open" }), el("span", { class: "hint", text: `tot ${fmtDatum(v.eind_at)}` }));
   else status.replaceChildren(el("span", { class: "chip warn", text: "Concept" }), el("span", { class: "hint", text: `start ${fmtDatum(v.start_at)}` }));
+
+  $("#start-blok").hidden = !v || !!vast;
+  if (v && !vast) {
+    $("#start-uitleg").textContent = `De stemming gaat vanzelf open op ${fmtDatum(v.start_at)}. Wil je nu al beginnen, klik dan op de knop. Daarna liggen de kandidaten vast en kun je de uitnodigingen versturen.`;
+  }
 }
+
+$("#verkiezing-starten").addEventListener("click", async () => {
+  wisFout();
+  if (!huidig) return;
+  const { data: kandidaten } = await db.from("kandidaten").select("id").eq("verkiezing_id", huidig.id);
+  if (!kandidaten?.length) return toonFout("Voeg eerst de kandidaten toe.");
+  if (!alleKiezers.length) return toonFout("Laad eerst de e-maillijst in.");
+  if (!instellingen.site_url) return toonFout("Vul eerst het adres van deze website in bij Huisstijl en website.");
+  if (new Date(huidig.eind_at) <= new Date()) return toonFout("Het eindmoment ligt al in het verleden. Pas eerst \"Stemmen kan tot\" aan.");
+  if (!confirm(`"${huidig.titel}" nu starten? Collega's kunnen dan stemmen tot ${fmtDatum(huidig.eind_at)}. Kandidaten en starttijd liggen daarna vast.`)) return;
+  const knop = $("#verkiezing-starten");
+  knop.disabled = true;
+  const { error } = await db.from("verkiezingen").update({ start_at: new Date().toISOString() }).eq("id", huidig.id);
+  knop.disabled = false;
+  if (error) return toonFout(error);
+  await laadVerkiezingen(huidig.id);
+  meld("#verzend-ok", "De verkiezing is gestart. Verstuur nu de uitnodigingen.");
+  $("#verzend-ok").closest("section").scrollIntoView({ behavior: "smooth", block: "start" });
+});
 
 function nieuweVerkiezing() {
   huidig = null;
