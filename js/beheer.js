@@ -4,12 +4,14 @@ import {
   vereisLogin, uitloggen, foutTekst, download, csvRegel,
 } from "./gemeen.js";
 import { parseCsv, uitTabel, uitOutlook, opschonen } from "./lijst-inlezen.js";
+import { maakWordSjabloon, laadAlsPng } from "./word-sjabloon.js";
 
 let verkiezingen = [];
 let huidig = null;          // de gekozen verkiezing (object) of null bij een nieuwe
 let instellingen = {};
 let voorbeeldLijst = null;  // ingelezen, nog niet opgeslagen lijst
 let alleKiezers = [];
+let account = null;
 
 const begonnen = () => huidig && new Date(huidig.start_at) <= Date.now();
 const gesloten = () => huidig && new Date(huidig.eind_at) <= Date.now();
@@ -384,6 +386,37 @@ async function samenvoeglijst(soort) {
   laadKiezers();
 }
 $("#dl-uitnodiging").addEventListener("click", () => samenvoeglijst("uitnodiging"));
+
+async function wordSjabloon(soort, knop) {
+  wisFout();
+  knop.disabled = true;
+  try {
+    const { data: kandidaten, error } = await db.from("kandidaten").select("naam, functie, foto_url")
+      .eq("verkiezing_id", huidig.id).order("volgorde").order("naam");
+    if (error) throw error;
+    const [logo, ...fotos] = await Promise.all([laadAlsPng(instellingen.logo_url, 600), ...kandidaten.map((k) => laadAlsPng(k.foto_url, 240))]);
+    const blob = maakWordSjabloon({
+      soort,
+      titel: huidig.titel,
+      organisatie: instellingen.organisatie || "Ondernemingsraad",
+      afzender: account?.naam || "",
+      logo,
+      kandidaten: kandidaten.map((k, i) => ({ naam: k.naam, functie: k.functie, foto: fotos[i] })),
+    });
+    const url = URL.createObjectURL(blob);
+    const a = el("a", { href: url, download: `${soort}-sjabloon.docx` });
+    document.body.append(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.parentNode?.removeChild(a); }, 1000);
+    meld("#verzend-ok", "Word-sjabloon gedownload. Open het in Word en koppel de lijst.");
+  } catch (e) {
+    toonFout(e);
+  } finally {
+    knop.disabled = false;
+  }
+}
+$("#sj-uitnodiging").addEventListener("click", (e) => wordSjabloon("uitnodiging", e.currentTarget));
+$("#sj-herinnering").addEventListener("click", (e) => wordSjabloon("herinnering", e.currentTarget));
 $("#dl-herinnering").addEventListener("click", () => samenvoeglijst("herinnering"));
 
 async function inplannen(soort) {
@@ -473,7 +506,7 @@ $("#huisstijl-form").addEventListener("submit", async (e) => {
 $("#uitloggen").addEventListener("click", uitloggen);
 
 (async function start() {
-  const account = await vereisLogin("beheerder");
+  account = await vereisLogin("beheerder");
   $("#wie").textContent = `Ingelogd als ${account.naam} (beheerder)`;
   $("#pagina").hidden = false;
   instellingen = await laadHuisstijl();

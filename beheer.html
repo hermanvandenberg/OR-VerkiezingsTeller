@@ -129,9 +129,22 @@
       <section class="kaart">
         <h2>Uitnodigingen en herinneringen</h2>
         <div id="verzend-samenvoegen" class="stapel krap" hidden>
-          <p>Download de lijst en verstuur hem met <b>Word &gt; Verzendlijsten &gt; Afdruk samenvoegen &gt; E-mailberichten</b> vanuit je eigen Outlook. In de lijst staat voor iedere collega een persoonlijke link in de kolom <code>link</code>.</p>
+          <p>Je verstuurt de mails zelf vanuit je eigen Outlook met <b>Word-afdruk samenvoegen</b>. Het Word-sjabloon heeft al de opmaak met logo, kandidaten en een knop met de persoonlijke link.</p>
+          <ol class="stappen">
+            <li><b>Download het Word-sjabloon</b> en open het in Word.</li>
+            <li><b>Download de lijst</b> met persoonlijke links.</li>
+            <li>In Word: <b>Verzendlijsten &gt; Adressen selecteren &gt; Bestaande lijst gebruiken</b> en kies de lijst. Vraagt Word om een scheidingsteken, kies dan de puntkomma (;).</li>
+            <li>Klik <b>Voorbeeld van resultaten</b> om te controleren. Stuur eerst een test naar jezelf via <b>Adressenlijst bewerken</b>.</li>
+            <li><b>Voltooien en samenvoegen &gt; E-mailberichten verzenden</b>: Aan = <code>email</code>, vul een onderwerp in, indeling HTML.</li>
+          </ol>
           <div class="rij">
+            <b>Uitnodiging:</b>
+            <button type="button" class="knop" id="sj-uitnodiging">Download Word-sjabloon</button>
             <button type="button" class="knop" id="dl-uitnodiging">Download uitnodigingslijst</button>
+          </div>
+          <div class="rij">
+            <b>Herinnering:</b>
+            <button type="button" class="knop licht" id="sj-herinnering">Download Word-sjabloon</button>
             <button type="button" class="knop licht" id="dl-herinnering">Download herinneringslijst</button>
           </div>
           <p class="notitie warn">Bewaar deze lijsten niet en verwijder de verzonden mails uit je map Verzonden items. Wie de lijst heeft, kan namens collega's stemmen. Met Outlook automatisch zie jij de links nooit.</p>

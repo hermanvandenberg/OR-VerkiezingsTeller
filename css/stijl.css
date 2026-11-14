@@ -134,3 +134,4 @@ code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monosp
   .tegels .tegel > :not(.foto):not(.vink) { grid-column: 2; }
 }
 .logo-voorbeeld { height: 56px; width: auto; max-width: 180px; object-fit: contain; }
+.stappen { margin: 0; padding-left: 22px; display: grid; gap: 6px; font-size: 14px; }
