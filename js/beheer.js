@@ -522,12 +522,20 @@ $("#thema-ophalen").addEventListener("click", async () => {
   knop.disabled = false;
   if (error || data?.fout) {
     let melding = data?.fout;
-    if (!melding && error?.context?.json) melding = (await error.context.json().catch(() => ({})))?.fout;
+    const status = error?.context?.status;
+    let detail = "";
+    if (!melding && error?.context?.text) {
+      detail = await error.context.text().catch(() => "");
+      try { melding = JSON.parse(detail)?.fout; } catch { /* geen JSON */ }
+    }
     if (!melding) {
-      const status = error?.context?.status;
-      melding = status === 404 || /not found|404|Failed to send|fetch/i.test(error?.message || "")
-        ? "De functie \"thema-ophalen\" is nog niet geïnstalleerd in Supabase (zie de README). Je kunt de kleuren hieronder ook zelf kiezen."
-        : (error?.message || "Het ophalen is mislukt.");
+      if (status === 404) {
+        melding = "De functie \"thema-ophalen\" is niet gevonden in Supabase. Controleer bij Edge Functions of hij precies zo heet (zie de README). Je kunt de kleuren hieronder ook zelf kiezen.";
+      } else if (status) {
+        melding = `De functie "thema-ophalen" gaf een fout (${status}${detail ? ": " + detail.slice(0, 200) : ""}). Kijk in Supabase bij Edge Functions > thema-ophalen > Logs. Je kunt de kleuren hieronder ook zelf kiezen.`;
+      } else {
+        melding = `De functie "thema-ophalen" reageert niet (${error?.message || "geen verbinding"}). Staat hij in Supabase bij Edge Functions, met de bestanden index.ts en herken.ts? Kijk anders bij Logs. Je kunt de kleuren hieronder ook zelf kiezen.`;
+      }
     }
     $("#thema-status").textContent = "";
     return toonFout(melding);
