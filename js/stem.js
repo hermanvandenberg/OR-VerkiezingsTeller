@@ -1,5 +1,5 @@
 // Stempagina: één kandidaat (of onthouden) kiezen, gegevens invullen, bevestigen.
-import { db, $, $$, el, fmtDatum, fotoOf } from "./gemeen.js";
+import { db, $, $$, el, fmtDatum, fotoOf, laadHuisstijl } from "./gemeen.js";
 
 const token = location.hash.replace(/^#/, "").trim().toLowerCase();
 let keuze = null; // { id: uuid | null, naam: string }
@@ -129,6 +129,7 @@ $("#bevestig-ja").addEventListener("click", async () => {
 });
 
 async function start() {
+  laadHuisstijl().catch(() => {});
   if (!/^[0-9a-f]{64}$/.test(token)) {
     return geenStem("Deze link werkt niet", "Open de stempagina via de knop in je uitnodigingsmail. Kopieer je de link, neem dan de hele link mee.");
   }

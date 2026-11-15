@@ -65,8 +65,9 @@ type Verkiezing = {
 
 function bouwMail(
   soort: string, naam: string, link: string, v: Verkiezing,
-  inst: { organisatie: string; logo_url: string | null },
+  inst: { organisatie: string; logo_url: string | null; kleur: string },
 ) {
+  const kleur = /^#[0-9a-fA-F]{6}$/.test(inst.kleur) ? inst.kleur : "#0d5f63";
   const eind = datumFmt.format(new Date(v.eind_at));
   const aanhef = naam ? `Beste ${esc(naam.split(" ")[0])},` : "Beste collega,";
   const onderwerp = soort === "herinnering"
@@ -80,7 +81,7 @@ function bouwMail(
           <td width="60" style="padding:10px">${
             k.foto_url
               ? `<img src="${esc(k.foto_url)}" width="52" height="52" alt="" style="display:block;border-radius:6px;object-fit:cover">`
-              : `<div style="width:52px;height:52px;border-radius:6px;background:#0d5f63"></div>`
+              : `<div style="width:52px;height:52px;border-radius:6px;background:${kleur}"></div>`
           }</td>
           <td style="padding:10px 10px 10px 0;font:14px Arial,sans-serif;color:#16202c"><b>${esc(k.naam)}</b><br>${esc(k.functie ?? "")}</td>
         </tr>
@@ -106,7 +107,7 @@ function bouwMail(
 </td></tr>
 <tr><td style="padding:0 18px"><table role="presentation" cellpadding="0" cellspacing="0" width="100%"><tr>${kandidaten}</tr></table></td></tr>
 <tr><td style="padding:18px 24px">
-  <a href="${esc(link)}" style="display:inline-block;background:#0d5f63;color:#ffffff;font:bold 15px Arial,sans-serif;text-decoration:none;padding:12px 22px;border-radius:6px">Breng mijn stem uit</a>
+  <a href="${esc(link)}" style="display:inline-block;background:${kleur};color:#ffffff;font:bold 15px Arial,sans-serif;text-decoration:none;padding:12px 22px;border-radius:6px">Breng mijn stem uit</a>
 </td></tr>
 <tr><td style="padding:0 24px 24px;font:13px/1.5 Arial,sans-serif;color:#5a6676">
   Deze link is persoonlijk en werkt één keer. Stuur hem niet door.<br>
@@ -116,6 +117,22 @@ function bouwMail(
 </td></tr>
 </table></td></tr></table></body></html>`;
   return { onderwerp, html };
+}
+
+// Zelfde regel als op de website: witte tekst, kleur zo nodig iets donkerder.
+function knopKleur(hex: unknown): string {
+  const m = String(hex ?? "").match(/^#([0-9a-fA-F]{6})$/);
+  if (!m) return "#0d5f63";
+  const rgb = [0, 2, 4].map((i) => parseInt(m[1].slice(i, i + 2), 16));
+  const lum = (c: number[]) => {
+    const [r, g, b] = c.map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  for (let i = 0; i <= 6; i++) {
+    const k = rgb.map((v) => v * (1 - i * 0.06));
+    if (1.05 / (lum(k) + 0.05) >= 4.5) return "#" + k.map((v) => Math.round(v).toString(16).padStart(2, "0")).join("");
+  }
+  return "#0d5f63";
 }
 
 Deno.serve(async (req) => {
@@ -132,7 +149,7 @@ Deno.serve(async (req) => {
   if (error) return new Response(error.message, { status: 500 });
   if (!rijen?.length) return Response.json({ verzonden: 0 });
 
-  const { data: inst } = await db.from("app_instellingen").select("organisatie, logo_url, site_url").eq("id", 1).single();
+  const { data: inst } = await db.from("app_instellingen").select("*").eq("id", 1).single();
   const site = String(inst?.site_url ?? "").replace(/\/+$/, "");
 
   let token: string;
@@ -165,6 +182,7 @@ Deno.serve(async (req) => {
     const v = await verkiezing(r.verkiezing_id);
     const { onderwerp, html } = bouwMail(r.soort, r.naam, `${site}/stem.html#${r.token}`, v, {
       organisatie: inst?.organisatie ?? "OR", logo_url: inst?.logo_url ?? null,
+      kleur: knopKleur(inst?.thema?.primair),
     });
     const res = await fetch(`https://graph.microsoft.com/v1.0/users/${encodeURIComponent(afzender)}/sendMail`, {
       method: "POST",

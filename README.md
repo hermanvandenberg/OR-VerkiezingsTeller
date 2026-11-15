@@ -9,7 +9,7 @@ Digitaal stemmen voor (tussentijdse) OR-verkiezingen. Iedere collega krijgt een 
 | `stem.html#<link>` | Iedere collega | Kandidaattegels naast elkaar, onthouden, naam en e-mail, bevestigingsvenster |
 | `index.html` | Commissie en beheerder | Inloggen, account aanmaken (alleen na uitnodiging), tweestapsverificatie |
 | `dashboard.html` | Kiescommissie | Opkomst, uitslag (na sluiting of live), meldingen, logboek |
-| `beheer.html` | Alleen de beheerder | Verkiezing, data en tijden, herinneringen, kandidaten met foto, e-maillijst, versturen, commissie, logo |
+| `beheer.html` | Alleen de beheerder | Verkiezing, data en tijden, herinneringen, kandidaten met foto, e-maillijst, versturen, commissie, logo en huisstijl |
 
 De website zelf staat op GitHub Pages. Stemmen, accounts en logboek staan in **Supabase** (database met inlog), omdat GitHub Pages zelf niets kan opslaan.
 
@@ -59,7 +59,7 @@ In deze repository: **Settings > Pages > Deploy from a branch > main / (root)**.
 Ga naar `.../index.html#registreren`, maak een account met het adres uit stap 1, bevestig via de mail, log in en scan de QR-code met Microsoft Authenticator of Google Authenticator. Je komt op het beheerscherm.
 
 ### 6. In het beheerscherm
-1. **Huisstijl en website**: vul de naam van de OR en het websiteadres in en upload het logo (PNG, JPG of WebP).
+1. **Huisstijl en website**: vul de naam van de OR en het websiteadres in en upload het logo (PNG, JPG of WebP). Bij **Thema** kun je de website van je bedrijf invullen en op **Thema ophalen** klikken: de app stelt dan kleuren, een lettertype en een logo voor (zie "Thema uit de bedrijfswebsite"). Je kunt de kleuren en het lettertype ook zelf kiezen. Het thema geldt voor alle pagina's, de mails en het Word-sjabloon.
 2. **Verkiezing**: titel, toelichting, start en einde (datum en tijd), wanneer de uitslag zichtbaar is, verzendwijze en herinneringsmomenten.
 3. **Kandidaten**: naam, functie, tekst en foto.
 4. **E-maillijst**: sleep een Excel- of CSV-bestand erin (ook een export van Outlook-contactpersonen), of plak adressen uit Outlook. Je ziet eerst hoeveel geldig, dubbel en ongeldig zijn.
@@ -89,6 +89,18 @@ Daarna in Supabase:
 3. **SQL Editor**: plak [`supabase/cron.sql`](supabase/cron.sql), vul de functie-URL en hetzelfde `CRON_GEHEIM` in, en klik **Run**.
 4. Zet bij de verkiezing de verzendwijze op **Outlook automatisch** en klik **Uitnodigingen versturen**. Er gaan ongeveer 25 mails per minuut uit; herinneringen gaan vanzelf op de ingestelde momenten.
 
+## Thema uit de bedrijfswebsite
+
+De knop **Thema ophalen** bekijkt de voorpagina van de bedrijfswebsite en zoekt de huisstijlkleuren, het lettertype en het logo. Dat gebeurt via een kleine functie in Supabase, omdat een browser andere websites niet zelf mag uitlezen. Je ziet altijd eerst een voorstel met voorbeeld; pas bij **Huisstijl opslaan** wordt het bewaard. Kleuren worden zo nodig iets donkerder of lichter gemaakt, zodat tekst goed leesbaar blijft.
+
+Eenmalig instellen in Supabase:
+1. **Al eerder geïnstalleerd?** Plak dan eerst [`supabase/updates/001-thema.sql`](supabase/updates/001-thema.sql) in de **SQL Editor** en klik **Run**. (Bij een nieuwe installatie zit dit al in `schema.sql`.)
+2. **Edge Functions > Deploy a new function > Via editor**, naam `thema-ophalen`. Plak [`index.ts`](supabase/functions/thema-ophalen/index.ts), voeg met **Add file** een tweede bestand `herken.ts` toe en plak [`herken.ts`](supabase/functions/thema-ophalen/herken.ts). Laat **Verify JWT** aan staan en klik **Deploy**.
+
+Alleen de beheerder (ingelogd met tweestapsverificatie) kan de functie gebruiken. Hij haalt alleen gewone openbare websites op (geen interne adressen), maximaal een paar seconden en een paar MB.
+
+Is het lettertype van de website niet vrij beschikbaar (zoals bij veel grote bedrijven), dan kies je zelf een vergelijkbaar lettertype uit de lijst.
+
 ## Een volgende verkiezing
 
 Klik in het beheerscherm op **Nieuwe verkiezing**. Oude verkiezingen blijven als archief bewaard, met hun uitslag en logboek. Een verkiezing kan ook meer dan twee kandidaten hebben.
@@ -110,4 +122,6 @@ js/*.js                                               logica per pagina
 supabase/schema.sql                                   database, rechten en regels
 supabase/cron.sql                                     planner voor automatisch mailen (optie B)
 supabase/functions/mail-verwerken/index.ts           mailfunctie via Microsoft Graph (optie B)
+supabase/functions/thema-ophalen/                     thema voorstellen uit de bedrijfswebsite
+supabase/updates/                                     aanvullingen voor een bestaande database
 ```

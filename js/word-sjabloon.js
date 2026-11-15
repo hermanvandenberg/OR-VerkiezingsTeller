@@ -93,8 +93,8 @@ function veld(naam, opmaak) {
 }
 
 // Hyperlink waarvan het adres per collega uit het veld "link" komt.
-function linkKnop(tekst) {
-  const o = { b: true, kleur: "FFFFFF", pt: 12 };
+function linkKnop(tekst, tekstKleur = "FFFFFF") {
+  const o = { b: true, kleur: tekstKleur, pt: 12 };
   return `<w:r>${rPr(o)}<w:fldChar w:fldCharType="begin"/></w:r>` +
     `<w:r>${rPr(o)}<w:instrText xml:space="preserve"> HYPERLINK "</w:instrText></w:r>` +
     `<w:r>${rPr(o)}<w:fldChar w:fldCharType="begin"/></w:r>` +
@@ -154,6 +154,8 @@ function tabel(rijen, kolommen) {
  * @param {string} o.afzender     naam onder de mail
  * @param {{bytes:Uint8Array,breed:number,hoog:number}|null} o.logo  PNG
  * @param {{naam:string,functie?:string,foto?:{bytes:Uint8Array,breed:number,hoog:number}|null}[]} o.kandidaten
+ * @param {string} [o.knopKleur]     hex zonder #, achtergrond van de knop
+ * @param {string} [o.knopTekst]     hex zonder #, tekstkleur van de knop
  */
 export function maakWordSjabloon(o) {
   const afbeeldingen = [];
@@ -201,7 +203,7 @@ export function maakWordSjabloon(o) {
   blokken.push(p("", { na: 200 }));
 
   // Knop
-  blokken.push(tabel([cel(p(linkKnop("Breng mijn stem uit"), { na: 0, jc: "center" }), { breedte: 3600, vul: PETROL, marge: 180 })], [3600]));
+  blokken.push(tabel([cel(p(linkKnop("Breng mijn stem uit", o.knopTekst || "FFFFFF"), { na: 0, jc: "center" }), { breedte: 3600, vul: o.knopKleur || PETROL, marge: 180 })], [3600]));
   blokken.push(p("", { na: 200 }));
 
   // Kleine lettertjes

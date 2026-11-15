@@ -5,6 +5,7 @@ import {
 } from "./gemeen.js";
 import { parseCsv, uitTabel, uitOutlook, opschonen } from "./lijst-inlezen.js";
 import { maakWordSjabloon, laadAlsPng } from "./word-sjabloon.js";
+import { STANDAARD, LETTERTYPEN, pasThemaToe, themaVariabelen } from "./thema.js";
 
 let verkiezingen = [];
 let huidig = null;          // de gekozen verkiezing (object) of null bij een nieuwe
@@ -402,6 +403,8 @@ async function wordSjabloon(soort, knop) {
       afzender: account?.naam || "",
       logo,
       kandidaten: kandidaten.map((k, i) => ({ naam: k.naam, functie: k.functie, foto: fotos[i] })),
+      knopKleur: themaVariabelen(instellingen.thema, false)["--knop"].slice(1).toUpperCase(),
+      knopTekst: themaVariabelen(instellingen.thema, false)["--on-petrol"].slice(1).toUpperCase(),
     });
     const url = URL.createObjectURL(blob);
     const a = el("a", { href: url, download: `${soort}-sjabloon.docx` });
@@ -472,15 +475,120 @@ $("#kopieer-link").addEventListener("click", async () => {
   catch { getSelection().selectAllChildren($("#registreer-link")); }
 });
 
-/* ---------------- Huisstijl ---------------- */
+/* ---------------- Huisstijl en thema ---------------- */
+
+let gekozenLogo = null; // data-URL van een logo van de bedrijfswebsite
+
+function huidigThema() {
+  return { primair: $("#h-primair").value, accent: $("#h-accent").value, lettertype: $("#h-font").value };
+}
+function toonThemaLive() { pasThemaToe(huidigThema()); }
 
 function toonHuisstijl() {
   $("#h-org").value = instellingen.organisatie || "";
   $("#h-site").value = instellingen.site_url || siteAdres();
+  $("#h-bedrijf").value = instellingen.bedrijf_website || "";
   const vb = $("#h-logo-voorbeeld");
   vb.hidden = !instellingen.logo_url;
   if (instellingen.logo_url) vb.src = instellingen.logo_url;
+  const t = { ...STANDAARD, ...(instellingen.thema || {}) };
+  $("#h-primair").value = t.primair;
+  $("#h-accent").value = t.accent;
+  $("#h-font").replaceChildren(
+    el("option", { value: "", text: "Standaard (Public Sans)" }),
+    ...LETTERTYPEN.filter((f) => f !== "Public Sans").map((f) => el("option", { value: f, text: f })),
+  );
+  $("#h-font").value = LETTERTYPEN.includes(t.lettertype) ? t.lettertype : "";
   $("#registreer-link").textContent = `${siteAdres()}/index.html#registreren`;
+}
+
+for (const id of ["#h-primair", "#h-accent", "#h-font"]) $(id).addEventListener("input", toonThemaLive);
+$("#thema-standaard").addEventListener("click", () => {
+  $("#h-primair").value = STANDAARD.primair;
+  $("#h-accent").value = STANDAARD.accent;
+  $("#h-font").value = "";
+  toonThemaLive();
+});
+
+$("#thema-ophalen").addEventListener("click", async () => {
+  wisFout();
+  let adres = $("#h-bedrijf").value.trim();
+  if (!adres) return toonFout("Vul eerst de website van je bedrijf in.");
+  if (!/^https?:\/\//i.test(adres)) { adres = "https://" + adres; $("#h-bedrijf").value = adres; }
+  const knop = $("#thema-ophalen");
+  knop.disabled = true;
+  $("#thema-status").textContent = "Website wordt bekeken… dit duurt een paar seconden.";
+  const { data, error } = await db.functions.invoke("thema-ophalen", { body: { url: adres } });
+  knop.disabled = false;
+  if (error || data?.fout) {
+    let melding = data?.fout;
+    if (!melding && error?.context?.json) melding = (await error.context.json().catch(() => ({})))?.fout;
+    if (!melding) {
+      const status = error?.context?.status;
+      melding = status === 404 || /not found|404|Failed to send|fetch/i.test(error?.message || "")
+        ? "De functie \"thema-ophalen\" is nog niet geïnstalleerd in Supabase (zie de README). Je kunt de kleuren hieronder ook zelf kiezen."
+        : (error?.message || "Het ophalen is mislukt.");
+    }
+    $("#thema-status").textContent = "";
+    return toonFout(melding);
+  }
+  toonVoorstel(data);
+});
+
+function toonVoorstel(v) {
+  const kleuren = v.kleuren || [];
+  $("#thema-kleuren").replaceChildren(...kleuren.map((k) => {
+    const knop = el("button", { type: "button", class: "staal", title: k.hex, "aria-label": `Kleur ${k.hex}` });
+    knop.style.background = k.hex;
+    knop.addEventListener("click", () => {
+      const doel = document.querySelector('input[name="kleurdoel"]:checked').value;
+      $(doel === "accent" ? "#h-accent" : "#h-primair").value = k.hex;
+      toonThemaLive();
+    });
+    return knop;
+  }));
+  if (v.primair) $("#h-primair").value = v.primair;
+  if (v.accent) $("#h-accent").value = v.accent;
+  const font = (v.lettertypen || []).find((f) => LETTERTYPEN.includes(f));
+  if (font) $("#h-font").value = font === "Public Sans" ? "" : font;
+
+  gekozenLogo = null;
+  const logos = v.logos || [];
+  $("#thema-logos-kop").hidden = !logos.length;
+  $("#thema-logos").replaceChildren(...logos.map((src, i) => {
+    const knop = el("button", { type: "button", class: "logo-keuze", "aria-pressed": "false" }, el("img", { src, alt: `Logo-optie ${i + 1}` }));
+    knop.addEventListener("click", () => {
+      const aan = knop.getAttribute("aria-pressed") !== "true";
+      for (const b of $$("#thema-logos .logo-keuze")) b.setAttribute("aria-pressed", "false");
+      knop.setAttribute("aria-pressed", aan ? "true" : "false");
+      gekozenLogo = aan ? src : null;
+    });
+    return knop;
+  }));
+  if (!$("#h-org").value && v.naam) $("#h-org").value = `Ondernemingsraad ${v.naam}`;
+  $("#thema-voorstel").hidden = false;
+  const gevonden = [kleuren.length && `${kleuren.length} kleuren`, logos.length && (logos.length === 1 ? "1 logo" : `${logos.length} logo's`), font && `lettertype ${font}`].filter(Boolean);
+  const onbekend = (v.lettertypen || []).filter((f) => !LETTERTYPEN.includes(f));
+  let tekst = gevonden.length
+    ? `Gevonden op ${v.bron}: ${gevonden.join(", ")}. Het voorstel staat hieronder ingevuld. Klik op "Huisstijl opslaan" om het te bewaren.`
+    : "Er zijn geen duidelijke huisstijlkleuren gevonden. Kies de kleuren hieronder zelf.";
+  if (onbekend.length && !font) tekst += ` Het lettertype van de website (${onbekend[0]}) is niet vrij beschikbaar; kies zelf een vergelijkbaar lettertype.`;
+  $("#thema-status").textContent = tekst;
+  toonThemaLive();
+}
+
+// Een logo (ook SVG) omzetten naar PNG zodat het overal werkt.
+async function dataUrlNaarPng(src) {
+  const img = new Image();
+  img.src = src;
+  await img.decode();
+  let w = img.naturalWidth || 600, h = img.naturalHeight || 200;
+  const schaal = Math.min(4, 800 / Math.max(w, h));
+  w = Math.round(w * schaal); h = Math.round(h * schaal);
+  const canvas = el("canvas", { width: w, height: h });
+  canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+  const blob = await new Promise((r) => canvas.toBlob(r, "image/png"));
+  return new File([blob], "logo.png", { type: "image/png" });
 }
 
 $("#huisstijl-form").addEventListener("submit", async (e) => {
@@ -488,14 +596,25 @@ $("#huisstijl-form").addEventListener("submit", async (e) => {
   wisFout();
   const site = $("#h-site").value.trim().replace(/\/+$/, "");
   if (site && !/^https:\/\//.test(site)) return toonFout("Het websiteadres moet met https:// beginnen.");
-  const rij = { organisatie: $("#h-org").value.trim() || "Ondernemingsraad", site_url: site || null };
+  const rij = {
+    organisatie: $("#h-org").value.trim() || "Ondernemingsraad",
+    site_url: site || null,
+    thema: huidigThema(),
+    bedrijf_website: $("#h-bedrijf").value.trim() || null,
+  };
   try {
-    const logo = $("#h-logo").files[0];
+    const logo = $("#h-logo").files[0] || (gekozenLogo ? await dataUrlNaarPng(gekozenLogo) : null);
     if (logo) rij.logo_url = await uploadAfbeelding(logo, "logo");
   } catch (err) { return toonFout(err); }
   const { error } = await db.from("app_instellingen").update(rij).eq("id", 1);
-  if (error) return toonFout(error);
+  if (error) {
+    return toonFout(/thema|bedrijf_website/.test(error.message)
+      ? "De database kent het thema nog niet. Voer eenmalig supabase/updates/001-thema.sql uit in de SQL Editor van Supabase (zie de README)."
+      : error);
+  }
   $("#h-logo").value = "";
+  gekozenLogo = null;
+  for (const b of $$("#thema-logos .logo-keuze")) b.setAttribute("aria-pressed", "false");
   instellingen = await laadHuisstijl();
   toonHuisstijl();
   meld("#huisstijl-ok", "Opgeslagen");

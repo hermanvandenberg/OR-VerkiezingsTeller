@@ -1,7 +1,7 @@
 /* OR-VerkiezingsTeller · huisstijl */
 :root {
   --bg: #f3f5f8; --surface: #ffffff; --sunk: #e8ecf2; --line: #d3dae4;
-  --ink: #16202c; --muted: #5a6676; --petrol: #0d5f63; --petrol-soft: #dcefef; --on-petrol: #ffffff;
+  --ink: #16202c; --muted: #5a6676; --petrol: #0d5f63; --petrol-soft: #dcefef; --on-petrol: #ffffff; --knop: #0d5f63;
   --rood: #c4302b; --rood-soft: #fbe4e2; --warn: #a86a00; --warn-soft: #fdf0d5; --ok: #1f7a45; --ok-soft: #dff2e6;
   --c1: #2f6f8f; --c2: #8a4f7d; --c3: #b0802f; --c4: #4f7a3a;
   --display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
@@ -12,7 +12,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #10161d; --surface: #18212b; --sunk: #0c1117; --line: #2b3644;
-    --ink: #e6ebf1; --muted: #9aa6b5; --petrol: #5cc1c4; --petrol-soft: #16383b; --on-petrol: #0c1117;
+    --ink: #e6ebf1; --muted: #9aa6b5; --petrol: #5cc1c4; --petrol-soft: #16383b; --on-petrol: #0c1117; --knop: #5cc1c4;
     --rood: #ff6b62; --rood-soft: #3d1a19; --warn: #f0b74a; --warn-soft: #3a2c10; --ok: #5fd18f; --ok-soft: #14321f;
     color-scheme: dark;
   }
@@ -55,7 +55,7 @@ input:disabled, select:disabled, textarea:disabled { background: var(--sunk); co
 :focus-visible { outline: 3px solid var(--petrol); outline-offset: 2px; }
 .knop {
   font: 700 15px var(--body); border: 0; border-radius: 8px; padding: 11px 18px;
-  background: var(--petrol); color: var(--on-petrol); cursor: pointer; text-decoration: none; display: inline-block;
+  background: var(--knop); color: var(--on-petrol); cursor: pointer; text-decoration: none; display: inline-block;
 }
 .knop.licht { background: transparent; border: 1px solid var(--line); color: var(--ink); }
 .knop.klein { padding: 6px 10px; font-size: 13px; }
@@ -135,3 +135,15 @@ code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monosp
 }
 .logo-voorbeeld { height: 56px; width: auto; max-width: 180px; object-fit: contain; }
 .stappen { margin: 0; padding-left: 22px; display: grid; gap: 6px; font-size: 14px; }
+
+/* Thema kiezen */
+.stalen { display: flex; flex-wrap: wrap; gap: 8px; }
+.staal { width: 40px; height: 40px; border-radius: 8px; border: 2px solid var(--line); cursor: pointer; padding: 0; }
+.staal[aria-pressed="true"] { outline: 3px solid var(--ink); outline-offset: 2px; }
+input[type="color"] { height: 44px; padding: 4px; cursor: pointer; }
+.logo-keuze { background: #fff; border: 2px solid var(--line); border-radius: 8px; padding: 8px; cursor: pointer; display: grid; place-items: center; height: 72px; min-width: 96px; }
+.logo-keuze img { max-height: 54px; max-width: 180px; object-fit: contain; }
+.logo-keuze[aria-pressed="true"] { border-color: var(--rood); box-shadow: 0 0 0 3px var(--rood-soft); }
+.thema-voorbeeld { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; border: 1px dashed var(--line); border-radius: 8px; padding: 12px; }
+.thema-voorbeeld .tegel { padding: 10px 44px 10px 14px; cursor: default; }
+.thema-voorbeeld .tegel .vink { top: 8px; right: 8px; }

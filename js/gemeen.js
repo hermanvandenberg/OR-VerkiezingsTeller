@@ -1,6 +1,7 @@
 // Gedeelde hulpfuncties voor alle pagina's.
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
+import { pasThemaToe } from "./thema.js";
 
 // Sessie alleen in dit tabblad bewaren: sluit je de browser, dan ben je uitgelogd.
 export const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -66,7 +67,8 @@ export function foutTekst(fout) {
 }
 
 export async function laadHuisstijl() {
-  const { data } = await db.from("app_instellingen").select("organisatie, logo_url, site_url").eq("id", 1).maybeSingle();
+  const { data } = await db.from("app_instellingen").select("*").eq("id", 1).maybeSingle();
+  if (data?.thema) pasThemaToe(data.thema);
   for (const img of $$("img.logo")) {
     if (data?.logo_url) { img.src = data.logo_url; img.alt = data.organisatie || "Logo"; img.hidden = false; }
     else img.hidden = true;
