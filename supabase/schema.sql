@@ -29,7 +29,9 @@ create table public.app_instellingen (
   id          int primary key default 1 check (id = 1),
   organisatie text not null default 'Ondernemingsraad',
   logo_url    text,
-  site_url    text
+  site_url    text,
+  thema       jsonb,   -- {"primair":"#..","accent":"#..","lettertype":"..."}
+  bedrijf_website text
 );
 insert into public.app_instellingen default values;
 
@@ -752,7 +754,8 @@ create trigger kandidaat_bewaken before insert or update or delete on public.kan
 create function private.instellingen_loggen() returns trigger
 language plpgsql security definer set search_path = '' as $$
 begin
-  perform private.log('huisstijl gewijzigd', jsonb_build_object('organisatie', new.organisatie), null);
+  perform private.log('huisstijl gewijzigd',
+                      jsonb_build_object('organisatie', new.organisatie, 'thema', new.thema), null);
   return new;
 end $$;
 

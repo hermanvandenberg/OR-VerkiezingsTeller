@@ -24,6 +24,53 @@
     </header>
     <p id="fout" class="fout" role="alert" hidden></p>
 
+    <!-- Huisstijl -->
+    <section class="kaart">
+      <h2>Huisstijl en website</h2>
+      <p class="hint">Stel dit eenmalig in. Het thema geldt voor de stempagina, de schermen van de commissie, de mails en het Word-sjabloon.</p>
+      <form id="huisstijl-form" class="stapel" novalidate>
+        <div class="velden">
+          <label class="veld" for="h-org">Naam van de OR<input id="h-org" placeholder="Ondernemingsraad"></label>
+          <label class="veld" for="h-site">Adres van deze website <span class="uitleg">nodig voor de stemlinks</span><input id="h-site" type="url" placeholder="https://…github.io/OR-VerkiezingsTeller"></label>
+        </div>
+        <div class="rij">
+          <img id="h-logo-voorbeeld" class="logo-voorbeeld" alt="Huidig logo" hidden>
+          <label class="veld" for="h-logo">Logo <span class="uitleg">PNG, JPG of WebP, max. 5 MB</span><input id="h-logo" type="file" accept="image/png,image/jpeg,image/webp"></label>
+        </div>
+        <div class="stapel krap">
+          <h3>Thema</h3>
+          <p class="hint">Vul de website van je bedrijf in. De app stelt dan kleuren, een lettertype en een logo voor. Je kunt alles daarna zelf aanpassen.</p>
+          <div class="velden">
+            <label class="veld" for="h-bedrijf">Website van je bedrijf<input id="h-bedrijf" type="url" inputmode="url" placeholder="https://www.bedrijf.nl"></label>
+            <div class="rij"><button type="button" class="knop licht" id="thema-ophalen">Thema ophalen</button></div>
+          </div>
+          <p id="thema-status" class="hint" role="status"></p>
+          <div id="thema-voorstel" class="stapel krap" hidden>
+            <span class="veld"><b>Gevonden kleuren</b> <span class="hint">Klik op een kleur om die te gebruiken als</span></span>
+            <div class="rij">
+              <label class="rij" for="doel-primair"><input type="radio" name="kleurdoel" id="doel-primair" value="primair" checked> hoofdkleur</label>
+              <label class="rij" for="doel-accent"><input type="radio" name="kleurdoel" id="doel-accent" value="accent"> accentkleur</label>
+            </div>
+            <div id="thema-kleuren" class="stalen"></div>
+            <span class="veld" id="thema-logos-kop"><b>Gevonden logo's</b> <span class="hint">Klik op het logo dat je wilt gebruiken</span></span>
+            <div id="thema-logos" class="rij"></div>
+          </div>
+          <div class="velden">
+            <label class="veld" for="h-primair">Hoofdkleur <span class="uitleg">knoppen en links</span><input id="h-primair" type="color" value="#0d5f63"></label>
+            <label class="veld" for="h-accent">Accentkleur <span class="uitleg">gekozen kandidaat</span><input id="h-accent" type="color" value="#c4302b"></label>
+            <label class="veld" for="h-font">Lettertype<select id="h-font"></select></label>
+          </div>
+          <div class="thema-voorbeeld" aria-label="Voorbeeld van het thema">
+            <span class="knop">Stem versturen</span>
+            <span class="tegel" aria-checked="true"><span class="vink" aria-hidden="true"></span><b>Gekozen kandidaat</b></span>
+            <a href="#thema-voorbeeld">Een link</a>
+            <button type="button" class="knop licht klein" id="thema-standaard">Standaardkleuren</button>
+          </div>
+        </div>
+        <div class="rij"><button type="submit" class="knop">Huisstijl opslaan</button><span id="huisstijl-ok" class="melding-ok" role="status"></span></div>
+      </form>
+    </section>
+
     <!-- 1. Verkiezing -->
     <section class="kaart">
       <div class="kop">
@@ -129,9 +176,22 @@
       <section class="kaart">
         <h2>Uitnodigingen en herinneringen</h2>
         <div id="verzend-samenvoegen" class="stapel krap" hidden>
-          <p>Download de lijst en verstuur hem met <b>Word &gt; Verzendlijsten &gt; Afdruk samenvoegen &gt; E-mailberichten</b> vanuit je eigen Outlook. In de lijst staat voor iedere collega een persoonlijke link in de kolom <code>link</code>.</p>
+          <p>Je verstuurt de mails zelf vanuit je eigen Outlook met <b>Word-afdruk samenvoegen</b>. Het Word-sjabloon heeft al de opmaak met logo, kandidaten en een knop met de persoonlijke link.</p>
+          <ol class="stappen">
+            <li><b>Download het Word-sjabloon</b> en open het in Word.</li>
+            <li><b>Download de lijst</b> met persoonlijke links.</li>
+            <li>In Word: <b>Verzendlijsten &gt; Adressen selecteren &gt; Bestaande lijst gebruiken</b> en kies de lijst. Vraagt Word om een scheidingsteken, kies dan de puntkomma (;).</li>
+            <li>Klik <b>Voorbeeld van resultaten</b> om te controleren. Stuur eerst een test naar jezelf via <b>Adressenlijst bewerken</b>.</li>
+            <li><b>Voltooien en samenvoegen &gt; E-mailberichten verzenden</b>: Aan = <code>email</code>, vul een onderwerp in, indeling HTML.</li>
+          </ol>
           <div class="rij">
+            <b>Uitnodiging:</b>
+            <button type="button" class="knop" id="sj-uitnodiging">Download Word-sjabloon</button>
             <button type="button" class="knop" id="dl-uitnodiging">Download uitnodigingslijst</button>
+          </div>
+          <div class="rij">
+            <b>Herinnering:</b>
+            <button type="button" class="knop licht" id="sj-herinnering">Download Word-sjabloon</button>
             <button type="button" class="knop licht" id="dl-herinnering">Download herinneringslijst</button>
           </div>
           <p class="notitie warn">Bewaar deze lijsten niet en verwijder de verzonden mails uit je map Verzonden items. Wie de lijst heeft, kan namens collega's stemmen. Met Outlook automatisch zie jij de links nooit.</p>
@@ -163,21 +223,6 @@
       <p id="commissie-ok" class="melding-ok" role="status"></p>
     </section>
 
-    <!-- 6. Huisstijl -->
-    <section class="kaart">
-      <h2>Huisstijl en website</h2>
-      <form id="huisstijl-form" class="stapel" novalidate>
-        <div class="velden">
-          <label class="veld" for="h-org">Naam van de OR<input id="h-org" placeholder="Ondernemingsraad"></label>
-          <label class="veld" for="h-site">Adres van deze website <span class="uitleg">nodig voor de stemlinks</span><input id="h-site" type="url" placeholder="https://…github.io/OR-VerkiezingsTeller"></label>
-        </div>
-        <div class="rij">
-          <img id="h-logo-voorbeeld" class="logo-voorbeeld" alt="Huidig logo" hidden>
-          <label class="veld" for="h-logo">Logo <span class="uitleg">PNG, JPG of WebP, max. 5 MB</span><input id="h-logo" type="file" accept="image/png,image/jpeg,image/webp"></label>
-        </div>
-        <div class="rij"><button type="submit" class="knop">Huisstijl opslaan</button><span id="huisstijl-ok" class="melding-ok" role="status"></span></div>
-      </form>
-    </section>
   </main>
   <script type="module" src="js/beheer.js"></script>
 </body>
