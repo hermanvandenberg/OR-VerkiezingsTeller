@@ -147,3 +147,4 @@ input[type="color"] { height: 44px; padding: 4px; cursor: pointer; }
 .thema-voorbeeld { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; border: 1px dashed var(--line); border-radius: 8px; padding: 12px; }
 .thema-voorbeeld .tegel { padding: 10px 44px 10px 14px; cursor: default; }
 .thema-voorbeeld .tegel .vink { top: 8px; right: 8px; }
+.kaart > .chip { justify-self: start; }
