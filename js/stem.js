@@ -1,7 +1,10 @@
 // Stempagina: één kandidaat (of onthouden) kiezen, gegevens invullen, bevestigen.
 import { db, $, $$, el, fmtDatum, fotoOf, laadHuisstijl } from "./gemeen.js";
+import { pasThemaToe } from "./thema.js";
 
 const token = location.hash.replace(/^#/, "").trim().toLowerCase();
+// Voorbeeld vanuit het beheerscherm: gegevens komen van dat venster, er wordt niets verstuurd.
+const voorbeeld = token === "voorbeeld";
 let keuze = null; // { id: uuid | null, naam: string }
 
 function geenStem(kop, tekst) {
@@ -90,6 +93,15 @@ $("#bevestig-nee").addEventListener("click", () => $("#bevestig").close());
 
 $("#bevestig-ja").addEventListener("click", async () => {
   const knop = $("#bevestig-ja");
+  if (voorbeeld) {
+    $("#bevestig").close();
+    $("#biljet").hidden = true;
+    $("#bedankt-keuze").textContent = keuze.naam;
+    $("#bedankt-apart").hidden = true;
+    $("#bedankt-hint").textContent = "Dit was een voorbeeld: er is geen stem opgeslagen. Je kunt dit venster sluiten.";
+    $("#bedankt").hidden = false;
+    return;
+  }
   knop.disabled = true;
   knop.textContent = "Bezig met versturen…";
   const { data, error } = await db.rpc("stem_uitbrengen", {
@@ -128,7 +140,22 @@ $("#bevestig-ja").addEventListener("click", async () => {
   bericht("Kies een kandidaat of onthouden.", true);
 });
 
+function startVoorbeeld() {
+  document.title = "Voorbeeld stempagina";
+  $("#voorbeeld-balk").hidden = false;
+  if (!window.opener) {
+    return geenStem("Voorbeeld niet beschikbaar", "Open het voorbeeld via de knop \"Voorbeeld stempagina\" in het beheerscherm.");
+  }
+  window.addEventListener("message", (e) => {
+    if (e.origin !== location.origin || e.source !== window.opener || e.data?.soort !== "voorbeeld-biljet") return;
+    pasThemaToe(e.data.thema);
+    toonBiljet({ ...e.data.biljet, status: "open", al_gestemd: false });
+  }, { once: true });
+  window.opener.postMessage({ soort: "voorbeeld-klaar" }, location.origin);
+}
+
 async function start() {
+  if (voorbeeld) return startVoorbeeld();
   laadHuisstijl().catch(() => {});
   if (!/^[0-9a-f]{64}$/.test(token)) {
     return geenStem("Deze link werkt niet", "Open de stempagina via de knop in je uitnodigingsmail. Kopieer je de link, neem dan de hele link mee.");

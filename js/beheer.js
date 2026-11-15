@@ -599,6 +599,47 @@ async function dataUrlNaarPng(src) {
   return new File([blob], "logo.png", { type: "image/png" });
 }
 
+/* ---------------- Voorbeeld stempagina ---------------- */
+
+// Opent stem.html in voorbeeldmodus en geeft het thema (ook nog niet opgeslagen)
+// en de kandidaten van de gekozen verkiezing door. Er wordt niets opgeslagen.
+let voorbeeldVenster = null;
+
+async function voorbeeldBiljet() {
+  let kandidaten = [];
+  if (huidig?.id) {
+    const { data } = await db.from("kandidaten").select("id, naam, functie, tekst, foto_url")
+      .eq("verkiezing_id", huidig.id).order("volgorde").order("naam");
+    kandidaten = data || [];
+  }
+  if (!kandidaten.length) {
+    kandidaten = ["A", "B"].map((l) => ({
+      id: l, naam: `Kandidaat ${l}`, functie: "Functie en afdeling", foto_url: null,
+      tekst: "Hier staat de korte motivatie van de kandidaat.",
+    }));
+  }
+  return {
+    titel: huidig?.titel || "Tussentijdse OR-verkiezing",
+    toelichting: huidig ? huidig.toelichting : "Er is één zetel vrij in de ondernemingsraad.",
+    eind_at: huidig?.eind_at || new Date(Date.now() + 3 * 864e5).toISOString(),
+    logo_url: gekozenLogo || instellingen.logo_url || null,
+    organisatie: $("#h-org").value.trim() || instellingen.organisatie,
+    kandidaten,
+  };
+}
+
+window.addEventListener("message", async (e) => {
+  if (e.origin !== location.origin || !voorbeeldVenster || e.source !== voorbeeldVenster || e.data?.soort !== "voorbeeld-klaar") return;
+  voorbeeldVenster.postMessage({ soort: "voorbeeld-biljet", thema: huidigThema(), biljet: await voorbeeldBiljet() }, location.origin);
+});
+
+for (const knop of $$(".voorbeeld-stem")) {
+  knop.addEventListener("click", () => {
+    voorbeeldVenster = window.open(`stem.html?voorbeeld=${Date.now()}#voorbeeld`, "or-voorbeeld");
+    if (!voorbeeldVenster) toonFout("Je browser blokkeerde het voorbeeldvenster. Sta pop-ups toe voor deze website en probeer het opnieuw.");
+  });
+}
+
 $("#huisstijl-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   wisFout();
