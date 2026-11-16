@@ -159,7 +159,7 @@ window.OR_VERTALINGEN = {
   "Uitnodigingen en herinneringen": ["Invitations and reminders", "Einladungen und Erinnerungen"],
   "Je verstuurt de mails zelf vanuit je eigen Outlook met": ["You send the emails yourself from your own Outlook using", "Sie versenden die E-Mails selbst aus Ihrem eigenen Outlook mit"],
   "Word-afdruk samenvoegen": ["Word mail merge", "Word-Seriendruck"],
-  ". Het Word-sjabloon heeft al de opmaak met logo, kandidaten en een knop met de persoonlijke link.": [". The Word template already has the layout with logo, candidates and a button with the personal link.", ". Die Word-Vorlage enthält bereits das Layout mit Logo, Kandidaten und einer Schaltfläche mit dem persönlichen Link."],
+  ". Het Word-sjabloon ziet eruit als de stempagina: met je huisstijlkleuren, logo, kandidaten met foto en een knop met de persoonlijke link.": [". The Word template looks like the voting page: with your house colours, logo, candidates with photos and a button with the personal link.", ". Die Word-Vorlage sieht aus wie die Abstimmungsseite: mit Ihren Hausfarben, Logo, Kandidaten mit Foto und einer Schaltfläche mit dem persönlichen Link."],
   "Download het Word-sjabloon": ["Download the Word template", "Laden Sie die Word-Vorlage herunter"],
   "en open het in Word.": ["and open it in Word.", "und öffnen Sie sie in Word."],
   "Download de lijst": ["Download the list", "Laden Sie die Liste herunter"],

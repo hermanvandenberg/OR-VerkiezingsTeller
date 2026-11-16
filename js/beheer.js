@@ -2,10 +2,10 @@
 import {
   db, $, $$, el, fmtDatum, fmtKort, fmtDag, naarLokaal, vanLokaal, fotoOf, laadHuisstijl,
   vereisLogin, uitloggen, foutTekst, download, csvRegel, t,
-} from "./gemeen.js?v=20261116g";
-import { parseCsv, uitTabel, uitOutlook, opschonen } from "./lijst-inlezen.js?v=20261116g";
-import { maakWordSjabloon, laadAlsPng } from "./word-sjabloon.js?v=20261116g";
-import { STANDAARD, LETTERTYPEN, pasThemaToe, themaVariabelen } from "./thema.js?v=20261116g";
+} from "./gemeen.js?v=20261116h";
+import { parseCsv, uitTabel, uitOutlook, opschonen } from "./lijst-inlezen.js?v=20261116h";
+import { maakWordSjabloon, laadAlsPng } from "./word-sjabloon.js?v=20261116h";
+import { STANDAARD, LETTERTYPEN, pasThemaToe, themaVariabelen } from "./thema.js?v=20261116h";
 
 let verkiezingen = [];
 let huidig = null;          // de gekozen verkiezing (object) of null bij een nieuwe
@@ -603,19 +603,20 @@ async function wordSjabloon(soort, knop) {
   wisFout();
   knop.disabled = true;
   try {
-    const { data: kandidaten, error } = await db.from("kandidaten").select("naam, functie, foto_url")
+    const { data: kandidaten, error } = await db.from("kandidaten").select("naam, functie, tekst, foto_url")
       .eq("verkiezing_id", huidig.id).order("volgorde").order("naam");
     if (error) throw error;
-    const [logo, ...fotos] = await Promise.all([laadAlsPng(instellingen.logo_url, 600), ...kandidaten.map((k) => laadAlsPng(k.foto_url, 240))]);
+    const [logo, ...fotos] = await Promise.all([laadAlsPng(instellingen.logo_url, 600), ...kandidaten.map((k) => laadAlsPng(k.foto_url, 400, { vierkant: true }))]);
     const blob = maakWordSjabloon({
       soort,
       titel: huidig.titel,
       organisatie: instellingen.organisatie || "Ondernemingsraad",
       afzender: account?.naam || "",
       logo,
-      kandidaten: kandidaten.map((k, i) => ({ naam: k.naam, functie: k.functie, foto: fotos[i] })),
-      knopKleur: themaVariabelen(instellingen.thema, false)["--knop"].slice(1).toUpperCase(),
-      knopTekst: themaVariabelen(instellingen.thema, false)["--on-petrol"].slice(1).toUpperCase(),
+      toelichting: huidig.toelichting || "",
+      kandidaten: kandidaten.map((k, i) => ({ naam: k.naam, functie: k.functie, tekst: k.tekst, foto: fotos[i] })),
+      kleuren: themaVariabelen(instellingen.thema, false),
+      lettertype: instellingen.thema?.lettertype || "",
     });
     const url = URL.createObjectURL(blob);
     const a = el("a", { href: url, download: `${soort}-sjabloon.docx` });
