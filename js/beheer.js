@@ -487,6 +487,11 @@ function toonThemaLive() { pasThemaToe(huidigThema()); }
 function toonHuisstijl() {
   $("#h-org").value = instellingen.organisatie || "";
   $("#h-site").value = instellingen.site_url || siteAdres();
+  // Waarschuwen als de stemlinks naar een ander adres wijzen dan waar de app nu draait.
+  const huidigAdres = location.origin + location.pathname.replace(/\/[^/]*$/, "");
+  const anders = instellingen.site_url && instellingen.site_url.replace(/\/+$/, "") !== huidigAdres.replace(/\/+$/, "");
+  $("#h-site-let-op").hidden = !anders;
+  $("#h-site-let-op").textContent = anders ? `Let op: je gebruikt de app nu via ${huidigAdres}. Klopt het adres hierboven nog?` : "";
   $("#h-bedrijf").value = instellingen.bedrijf_website || "";
   const vb = $("#h-logo-voorbeeld");
   vb.hidden = !instellingen.logo_url;
