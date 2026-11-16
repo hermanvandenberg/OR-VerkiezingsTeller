@@ -233,6 +233,23 @@
     </section>
 
   </main>
+  <dialog id="verwijder-venster" aria-labelledby="verwijder-kop">
+    <form class="venster" id="verwijder-form" method="dialog" novalidate>
+      <h2 id="verwijder-kop">Verkiezing verwijderen</h2>
+      <p id="verwijder-uitleg"></p>
+      <p class="hint">Huisstijl, logo en de logins van de commissie blijven staan. Dit kan niet ongedaan worden gemaakt.</p>
+      <label class="veld" for="verwijder-naam">Typ ter bevestiging de naam van de verkiezing:
+        <b id="verwijder-titel"></b>
+        <input id="verwijder-naam" autocomplete="off" spellcheck="false">
+      </label>
+      <div class="rij">
+        <button type="submit" class="knop gevaar" id="verwijder-ja" disabled>Definitief verwijderen</button>
+        <button type="button" class="knop licht" id="verwijder-nee">Annuleren</button>
+      </div>
+      <p id="verwijder-fout" class="fout" role="alert" hidden></p>
+    </form>
+  </dialog>
+
   <script type="module" src="js/beheer.js"></script>
 </body>
 </html>

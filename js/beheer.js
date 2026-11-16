@@ -131,7 +131,7 @@ function vulFormulier(v) {
 
   const vast = begonnen();
   for (const id of ["#v-start", "#v-uitslag"]) $(id).disabled = !!vast;
-  $("#verkiezing-weg").hidden = !v || vast;
+  $("#verkiezing-weg").hidden = !v;
 
   const status = $("#verkiezing-status");
   if (!v) status.replaceChildren(el("span", { class: "chip warn", text: "Nieuw, nog niet opgeslagen" }));
@@ -227,11 +227,44 @@ $("#verkiezing-form").addEventListener("submit", async (e) => {
   await laadVerkiezingen(data.id);
 });
 
-$("#verkiezing-weg").addEventListener("click", async () => {
-  if (!huidig || !confirm(`Weet je zeker dat je "${huidig.titel}" wilt verwijderen? Kandidaten en kiezerslijst gaan ook weg.`)) return;
-  const { error } = await db.from("verkiezingen").delete().eq("id", huidig.id);
-  if (error) return toonFout(error);
+// Verwijderen: altijd via een venster waarin de naam moet worden overgetypt.
+$("#verkiezing-weg").addEventListener("click", () => {
+  if (!huidig) return;
+  wisFout();
+  const open = begonnen() && !gesloten();
+  $("#verwijder-uitleg").textContent = begonnen()
+    ? `"${huidig.titel}" wordt helemaal verwijderd: kandidaten, kiezerslijst, alle stemmen, meldingen en de uitslag.`
+      + (open ? " Let op: de stemming is nog open. Stemlinks werken daarna niet meer." : "")
+    : `"${huidig.titel}" wordt verwijderd, met de kandidaten en de kiezerslijst.`;
+  $("#verwijder-titel").textContent = huidig.titel;
+  $("#verwijder-naam").value = "";
+  $("#verwijder-ja").disabled = true;
+  $("#verwijder-fout").hidden = true;
+  $("#verwijder-venster").showModal();
+  $("#verwijder-naam").focus();
+});
+$("#verwijder-naam").addEventListener("input", () => {
+  $("#verwijder-ja").disabled = $("#verwijder-naam").value.trim() !== huidig?.titel.trim();
+});
+$("#verwijder-nee").addEventListener("click", () => $("#verwijder-venster").close());
+$("#verwijder-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (!huidig || $("#verwijder-ja").disabled) return;
+  const knop = $("#verwijder-ja");
+  knop.disabled = true;
+  const { error } = await db.rpc("verkiezing_verwijderen", { p_verkiezing: huidig.id, p_titel: $("#verwijder-naam").value });
+  if (error) {
+    knop.disabled = false;
+    $("#verwijder-fout").textContent = /verkiezing_verwijderen/.test(error.message || "")
+      ? "Voer eerst supabase/updates/003-verkiezing-verwijderen.sql uit in de SQL Editor van Supabase (zie de README)."
+      : foutTekst(error);
+    $("#verwijder-fout").hidden = false;
+    return;
+  }
+  const titel = huidig.titel;
+  $("#verwijder-venster").close();
   await laadVerkiezingen();
+  meld("#verkiezing-ok", `"${titel}" is verwijderd`);
 });
 
 /* ---------------- Kandidaten ---------------- */

@@ -738,6 +738,46 @@ begin
   return private.vernietigen_verlopen();
 end $$;
 
+-- Een hele verkiezing verwijderen: kandidaten, kiezers, stemmen, meldingen en
+-- uitslag. Alleen de beheerder, en alleen als de naam precies wordt overgetypt.
+-- Huisstijl, logo en commissie blijven staan. In het logboek blijft een regel
+-- "verkiezing verwijderd" staan; e-mailadressen van kiezers worden eruit gehaald.
+create or replace function public.verkiezing_verwijderen(p_verkiezing uuid, p_titel text) returns void
+language plpgsql volatile security definer set search_path = '' as $$
+declare
+  v public.verkiezingen;
+  v_stemmen int;
+  v_kiezers int;
+begin
+  if not public.is_beheerder() then
+    raise exception 'Geen toegang';
+  end if;
+  select * into v from public.verkiezingen where id = p_verkiezing for update;
+  if not found then
+    raise exception 'Verkiezing niet gevonden';
+  end if;
+  if btrim(coalesce(p_titel, '')) <> btrim(v.titel) then
+    raise exception 'De naam klopt niet. Typ de naam van de verkiezing precies over.';
+  end if;
+
+  select count(*) into v_stemmen from public.stemmen where verkiezing_id = v.id;
+  select count(*) into v_kiezers from public.kiezers where verkiezing_id = v.id;
+
+  update public.logboek set details = details - 'email'
+   where verkiezing_id = v.id and details ? 'email';
+  delete from public.meldingen where verkiezing_id = v.id;
+  delete from public.stemmen where verkiezing_id = v.id;
+
+  perform set_config('or.verwijderen', 'aan', true);
+  delete from public.verkiezingen where id = v.id;   -- kandidaten, kiezers en wachtrij gaan mee
+  perform set_config('or.verwijderen', '', true);
+
+  perform private.log('verkiezing verwijderd',
+                      jsonb_build_object('titel', v.titel, 'status', private.status_van(v),
+                                         'stemmen', v_stemmen, 'kiezers', v_kiezers),
+                      null);
+end $$;
+
 -- Alleen voor de mailfunctie (service role).
 create function public.mail_wachtrij_pakken(p_max int)
 returns table (id bigint, soort text, verkiezing_id uuid, naam text, email text, token text)
@@ -858,6 +898,10 @@ begin
     raise exception 'De datum om de stemmen te vernietigen moet na het einde van de stemming liggen';
   end if;
   if tg_op = 'DELETE' then
+    -- Via public.verkiezing_verwijderen (met naamcontrole); die logt zelf.
+    if coalesce(current_setting('or.verwijderen', true), '') = 'aan' then
+      return old;
+    end if;
     if old.start_at <= now() then
       raise exception 'Een verkiezing die al begonnen is kan niet verwijderd worden';
     end if;
@@ -977,6 +1021,8 @@ grant execute on function public.dashboard(uuid), public.melding_afhandelen(bigi
                           to authenticated;
 
 grant execute on function public.stemmen_vernietigen(uuid), public.vernietigen_verlopen() to authenticated;
+
+grant execute on function public.verkiezing_verwijderen(uuid, text) to authenticated;
 
 grant execute on function public.mail_wachtrij_pakken(int), public.mail_resultaat(bigint, boolean, text, boolean)
   to service_role;
