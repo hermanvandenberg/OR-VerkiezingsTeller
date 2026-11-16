@@ -2,10 +2,10 @@
 import {
   db, $, $$, el, fmtDatum, fmtKort, fmtDag, naarLokaal, vanLokaal, fotoOf, laadHuisstijl,
   vereisLogin, uitloggen, foutTekst, download, csvRegel, t,
-} from "./gemeen.js?v=20261116d";
-import { parseCsv, uitTabel, uitOutlook, opschonen } from "./lijst-inlezen.js?v=20261116d";
-import { maakWordSjabloon, laadAlsPng } from "./word-sjabloon.js?v=20261116d";
-import { STANDAARD, LETTERTYPEN, pasThemaToe, themaVariabelen } from "./thema.js?v=20261116d";
+} from "./gemeen.js?v=20261116e";
+import { parseCsv, uitTabel, uitOutlook, opschonen } from "./lijst-inlezen.js?v=20261116e";
+import { maakWordSjabloon, laadAlsPng } from "./word-sjabloon.js?v=20261116e";
+import { STANDAARD, LETTERTYPEN, pasThemaToe, themaVariabelen } from "./thema.js?v=20261116e";
 
 let verkiezingen = [];
 let huidig = null;          // de gekozen verkiezing (object) of null bij een nieuwe
@@ -484,6 +484,58 @@ $("#plak-lezen").addEventListener("click", () => {
   const tabelachtig = /\t/.test(tekst) && tekst.split(/\r?\n/).length > 1;
   toonVoorbeeld(opschonen(tabelachtig ? uitTabel(parseCsv(tekst)) : uitOutlook(tekst)));
 });
+/* Verzamelmail (distributiegroep) uit Microsoft 365 */
+
+async function groepFunctie(body) {
+  const { data, error } = await db.functions.invoke("groep-leden", { body });
+  if (error) return { code: error?.context?.status === 403 ? "geen_toegang" : "niet_ingesteld" };
+  return data || { code: "graph_fout" };
+}
+
+function groepMelding(code) {
+  const nietIngesteld = t("De koppeling met Microsoft 365 is (nog) niet ingesteld. Kopieer de leden dan uit Outlook, zie de uitleg bij het plakvak. IT kan de koppeling instellen met de stappen in de README.");
+  return {
+    niet_ingesteld: nietIngesteld,
+    inloggen_mislukt: t("Inloggen bij Microsoft 365 lukte niet. Vraag IT om de gegevens van de app-registratie te controleren."),
+    geen_machtiging: t("De app mag de leden van groepen nog niet lezen. Vraag IT om de machtigingen GroupMember.Read.All en User.ReadBasic.All toe te voegen (zie de README)."),
+    niet_gevonden: t("Deze verzamelmail is niet gevonden."),
+    geen_toegang: t("Je hebt hier geen toegang toe. Log opnieuw in."),
+  }[code] || t("Microsoft 365 gaf een fout. Probeer het later opnieuw, of kopieer de leden uit Outlook.");
+}
+
+async function zoekGroep() {
+  wisFout();
+  const zoek = $("#groep-zoek").value.trim();
+  const uit = $("#groep-resultaat");
+  if (zoek.length < 2) return toonFout(t("Typ minstens 2 letters van de naam of het adres."));
+  uit.replaceChildren(el("span", { class: "hint", text: t("Bezig met zoeken…") }));
+  const data = await groepFunctie({ zoek });
+  if (data.code) { uit.replaceChildren(); return toonFout(groepMelding(data.code)); }
+  if (!data.groepen.length) return uit.replaceChildren(el("span", { class: "hint", text: t("Geen verzamelmail gevonden met deze naam.") }));
+  data.groepen.sort((a, b) => a.naam.localeCompare(b.naam));
+  uit.replaceChildren(...data.groepen.map((g) => el("button", {
+    type: "button", class: "knop licht klein", onclick: () => haalLeden(g), text: g.email ? `${g.naam} · ${g.email}` : g.naam,
+  })));
+}
+
+async function haalLeden(g) {
+  wisFout();
+  const uit = $("#groep-resultaat");
+  uit.replaceChildren(el("span", { class: "hint", text: t("Leden van {naam} worden opgehaald…", { naam: g.naam }) }));
+  const data = await groepFunctie({ groep: g.id });
+  if (data.code) { uit.replaceChildren(); return toonFout(groepMelding(data.code)); }
+  // Bij elkaar voegen met wat al in het voorbeeld staat, zodat meerdere verzamelmails samen kunnen.
+  const eerder = (!$("#voorbeeld").hidden && voorbeeldLijst) || { geldig: [], dubbel: [], ongeldig: [] };
+  const nieuw = opschonen([...eerder.geldig, ...data.leden]);
+  toonVoorbeeld({ geldig: nieuw.geldig, dubbel: [...eerder.dubbel, ...nieuw.dubbel], ongeldig: [...eerder.ongeldig, ...nieuw.ongeldig] });
+  const tekst = [t("{n} leden van {naam} staan in het voorbeeld hieronder. Zoek eventueel nog een verzamelmail, of klik op Toevoegen aan de verkiezing.", { n: data.leden.length, naam: g.naam })];
+  if (data.zonderMail) tekst.push(t("{n} leden zonder e-mailadres zijn overgeslagen.", { n: data.zonderMail }));
+  uit.replaceChildren(el("span", { class: "hint", text: tekst.join(" ") }));
+}
+
+$("#groep-zoeken").addEventListener("click", zoekGroep);
+$("#groep-zoek").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); zoekGroep(); } });
+
 $("#lijst-annuleren").addEventListener("click", () => { voorbeeldLijst = null; $("#voorbeeld").hidden = true; $("#lijst-bestand").value = ""; });
 $("#lijst-toevoegen").addEventListener("click", async () => {
   if (!voorbeeldLijst?.geldig.length) return;
