@@ -2,10 +2,10 @@
 import {
   db, $, $$, el, fmtDatum, fmtKort, fmtDag, naarLokaal, vanLokaal, fotoOf, laadHuisstijl,
   vereisLogin, uitloggen, foutTekst, download, csvRegel, t,
-} from "./gemeen.js?v=20261116f";
-import { parseCsv, uitTabel, uitOutlook, opschonen } from "./lijst-inlezen.js?v=20261116f";
-import { maakWordSjabloon, laadAlsPng } from "./word-sjabloon.js?v=20261116f";
-import { STANDAARD, LETTERTYPEN, pasThemaToe, themaVariabelen } from "./thema.js?v=20261116f";
+} from "./gemeen.js?v=20261116g";
+import { parseCsv, uitTabel, uitOutlook, opschonen } from "./lijst-inlezen.js?v=20261116g";
+import { maakWordSjabloon, laadAlsPng } from "./word-sjabloon.js?v=20261116g";
+import { STANDAARD, LETTERTYPEN, pasThemaToe, themaVariabelen } from "./thema.js?v=20261116g";
 
 let verkiezingen = [];
 let huidig = null;          // de gekozen verkiezing (object) of null bij een nieuwe
@@ -651,29 +651,58 @@ $("#mail-herinnering").addEventListener("click", () => inplannen("herinnering"))
 /* ---------------- Kiescommissie ---------------- */
 
 async function laadCommissie() {
-  const { data, error } = await db.from("toegang").select("email, naam, rol, user_id, uitgenodigd_at").order("rol").order("naam");
+  // commissie_lijst (update 004) weet of een account echt actief is; anders de oude manier.
+  let { data, error } = await db.rpc("commissie_lijst");
+  if (error && /commissie_lijst/.test(error.message || "")) {
+    ({ data, error } = await db.from("toegang").select("email, naam, rol, user_id, uitgenodigd_at").order("rol").order("naam"));
+    if (data) data = data.map((lid) => ({ ...lid, actief: !!lid.user_id }));
+  }
   if (error) return toonFout(error);
   $("#commissie").replaceChildren(el("table", {},
     el("thead", {}, el("tr", {}, el("th", { text: t("Naam") }), el("th", { text: t("E-mail") }), el("th", { text: t("Rol") }), el("th", { text: t("Account") }), el("th"))),
     el("tbody", {}, ...data.map((lid) => el("tr", {},
       el("td", { text: lid.naam }), el("td", { text: lid.email }), el("td", { text: t(lid.rol) }),
-      el("td", {}, el("span", { class: `chip ${lid.user_id ? "ok" : "warn"}`, text: lid.user_id ? t("Actief") : t("Uitgenodigd") })),
-      el("td", {}, lid.rol === "beheerder" ? null : el("button", { type: "button", class: "knop licht klein", text: t("Verwijderen"), onclick: async () => {
-        if (!confirm(t("{naam} uit de kiescommissie halen? Diegene kan dan niet meer inloggen op de commissiepagina's.", { naam: lid.naam }))) return;
-        const { error: err } = await db.rpc("commissie_verwijderen", { p_email: lid.email });
-        if (err) return toonFout(err);
-        laadCommissie();
-      } })))))));
+      el("td", {}, el("span", { class: `chip ${lid.actief ? "ok" : "warn"}`, text: lid.actief ? t("Actief") : t("Uitgenodigd") })),
+      el("td", {}, lid.rol === "beheerder" ? null : el("span", { class: "rij" },
+        lid.actief ? null : el("button", { type: "button", class: "knop licht klein", text: t("Uitnodiging opnieuw mailen"), onclick: async (e) => {
+          e.currentTarget.disabled = true;
+          await mailUitnodiging(lid.email, lid.naam);
+          laadCommissie();
+        } }),
+        el("button", { type: "button", class: "knop licht klein", text: t("Verwijderen"), onclick: async () => {
+          if (!confirm(t("{naam} uit de kiescommissie halen? Diegene kan dan niet meer inloggen op de commissiepagina's.", { naam: lid.naam }))) return;
+          const { error: err } = await db.rpc("commissie_verwijderen", { p_email: lid.email });
+          if (err) return toonFout(err);
+          laadCommissie();
+        } }))))))));
+}
+
+// Uitnodigingsmail via de functie commissie-uitnodigen. Lukt dat niet, dan uitleggen
+// hoe het verder kan (de registratielink zelf sturen).
+async function mailUitnodiging(email, naam) {
+  const { data, error } = await db.functions.invoke("commissie-uitnodigen", { body: { email } });
+  const code = error ? (error?.context?.status === 403 ? "geen_toegang" : "niet_ingesteld") : data?.ok ? "ok" : data?.code;
+  const teksten = {
+    ok: t("Uitnodiging gemaild naar {naam} ({email}). Diegene klikt op de link in de mail, kiest een wachtwoord en stelt tweestapsverificatie in.", { naam, email }),
+    al_geregistreerd: t("{naam} heeft al een account en kan gewoon inloggen. Wachtwoord vergeten? Gebruik dan Wachtwoord vergeten op de inlogpagina.", { naam }),
+    geen_site: t("Vul eerst het adres van deze website in bij Huisstijl en website."),
+    limiet: t("De mailserver laat nu even geen mails meer toe. Probeer het over een uur opnieuw, of stel een eigen mailserver in (zie de README)."),
+    niet_ingesteld: t("{naam} staat in de lijst, maar de uitnodigingsmail kon niet worden verstuurd: de functie commissie-uitnodigen is nog niet geïnstalleerd (zie de README). Stuur diegene voorlopig de link hierboven.", { naam }),
+  };
+  if (code === "ok") return meld("#commissie-ok", teksten.ok);
+  if (code === "al_geregistreerd") return meld("#commissie-ok", teksten.al_geregistreerd);
+  toonFout(teksten[code] || t("De uitnodigingsmail kon niet worden verstuurd ({fout}). Stuur {naam} voorlopig de link hierboven.", { fout: data?.detail || code || "?", naam }));
 }
 
 $("#commissie-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   wisFout();
-  const { error } = await db.rpc("commissie_uitnodigen", { p_naam: $("#k-naam").value, p_email: $("#k-email").value });
+  const naam = $("#k-naam").value.trim(), email = $("#k-email").value.trim();
+  const { error } = await db.rpc("commissie_uitnodigen", { p_naam: naam, p_email: email });
   if (error) return toonFout(/duplicate|unique/i.test(error.message) ? t("Dit e-mailadres staat al in de lijst.") : error);
-  meld("#commissie-ok", t("{naam} is uitgenodigd. Stuur diegene de link hierboven.", { naam: $("#k-naam").value }));
   $("#k-naam").value = "";
   $("#k-email").value = "";
+  await mailUitnodiging(email.toLowerCase(), naam);
   laadCommissie();
 });
 

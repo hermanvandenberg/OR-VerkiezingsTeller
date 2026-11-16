@@ -9,10 +9,10 @@
   <title>Beheer · OR-VerkiezingsTeller</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700&display=swap">
   <link rel="icon" href="img/icoon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/stijl.css?v=20261116f">
-  <script src="js/modus.js?v=20261116f"></script>
-  <script defer src="js/vertalingen.js?v=20261116f"></script>
-  <script defer src="js/taal.js?v=20261116f"></script>
+  <link rel="stylesheet" href="css/stijl.css?v=20261116g">
+  <script src="js/modus.js?v=20261116g"></script>
+  <script defer src="js/vertalingen.js?v=20261116g"></script>
+  <script defer src="js/taal.js?v=20261116g"></script>
 </head>
 <body>
   <main class="wrap" id="pagina" hidden>
@@ -209,14 +209,14 @@
     <!-- 5. Kiescommissie -->
     <section class="kaart" id="tab-commissie" data-tab="commissie" role="tabpanel" aria-labelledby="knop-commissie">
       <h2>Kiescommissie</h2>
-      <p class="hint">Maximaal 5 leden. Een uitgenodigd lid maakt zelf een account aan via de link hieronder, met het e-mailadres dat je hier invult, en stelt tweestapsverificatie in.</p>
+      <p class="hint">Maximaal 5 leden. Een nieuw lid krijgt direct een uitnodigingsmail, kiest via de link een wachtwoord en stelt tweestapsverificatie in.</p>
       <div id="commissie" class="tabel"></div>
       <form id="commissie-form" class="velden" novalidate>
         <label class="veld" for="k-naam">Naam<input id="k-naam" placeholder="Naam commissielid" required></label>
         <label class="veld" for="k-email">E-mail<input id="k-email" type="email" placeholder="naam@bedrijf.nl" required></label>
         <div class="rij"><button type="submit" class="knop">Uitnodigen</button></div>
       </form>
-      <p class="hint">Stuur nieuwe leden deze link: <span id="registreer-link" class="mono"></span> <button type="button" class="knop licht klein" id="kopieer-link">Kopieer</button></p>
+      <p class="hint">Komt de mail niet aan? Stuur dan deze link: <span id="registreer-link" class="mono"></span> <button type="button" class="knop licht klein" id="kopieer-link">Kopieer</button></p>
       <p id="commissie-ok" class="melding-ok" role="status"></p>
     </section>
 
@@ -286,6 +286,6 @@
     </form>
   </dialog>
 
-  <script type="module" src="js/beheer.js?v=20261116f"></script>
+  <script type="module" src="js/beheer.js?v=20261116g"></script>
 </body>
 </html>
