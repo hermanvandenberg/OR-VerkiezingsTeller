@@ -8,10 +8,10 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Beheer · OR-VerkiezingsTeller</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700&display=swap">
-  <link rel="stylesheet" href="css/stijl.css?v=20261116d">
-  <script src="js/modus.js?v=20261116d"></script>
-  <script defer src="js/vertalingen.js?v=20261116d"></script>
-  <script defer src="js/taal.js?v=20261116d"></script>
+  <link rel="stylesheet" href="css/stijl.css?v=20261116e">
+  <script src="js/modus.js?v=20261116e"></script>
+  <script defer src="js/vertalingen.js?v=20261116e"></script>
+  <script defer src="js/taal.js?v=20261116e"></script>
 </head>
 <body>
   <main class="wrap" id="pagina" hidden>
@@ -129,7 +129,26 @@
               <textarea id="lijst-plak" placeholder="Jansen, Piet &lt;p.jansen@bedrijf.nl&gt;; Smit, Ruud &lt;r.smit@bedrijf.nl&gt;"></textarea>
             </label>
             <div class="rij"><button type="button" class="knop licht klein" id="plak-lezen">Adressen inlezen</button></div>
+            <details class="uitleg-groep">
+              <summary>Zo kopieer je de leden van een verzamelmail uit Outlook</summary>
+              <ol class="stappen">
+                <li>Maak in Outlook een nieuwe e-mail en typ bij <b>Aan</b> de naam van de verzamelmail.</li>
+                <li>Klik op het <b>plusje (+)</b> voor de naam, of klik met de rechtermuisknop op de naam en kies <b>Uitvouwen</b>. Bevestig met <b>OK</b>. Nu staan alle leden los in het veld Aan.</li>
+                <li>Klik in het veld Aan en druk op <b>Ctrl+A</b> en daarna op <b>Ctrl+C</b>.</li>
+                <li>Plak de adressen in het vak hierboven met <b>Ctrl+V</b> en klik op <b>Adressen inlezen</b>.</li>
+                <li>Sluit de e-mail zonder te versturen.</li>
+              </ol>
+              <p class="hint">Meerdere verzamelmails? Plak ze allemaal in het vak; dubbele adressen worden er vanzelf uit gehaald. De verzamelmail zelf als adres gebruiken kan niet, want iedere collega krijgt een eigen, persoonlijke stemlink.</p>
+            </details>
           </div>
+        </div>
+        <div class="stapel krap">
+          <label class="veld" for="groep-zoek"><b>Of zoek een verzamelmail in Microsoft 365</b>
+            <span class="hint">Werkt alleen als IT de koppeling met Microsoft 365 heeft ingesteld (zie de README).</span>
+            <input id="groep-zoek" type="search" placeholder="Naam of adres van de verzamelmail">
+          </label>
+          <div class="rij"><button type="button" class="knop licht klein" id="groep-zoeken">Zoeken</button></div>
+          <div id="groep-resultaat" class="rij"></div>
         </div>
         <div id="voorbeeld" class="stapel krap" hidden>
           <p class="rij"><span id="vb-geldig" class="chip ok"></span><span id="vb-dubbel" class="chip warn"></span><span id="vb-ongeldig" class="chip rood"></span></p>
@@ -266,6 +285,6 @@
     </form>
   </dialog>
 
-  <script type="module" src="js/beheer.js?v=20261116d"></script>
+  <script type="module" src="js/beheer.js?v=20261116e"></script>
 </body>
 </html>

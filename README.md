@@ -161,6 +161,25 @@ Stemlinks die al verstuurd zijn met het oude github.io-adres blijven werken: Git
 
 Extra beveiliging (aanbevolen): verifieer de domeinnaam in je GitHub-profiel onder **Settings > Pages > Add a domain**. GitHub geeft je dan een TXT-record om bij je DNS toe te voegen. Daarmee kan niemand anders jouw domeinnaam aan een eigen GitHub-site koppelen.
 
+## Verzamelmails gebruiken voor de e-maillijst
+
+Iedere collega krijgt een eigen, persoonlijke stemlink. Daarom kun je de stemmail niet naar een verzamelmail (distributiegroep) sturen. Je kunt wel de leden van een verzamelmail in één keer in de e-maillijst zetten. Dubbele adressen worden er vanzelf uit gehaald, ook als iemand in meerdere verzamelmails zit.
+
+**Zonder hulp van IT: kopiëren uit Outlook**
+1. Maak in Outlook een nieuwe e-mail en typ bij **Aan** de naam van de verzamelmail.
+2. Klik op het **plusje (+)** voor de naam, of klik met de rechtermuisknop en kies **Uitvouwen**. Bevestig met **OK**.
+3. Klik in het veld Aan, druk op **Ctrl+A** en dan op **Ctrl+C**.
+4. Ga in de app naar **E-maillijst**, plak in **Of plak adressen uit Outlook** en klik **Adressen inlezen**. Herhaal dit voor elke verzamelmail; je kunt ze ook allemaal tegelijk plakken.
+5. Sluit de e-mail in Outlook zonder te versturen.
+
+**Met de Microsoft 365-koppeling: zoeken in de app**
+
+Heeft IT de app-registratie voor "Outlook automatisch" al gemaakt (zie stap 7B)? Dan kan de app verzamelmails ook zelf opzoeken. IT voegt daarvoor eenmalig toe:
+1. API-machtigingen **Microsoft Graph > Application > GroupMember.Read.All** en **User.ReadBasic.All**, met **admin consent**. Deze machtigingen geven alleen leesrecht.
+2. In Supabase: **Edge Functions > Deploy a new function > Via editor**, naam `groep-leden`, plak [`supabase/functions/groep-leden/index.ts`](supabase/functions/groep-leden/index.ts). Laat **Verify JWT** aan staan. De functie gebruikt dezelfde geheimen `MS_TENANT_ID`, `MS_CLIENT_ID` en `MS_CLIENT_SECRET`.
+
+Daarna typ je in **E-maillijst > Of zoek een verzamelmail in Microsoft 365** een deel van de naam, klik je op de juiste verzamelmail en controleer je het voorbeeld. Je kunt meerdere verzamelmails na elkaar ophalen en daarna in één keer toevoegen. Alleen jij als beheerder kunt deze functie gebruiken. Leden van groepen binnen de verzamelmail worden meegenomen. Dynamische distributiegroepen worden niet ondersteund; kopieer die uit Outlook.
+
 ## Talen
 
 Elke pagina, ook de stempagina, heeft onderaan of rechtsboven een keuze **NL / EN / DE**. Bij het eerste bezoek kiest de app de taal van de browser (Nederlands, Engels of Duits, anders Nederlands). Een gemaakte keuze wordt per browser onthouden.
@@ -182,5 +201,6 @@ supabase/schema.sql                                   database, rechten en regel
 supabase/cron.sql                                     planner voor automatisch mailen (optie B)
 supabase/functions/mail-verwerken/index.ts           mailfunctie via Microsoft Graph (optie B)
 supabase/functions/thema-ophalen/                     thema voorstellen uit de bedrijfswebsite
+supabase/functions/groep-leden/index.ts              leden van een verzamelmail ophalen uit Microsoft 365
 supabase/updates/                                     aanvullingen voor een bestaande database
 ```
