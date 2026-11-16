@@ -8,8 +8,10 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Stemmen · OR-verkiezing</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700&display=swap">
-  <link rel="stylesheet" href="css/stijl.css?v=20261116a">
-  <script src="js/modus.js?v=20261116a"></script>
+  <link rel="stylesheet" href="css/stijl.css?v=20261116b">
+  <script src="js/modus.js?v=20261116b"></script>
+  <script defer src="js/vertalingen.js?v=20261116b"></script>
+  <script defer src="js/taal.js?v=20261116b"></script>
 </head>
 <body>
   <main class="wrap smal">
@@ -59,7 +61,7 @@
       <p id="bedankt-apart" class="notitie warn" hidden>Het e-mailadres dat je invulde is anders dan het adres waarop je deze uitnodiging kreeg. De kiescommissie controleert je stem daarom eerst.</p>
       <p class="hint" id="bedankt-hint">Je stemlink werkt nu niet meer. Je kunt dit venster sluiten.</p>
     </section>
-    <footer class="voet" data-weergave></footer>
+    <footer class="voet"><div data-taal></div><div data-weergave></div></footer>
   </main>
 
   <dialog id="bevestig" aria-labelledby="bevestig-kop">
@@ -77,6 +79,6 @@
     </div>
   </dialog>
 
-  <script type="module" src="js/stem.js?v=20261116a"></script>
+  <script type="module" src="js/stem.js?v=20261116b"></script>
 </body>
 </html>

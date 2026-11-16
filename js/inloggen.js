@@ -1,5 +1,5 @@
 // Inloggen, registreren, wachtwoord herstellen en tweestapsverificatie.
-import { db, $, $$, laadHuisstijl } from "./gemeen.js?v=20261116a";
+import { db, $, $$, t, laadHuisstijl } from "./gemeen.js?v=20261116b";
 
 const VIEWS = ["inloggen", "registreren", "vergeten", "nieuw", "mfa-instellen", "mfa-code"];
 let herstelModus = false;
@@ -51,7 +51,7 @@ async function naInloggen() {
     if (f.status !== "verified") await db.auth.mfa.unenroll({ factorId: f.id });
   }
   const { data, error } = await db.auth.mfa.enroll({ factorType: "totp", friendlyName: "OR-VerkiezingsTeller" });
-  if (error) { toon("inloggen"); return fout("inloggen", "Tweestapsverificatie kon niet worden gestart: " + error.message); }
+  if (error) { toon("inloggen"); return fout("inloggen", t("Tweestapsverificatie kon niet worden gestart: ") + error.message); }
   $("#mfa-qr").src = data.totp.qr_code;
   $("#mfa-sleutel").textContent = data.totp.secret;
   $("#v-mfa-instellen").dataset.factor = data.id;
@@ -63,7 +63,7 @@ async function doorsturen() {
   if (!account) {
     await db.auth.signOut();
     toon("inloggen");
-    return fout("inloggen", "Dit account heeft (nog) geen toegang. Vraag de beheerder om je uit te nodigen.");
+    return fout("inloggen", t("Dit account heeft (nog) geen toegang. Vraag de beheerder om je uit te nodigen."));
   }
   location.replace(account.rol === "beheerder" ? "beheer.html" : "dashboard.html");
 }
@@ -77,8 +77,8 @@ $("#v-inloggen").addEventListener("submit", async (e) => {
   bezig(e.target, false);
   if (error) {
     return fout("inloggen", /confirm/i.test(error.message)
-      ? "Bevestig eerst je e-mailadres via de link in de mail die je kreeg."
-      : "E-mailadres of wachtwoord klopt niet.");
+      ? t("Bevestig eerst je e-mailadres via de link in de mail die je kreeg.")
+      : t("E-mailadres of wachtwoord klopt niet."));
   }
   naInloggen();
 });
@@ -86,8 +86,8 @@ $("#v-inloggen").addEventListener("submit", async (e) => {
 $("#v-registreren").addEventListener("submit", async (e) => {
   e.preventDefault();
   const ww = $("#re-ww").value;
-  if (ww.length < 12) return fout("registreren", "Kies een wachtwoord van minimaal 12 tekens.");
-  if (ww !== $("#re-ww2").value) return fout("registreren", "De twee wachtwoorden zijn niet gelijk.");
+  if (ww.length < 12) return fout("registreren", t("Kies een wachtwoord van minimaal 12 tekens."));
+  if (ww !== $("#re-ww2").value) return fout("registreren", t("De twee wachtwoorden zijn niet gelijk."));
   bezig(e.target, true);
   const { error } = await db.auth.signUp({
     email: $("#re-email").value.trim(), password: ww, options: { emailRedirectTo: terugUrl() },
@@ -95,10 +95,10 @@ $("#v-registreren").addEventListener("submit", async (e) => {
   bezig(e.target, false);
   if (error) {
     return fout("registreren", /database error|niet uitgenodigd/i.test(error.message)
-      ? "Dit e-mailadres is niet uitgenodigd. Vraag de beheerder om je toe te voegen aan de kiescommissie."
+      ? t("Dit e-mailadres is niet uitgenodigd. Vraag de beheerder om je toe te voegen aan de kiescommissie.")
       : error.message);
   }
-  ok("registreren", "Gelukt. Je krijgt een mail om je e-mailadres te bevestigen. Klik op de link in die mail en log daarna in.");
+  ok("registreren", t("Gelukt. Je krijgt een mail om je e-mailadres te bevestigen. Klik op de link in die mail en log daarna in."));
 });
 
 $("#v-vergeten").addEventListener("submit", async (e) => {
@@ -106,13 +106,13 @@ $("#v-vergeten").addEventListener("submit", async (e) => {
   bezig(e.target, true);
   await db.auth.resetPasswordForEmail($("#ve-email").value.trim(), { redirectTo: terugUrl() });
   bezig(e.target, false);
-  ok("vergeten", "Als dit adres bij ons bekend is, ontvang je binnen een paar minuten een mail met een herstellink.");
+  ok("vergeten", t("Als dit adres bij ons bekend is, ontvang je binnen een paar minuten een mail met een herstellink."));
 });
 
 $("#v-nieuw").addEventListener("submit", async (e) => {
   e.preventDefault();
   const ww = $("#nw-ww").value;
-  if (ww.length < 12) return fout("nieuw", "Kies een wachtwoord van minimaal 12 tekens.");
+  if (ww.length < 12) return fout("nieuw", t("Kies een wachtwoord van minimaal 12 tekens."));
   bezig(e.target, true);
   const { error } = await db.auth.updateUser({ password: ww });
   bezig(e.target, false);
@@ -123,9 +123,9 @@ $("#v-nieuw").addEventListener("submit", async (e) => {
 
 async function verifieer(view, invoer) {
   const code = $(invoer).value.replace(/\D/g, "");
-  if (code.length !== 6) return fout(view, "Vul de 6 cijfers uit je app in.");
+  if (code.length !== 6) return fout(view, t("Vul de 6 cijfers uit je app in."));
   const { error } = await db.auth.mfa.challengeAndVerify({ factorId: $(`#v-${view}`).dataset.factor, code });
-  if (error) return fout(view, "Deze code klopt niet of is verlopen. Probeer de nieuwe code uit je app.");
+  if (error) return fout(view, t("Deze code klopt niet of is verlopen. Probeer de nieuwe code uit je app."));
   doorsturen();
 }
 
