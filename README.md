@@ -45,7 +45,7 @@ Eén uitzondering, alleen zolang het duurt: een stem met een afwijkend e-mailadr
 ### 2. Inloggen instellen
 In Supabase onder **Authentication**:
 1. **Sign In / Providers > Email**: laat "Confirm email" aan. Zet de minimale wachtwoordlengte op 12.
-2. **URL Configuration**: zet de *Site URL* op het adres van je website (stap 4), bijvoorbeeld `https://hermanvandenberg.github.io/OR-VerkiezingsTeller/index.html`, en voeg hetzelfde adres toe bij *Redirect URLs*.
+2. **URL Configuration**: zet de *Site URL* op het adres van je website (stap 4), bijvoorbeeld `https://hermanvandenberg.github.io/OR-VerkiezingsTeller/index.html`, en voeg hetzelfde adres toe bij *Redirect URLs*. Gebruik je een eigen domeinnaam, zie dan "Eigen domeinnaam".
 3. **Multi-Factor**: controleer dat TOTP (authenticator-app) aan staat.
 4. Tip: de standaard mailserver van Supabase verstuurt maar een paar mails per uur. Voor 5 commissieleden is dat genoeg; anders stel je onder **SMTP Settings** je eigen mailserver in.
 
@@ -126,6 +126,36 @@ Klik in het beheerscherm op **Nieuwe verkiezing**. Oude verkiezingen blijven als
 update public.toegang set rol = 'beheerder' where email = 'nieuw@bedrijf.nl';
 update public.toegang set rol = 'commissie' where email = 'oud@bedrijf.nl';  -- of: delete ...
 ```
+
+## Eigen domeinnaam
+
+Je kunt de website op een eigen adres zetten, bijvoorbeeld `https://or-verkiezingen.com` in plaats van `https://<gebruikersnaam>.github.io/OR-VerkiezingsTeller`. Doe de stappen in deze volgorde.
+
+**1. DNS bij de partij waar je de domeinnaam kocht.** Voeg deze records toe en verwijder eventuele andere A-, AAAA- of CNAME-records voor het hoofddomein (`@`) en `www`, zoals een parkeerpagina:
+
+| Type | Naam | Waarde |
+|---|---|---|
+| A | @ | 185.199.108.153 |
+| A | @ | 185.199.109.153 |
+| A | @ | 185.199.110.153 |
+| A | @ | 185.199.111.153 |
+| AAAA | @ | 2606:50c0:8000::153 |
+| AAAA | @ | 2606:50c0:8001::153 |
+| AAAA | @ | 2606:50c0:8002::153 |
+| AAAA | @ | 2606:50c0:8003::153 |
+| CNAME | www | `<gebruikersnaam>.github.io` |
+
+Het kan een paar minuten tot een paar uur duren voordat dit overal werkt.
+
+**2. GitHub.** In deze repository: **Settings > Pages > Custom domain**, vul de domeinnaam in (zonder `https://` en zonder `www`) en klik **Save**. GitHub zet dan zelf een bestand `CNAME` in de repository. Wacht tot de controle groen is en vink **Enforce HTTPS** aan. (Is dat vakje grijs, wacht dan nog even; GitHub maakt eerst een certificaat aan.)
+
+**3. Supabase.** Onder **Authentication > URL Configuration**: zet de *Site URL* op `https://<jouw-domein>/index.html` en voeg bij *Redirect URLs* `https://<jouw-domein>/**` toe. Laat het oude github.io-adres er voorlopig ook in staan.
+
+**4. In de app.** Open de app via het nieuwe adres, ga naar **Beheer > Huisstijl en website** en zet **Adres van deze website** op `https://<jouw-domein>`. Klik **Huisstijl opslaan**. Nieuwe stemlinks, herinneringen en de registratielink voor de commissie gebruiken dan het nieuwe adres.
+
+Stemlinks die al verstuurd zijn met het oude github.io-adres blijven werken: GitHub stuurt ze automatisch door naar het nieuwe adres.
+
+Extra beveiliging (aanbevolen): verifieer de domeinnaam in je GitHub-profiel onder **Settings > Pages > Add a domain**. GitHub geeft je dan een TXT-record om bij je DNS toe te voegen. Daarmee kan niemand anders jouw domeinnaam aan een eigen GitHub-site koppelen.
 
 ## Bestanden
 
