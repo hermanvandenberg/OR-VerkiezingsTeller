@@ -120,6 +120,8 @@ Het vernietigen gebeurt elke nacht om 03:15 via de planner van Supabase (pg_cron
 
 Klik in het beheerscherm op **Nieuwe verkiezing**. Oude verkiezingen blijven als archief bewaard, met hun uitslag en logboek. Een verkiezing kan ook meer dan twee kandidaten hebben.
 
+**Een verkiezing verwijderen**, bijvoorbeeld een testverkiezing: kies de verkiezing in het beheerscherm en klik **Verwijderen**. Typ ter bevestiging de naam van de verkiezing over. Kandidaten, kiezerslijst, stemmen, meldingen en uitslag gaan dan weg; huisstijl, logo en de commissie blijven staan. Al eerder geïnstalleerd? Voer dan eenmalig [`supabase/updates/003-verkiezing-verwijderen.sql`](supabase/updates/003-verkiezing-verwijderen.sql) uit in de **SQL Editor**.
+
 **Beheer overdragen** aan een nieuw OR-lid: laat diegene als commissielid uitnodigen en een account maken, en voer dan in de SQL Editor uit:
 
 ```sql
