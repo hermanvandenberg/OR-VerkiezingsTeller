@@ -1,5 +1,5 @@
 // Scherm van de kiescommissie.
-import { db, $, el, fmtDatum, fmtKort, laadHuisstijl, vereisLogin, uitloggen, foutTekst, download, csvRegel } from "./gemeen.js";
+import { db, $, el, fmtDatum, fmtKort, fmtDag, laadHuisstijl, vereisLogin, uitloggen, foutTekst, download, csvRegel } from "./gemeen.js";
 
 const SOORTEN = {
   ander_emailadres: "Ander e-mailadres ingevuld",
@@ -81,6 +81,13 @@ async function vernieuw() {
   if (d.afgekeurd) extra.push(`${d.afgekeurd} afgekeurd.`);
   $("#uitslag-extra").textContent = extra.join(" ");
 
+  const bewaar = $("#bewaar-info");
+  bewaar.hidden = !d.vernietigen_op && !d.vernietigd_at;
+  bewaar.className = d.vernietigd_at ? "notitie" : "hint";
+  bewaar.textContent = d.vernietigd_at
+    ? `De stemmen, de kiezerslijst en de meldingen zijn vernietigd op ${fmtDatum(d.vernietigd_at)}. De uitslag hierboven is bewaard.`
+    : `Bewaartermijn: de stemmen en kiezersgegevens worden vernietigd op ${fmtDag(d.vernietigen_op)}.`;
+
   await Promise.all([laadMeldingen(), laadLogboek()]);
 }
 
@@ -135,7 +142,7 @@ async function laadLogboek() {
     el("thead", {}, el("tr", {}, el("th", { text: "Wanneer" }), el("th", { text: "Wie" }), el("th", { text: "Wat" }))),
     el("tbody", {}, ...data.map((r) => el("tr", {},
       el("td", { text: fmtKort(r.at) }), el("td", { text: r.wie }),
-      el("td", {}, r.actie, r.details ? el("div", { class: "hint mono", text: Object.entries(r.details).map(([k, v]) => `${k}: ${/^\d{4}-\d\d-\d\dT/.test(v) ? fmtKort(v) : v}`).join(" · ") }) : null))))));
+      el("td", {}, r.actie, r.details ? el("div", { class: "hint mono", text: Object.entries(r.details).map(([k, v]) => `${k}: ${/^\d{4}-\d\d-\d\dT/.test(v) ? fmtKort(v) : v && typeof v === "object" ? Object.values(v).filter(Boolean).join(", ") : v}`).join(" · ") }) : null))))));
 }
 
 $("#uitslag-download").addEventListener("click", () => {
@@ -155,6 +162,7 @@ $("#uitloggen").addEventListener("click", uitloggen);
   $("#naar-beheer").hidden = account.rol !== "beheerder";
   $("#pagina").hidden = false;
   laadHuisstijl().catch(() => {});
+  await db.rpc("vernietigen_verlopen").then(() => {}, () => {});
   try {
     await laadVerkiezingen();
     await vernieuw();

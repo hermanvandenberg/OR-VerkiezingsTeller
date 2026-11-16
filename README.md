@@ -60,7 +60,7 @@ Ga naar `.../index.html#registreren`, maak een account met het adres uit stap 1,
 
 ### 6. In het beheerscherm
 1. **Huisstijl en website**: vul de naam van de OR en het websiteadres in en upload het logo (PNG, JPG of WebP). Bij **Thema** kun je de website van je bedrijf invullen en op **Thema ophalen** klikken: de app stelt dan kleuren, een lettertype en een logo voor (zie "Thema uit de bedrijfswebsite"). Je kunt de kleuren en het lettertype ook zelf kiezen. Het thema geldt voor alle pagina's, de mails en het Word-sjabloon.
-2. **Verkiezing**: titel, toelichting, start en einde (datum en tijd), wanneer de uitslag zichtbaar is, verzendwijze en herinneringsmomenten.
+2. **Verkiezing**: titel, toelichting, start en einde (datum en tijd), wanneer de uitslag zichtbaar is, verzendwijze, herinneringsmomenten en de datum waarop de stemmen worden vernietigd (zie "Bewaartermijn").
 3. **Kandidaten**: naam, functie, tekst en foto.
 4. **E-maillijst**: sleep een Excel- of CSV-bestand erin (ook een export van Outlook-contactpersonen), of plak adressen uit Outlook. Je ziet eerst hoeveel geldig, dubbel en ongeldig zijn.
 5. **Kiescommissie**: vul naam en e-mail in (max. 5) en stuur ze de registratielink die eronder staat.
@@ -100,6 +100,21 @@ Eenmalig instellen in Supabase:
 Alleen de beheerder (ingelogd met tweestapsverificatie) kan de functie gebruiken. Hij haalt alleen gewone openbare websites op (geen interne adressen), maximaal een paar seconden en een paar MB.
 
 Is het lettertype van de website niet vrij beschikbaar (zoals bij veel grote bedrijven), dan kies je zelf een vergelijkbaar lettertype uit de lijst.
+
+## Bewaartermijn: stemmen vernietigen
+
+Bij elke verkiezing staat een datum **Stemmen vernietigen op**. Standaard is dat 3 maanden na sluiting; je kunt de datum zelf aanpassen, zolang hij na het einde van de stemming ligt. Op die dag wordt automatisch gewist:
+
+- alle stemmen;
+- de kiezerslijst: namen, e-mailadressen en wie er gestemd heeft;
+- de meldingen en de mailwachtrij;
+- e-mailadressen van kiezers in het logboek.
+
+De **uitslag in aantallen** (per kandidaat, onthouden, opkomst) blijft bewaard, net als de kandidaten en het logboek, met de regel "stemmen vernietigd". Na sluiting kun je ook eerder vernietigen met de knop **Stemmen nu vernietigen** in het beheerscherm. Vernietigen kan niet ongedaan worden gemaakt.
+
+Het vernietigen gebeurt elke nacht om 03:15 via de planner van Supabase (pg_cron), en voor de zekerheid ook als iemand het beheer- of commissiescherm opent.
+
+**Al eerder geïnstalleerd?** Plak dan eenmalig [`supabase/updates/002-bewaartermijn.sql`](supabase/updates/002-bewaartermijn.sql) in de **SQL Editor** en klik **Run**. Bestaande verkiezingen krijgen dan de standaarddatum van 3 maanden na sluiting.
 
 ## Een volgende verkiezing
 

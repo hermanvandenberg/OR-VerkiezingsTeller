@@ -1,6 +1,6 @@
 // Beheerscherm: alleen voor de beheerder.
 import {
-  db, $, $$, el, fmtDatum, fmtKort, naarLokaal, vanLokaal, fotoOf, laadHuisstijl,
+  db, $, $$, el, fmtDatum, fmtKort, fmtDag, naarLokaal, vanLokaal, fotoOf, laadHuisstijl,
   vereisLogin, uitloggen, foutTekst, download, csvRegel,
 } from "./gemeen.js";
 import { parseCsv, uitTabel, uitOutlook, opschonen } from "./lijst-inlezen.js";
@@ -63,6 +63,62 @@ function herinneringRij(waarde = "") {
   return rij;
 }
 
+/* ---------------- Bewaartermijn ---------------- */
+
+// Bestaat de kolom al? (Niet als supabase/updates/002-bewaartermijn.sql nog niet is uitgevoerd.)
+const bewaarKolom = () => !verkiezingen.length || "vernietigen_op" in verkiezingen[0];
+
+// Standaard: 3 maanden na het eindmoment, als "YYYY-MM-DD".
+function standaardVernietig(eindLokaal) {
+  if (!eindLokaal) return "";
+  const d = new Date(eindLokaal);
+  d.setMonth(d.getMonth() + 3);
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+function toonBewaartermijn(v) {
+  const veld = $("#v-vernietigen");
+  const status = $("#bewaar-status");
+  const knop = $("#nu-vernietigen");
+  knop.hidden = true;
+  if (!bewaarKolom()) {
+    veld.disabled = true;
+    veld.value = "";
+    status.textContent = "Voer eerst supabase/updates/002-bewaartermijn.sql uit in de SQL Editor van Supabase (zie de README).";
+    return;
+  }
+  const standaard = standaardVernietig($("#v-eind").value);
+  veld.value = v?.vernietigen_op || standaard;
+  veld.dataset.auto = !v || v.vernietigen_op === standaard ? "1" : "";
+  veld.disabled = !!v?.vernietigd_at;
+  if (v?.vernietigd_at) {
+    status.textContent = `De stemmen, de kiezerslijst en de meldingen zijn vernietigd op ${fmtDatum(v.vernietigd_at)}. De uitslag in aantallen is bewaard.`;
+  } else {
+    status.textContent = `Op ${fmtDag(veld.value)} worden de stemmen, de kiezerslijst (namen, e-mailadressen, wie gestemd heeft) en de meldingen automatisch vernietigd. De uitslag in aantallen blijft bewaard.`;
+    knop.hidden = !gesloten();
+  }
+}
+
+$("#v-eind").addEventListener("change", () => {
+  const veld = $("#v-vernietigen");
+  if (veld.dataset.auto === "1" && !veld.disabled) veld.value = standaardVernietig($("#v-eind").value);
+});
+$("#v-vernietigen").addEventListener("input", () => { $("#v-vernietigen").dataset.auto = ""; });
+
+$("#nu-vernietigen").addEventListener("click", async () => {
+  wisFout();
+  if (!huidig || !gesloten()) return;
+  if (!confirm(`Alle stemmen, de kiezerslijst en de meldingen van "${huidig.titel}" nu definitief vernietigen?\n\nDe uitslag in aantallen blijft bewaard. Dit kan niet ongedaan worden gemaakt.`)) return;
+  const knop = $("#nu-vernietigen");
+  knop.disabled = true;
+  const { error } = await db.rpc("stemmen_vernietigen", { p_verkiezing: huidig.id });
+  knop.disabled = false;
+  if (error) return toonFout(error);
+  await laadVerkiezingen(huidig.id);
+  meld("#verkiezing-ok", "Stemmen vernietigd");
+});
+
 function vulFormulier(v) {
   $("#v-titel").value = v?.titel ?? "";
   $("#v-toelichting").value = v?.toelichting ?? "";
@@ -71,6 +127,7 @@ function vulFormulier(v) {
   $("#v-uitslag").value = v?.uitslag_zichtbaar ?? "na_sluiting";
   $("#v-verzend").value = v?.verzendwijze ?? "samenvoegen";
   $("#herinneringen").replaceChildren(...(v?.herinneringen ?? []).map((h) => herinneringRij(naarLokaal(h))));
+  toonBewaartermijn(v);
 
   const vast = begonnen();
   for (const id of ["#v-start", "#v-uitslag"]) $(id).disabled = !!vast;
@@ -143,11 +200,24 @@ $("#verkiezing-form").addEventListener("submit", async (e) => {
     herinneringen: $$("#herinneringen input").map((i) => vanLokaal(i.value)).filter(Boolean).sort(),
   };
   if (!rij.titel) return toonFout("Geef de verkiezing een titel.");
+  if (huidig?.vernietigd_at) {
+    // Archief: alleen titel en toelichting zijn nog aan te passen.
+    const { error } = await db.from("verkiezingen").update({ titel: rij.titel, toelichting: rij.toelichting }).eq("id", huidig.id);
+    if (error) return toonFout(error);
+    meld("#verkiezing-ok", "Opgeslagen");
+    return laadVerkiezingen(huidig.id);
+  }
   if (!rij.start_at || !rij.eind_at) return toonFout("Vul een start- en eindmoment in.");
   if (new Date(rij.eind_at) <= new Date(rij.start_at)) return toonFout("Het eindmoment moet na de start liggen.");
   const buiten = rij.herinneringen.filter((h) => h <= rij.start_at || h >= rij.eind_at);
   if (buiten.length) return toonFout("Herinneringen moeten tussen de start en het eindmoment liggen.");
   if (begonnen()) { delete rij.start_at; delete rij.uitslag_zichtbaar; }
+  if (bewaarKolom()) {
+    rij.vernietigen_op = $("#v-vernietigen").value || null;
+    if (rij.vernietigen_op && rij.vernietigen_op <= $("#v-eind").value.slice(0, 10)) {
+      return toonFout("De datum om de stemmen te vernietigen moet na het einde van de stemming liggen.");
+    }
+  }
 
   const { data, error } = huidig
     ? await db.from("verkiezingen").update(rij).eq("id", huidig.id).select().single()
@@ -679,5 +749,7 @@ $("#uitloggen").addEventListener("click", uitloggen);
   $("#pagina").hidden = false;
   instellingen = await laadHuisstijl();
   toonHuisstijl();
+  // Verlopen bewaartermijnen afhandelen (gebeurt ook elke nacht via de planner).
+  await db.rpc("vernietigen_verlopen").then(() => {}, () => {});
   await Promise.all([laadVerkiezingen(), laadCommissie()]);
 })();

@@ -113,6 +113,15 @@
             </select>
           </label>
         </div>
+        <div class="velden">
+          <label class="veld" for="v-vernietigen">Stemmen vernietigen op <span class="uitleg">standaard 3 maanden na sluiting</span>
+            <input id="v-vernietigen" type="date">
+          </label>
+          <div class="stapel krap bewaar">
+            <p id="bewaar-status" class="hint"></p>
+            <div class="rij"><button type="button" class="knop gevaar klein" id="nu-vernietigen" hidden>Stemmen nu vernietigen</button></div>
+          </div>
+        </div>
         <div class="stapel krap">
           <span class="veld"><b>Herinneringen</b> <span class="hint">Gaan naar iedereen die nog niet gestemd heeft.</span></span>
           <div id="herinneringen" class="stapel krap"></div>
