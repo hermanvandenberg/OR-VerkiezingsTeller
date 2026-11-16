@@ -161,7 +161,17 @@ Stemlinks die al verstuurd zijn met het oude github.io-adres blijven werken: Git
 
 Extra beveiliging (aanbevolen): verifieer de domeinnaam in je GitHub-profiel onder **Settings > Pages > Add a domain**. GitHub geeft je dan een TXT-record om bij je DNS toe te voegen. Daarmee kan niemand anders jouw domeinnaam aan een eigen GitHub-site koppelen.
 
+## Talen
+
+Elke pagina, ook de stempagina, heeft onderaan of rechtsboven een keuze **NL / EN / DE**. Bij het eerste bezoek kiest de app de taal van de browser (Nederlands, Engels of Duits, anders Nederlands). Een gemaakte keuze wordt per browser onthouden.
+
+Alleen de vaste teksten van de app worden vertaald. Wat je zelf invult (titel, toelichting, namen en teksten van kandidaten) blijft zoals je het schreef. De mails en het Word-sjabloon blijven Nederlands.
+
+Teksten aanpassen of toevoegen: `js/vertalingen.js` bevat per Nederlandse tekst de Engelse en Duitse vertaling. In de code staan de teksten als `t("Nederlandse tekst")`.
+
 ## Bestanden
+
+Na een wijziging in `css/` of `js/`: verhoog het versienummer `?v=...` in alle HTML-bestanden en `import`-regels (overal hetzelfde), zodat browsers niet de oude versie uit hun cache gebruiken.
 
 ```
 index.html, stem.html, dashboard.html, beheer.html   de pagina's

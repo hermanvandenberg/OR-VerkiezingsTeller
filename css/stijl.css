@@ -160,7 +160,7 @@ input[type="color"] { height: 44px; padding: 4px; cursor: pointer; }
 .weergave button { border: 0; background: transparent; color: var(--muted); font: 600 12px var(--body); padding: 4px 10px; border-radius: 999px; cursor: pointer; }
 .weergave button[aria-checked="true"] { background: var(--sunk); color: var(--ink); }
 .weergave button:focus-visible { outline: 2px solid var(--petrol); outline-offset: 1px; }
-.voet { display: flex; justify-content: center; padding-top: 8px; }
+.voet { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; padding-top: 8px; }
 
 /* Beheer: tabbladen links, op smalle schermen bovenaan */
 .indeling { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 24px; align-items: start; }

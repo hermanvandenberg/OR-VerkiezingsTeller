@@ -1,6 +1,6 @@
 // Stempagina: één kandidaat (of onthouden) kiezen, gegevens invullen, bevestigen.
-import { db, $, $$, el, fmtDatum, fotoOf, laadHuisstijl } from "./gemeen.js";
-import { pasThemaToe } from "./thema.js";
+import { db, $, $$, el, t, fmtDatum, fotoOf, laadHuisstijl } from "./gemeen.js?v=20261116b";
+import { pasThemaToe } from "./thema.js?v=20261116b";
 
 const token = location.hash.replace(/^#/, "").trim().toLowerCase();
 // Voorbeeld vanuit het beheerscherm: gegevens komen van dat venster, er wordt niets verstuurd.
@@ -25,20 +25,20 @@ function kies(tegel, id, naam) {
   for (const t of $$(".tegel")) t.setAttribute("aria-checked", t === tegel ? "true" : "false");
   keuze = { id, naam };
   $("#versturen").setAttribute("aria-disabled", "false");
-  bericht(`Gekozen: ${naam}`);
+  bericht(t("Gekozen: {naam}", { naam }));
 }
 
 function toonBiljet(b) {
   $("#titel").textContent = b.titel;
-  document.title = `Stemmen · ${b.titel}`;
-  $("#sluit").textContent = `Stemmen kan tot ${fmtDatum(b.eind_at)}`;
+  document.title = t("Stemmen · {titel}", { titel: b.titel });
+  $("#sluit").textContent = t("Stemmen kan tot {datum}", { datum: fmtDatum(b.eind_at) });
   for (const img of $$("img.logo")) {
-    if (b.logo_url) { img.src = b.logo_url; img.alt = b.organisatie || "Logo"; img.hidden = false; }
+    if (b.logo_url) { img.src = b.logo_url; img.alt = b.organisatie || t("Logo"); img.hidden = false; }
   }
 
-  if (b.al_gestemd) return geenStem("Je hebt al gestemd", "Met deze link is al een stem uitgebracht. Iedere collega kan één keer stemmen.");
-  if (b.status === "nog_niet_open") return geenStem("De stemming is nog niet open", `Je kunt stemmen vanaf ${fmtDatum(b.start_at)}. Bewaar de mail met je link.`);
-  if (b.status === "gesloten") return geenStem("De stemming is gesloten", "Stemmen is niet meer mogelijk. De uitslag wordt bekendgemaakt door de OR.");
+  if (b.al_gestemd) return geenStem(t("Je hebt al gestemd"), t("Met deze link is al een stem uitgebracht. Iedere collega kan één keer stemmen."));
+  if (b.status === "nog_niet_open") return geenStem(t("De stemming is nog niet open"), t("Je kunt stemmen vanaf {datum}. Bewaar de mail met je link.", { datum: fmtDatum(b.start_at) }));
+  if (b.status === "gesloten") return geenStem(t("De stemming is gesloten"), t("Stemmen is niet meer mogelijk. De uitslag wordt bekendgemaakt door de OR."));
 
   $("#toelichting").textContent = b.toelichting || "";
   $("#toelichting").hidden = !b.toelichting;
@@ -57,7 +57,7 @@ function toonBiljet(b) {
     tegels.append(tegel);
   });
   const ont = $("#onthouden");
-  ont.addEventListener("click", () => kies(ont, null, "Onthouden"));
+  ont.addEventListener("click", () => kies(ont, null, t("Onthouden")));
 
   // Pijltjestoetsen binnen de keuzes, zoals bij gewone keuzerondjes.
   const alle = $$(".tegel");
@@ -70,7 +70,7 @@ function toonBiljet(b) {
     volgende.click();
   }));
 
-  $("#geheim-uitleg").textContent = "Je stem is geheim. Er wordt nergens opgeslagen op wie jij hebt gestemd; alleen dát je gestemd hebt.";
+  $("#geheim-uitleg").textContent = t("Je stem is geheim. Er wordt nergens opgeslagen op wie jij hebt gestemd; alleen dát je gestemd hebt.");
 
   $("#laden").hidden = true;
   $("#biljet").hidden = false;
@@ -78,11 +78,11 @@ function toonBiljet(b) {
 
 $("#biljet").addEventListener("submit", (e) => {
   e.preventDefault();
-  if (!keuze) return bericht("Je hebt nog geen kandidaat gekozen. Kies een tegel of onthouden.", true);
+  if (!keuze) return bericht(t("Je hebt nog geen kandidaat gekozen. Kies een tegel of onthouden."), true);
   const naam = $("#naam").value.trim();
   const email = $("#email").value.trim();
-  if (!naam) { $("#naam").focus(); return bericht("Vul je naam in.", true); }
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { $("#email").focus(); return bericht("Vul een geldig e-mailadres in.", true); }
+  if (!naam) { $("#naam").focus(); return bericht(t("Vul je naam in."), true); }
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { $("#email").focus(); return bericht(t("Vul een geldig e-mailadres in."), true); }
   $("#bevestig-keuze").textContent = keuze.naam;
   $("#bevestig-gegevens").textContent = `${naam} · ${email}`;
   $("#bevestig-fout").hidden = true;
@@ -98,12 +98,12 @@ $("#bevestig-ja").addEventListener("click", async () => {
     $("#biljet").hidden = true;
     $("#bedankt-keuze").textContent = keuze.naam;
     $("#bedankt-apart").hidden = true;
-    $("#bedankt-hint").textContent = "Dit was een voorbeeld: er is geen stem opgeslagen. Je kunt dit venster sluiten.";
+    $("#bedankt-hint").textContent = t("Dit was een voorbeeld: er is geen stem opgeslagen. Je kunt dit venster sluiten.");
     $("#bedankt").hidden = false;
     return;
   }
   knop.disabled = true;
-  knop.textContent = "Bezig met versturen…";
+  knop.textContent = t("Bezig met versturen…");
   const { data, error } = await db.rpc("stem_uitbrengen", {
     p_token: token,
     p_kandidaat: keuze.id,
@@ -112,10 +112,10 @@ $("#bevestig-ja").addEventListener("click", async () => {
     p_email: $("#email").value.trim(),
   });
   knop.disabled = false;
-  knop.textContent = "Ja, verstuur mijn stem";
+  knop.textContent = t("Ja, verstuur mijn stem");
 
   if (error) {
-    $("#bevestig-fout").textContent = "Versturen lukte niet. Controleer je internetverbinding en probeer het opnieuw.";
+    $("#bevestig-fout").textContent = t("Versturen lukte niet. Controleer je internetverbinding en probeer het opnieuw.");
     $("#bevestig-fout").hidden = false;
     return;
   }
@@ -130,21 +130,21 @@ $("#bevestig-ja").addEventListener("click", async () => {
   }
   $("#bevestig").close();
   const teksten = {
-    al_gestemd: ["Je hebt al gestemd", "Met deze link is al een stem uitgebracht."],
-    nog_niet_open: ["De stemming is nog niet open", "Probeer het later opnieuw."],
-    gesloten: ["De stemming is gesloten", "Stemmen is niet meer mogelijk."],
-    ongeldig: ["Deze link werkt niet", "Gebruik de link uit je meest recente uitnodiging. Lukt het niet, neem dan contact op met de OR."],
+    al_gestemd: [t("Je hebt al gestemd"), t("Met deze link is al een stem uitgebracht.")],
+    nog_niet_open: [t("De stemming is nog niet open"), t("Probeer het later opnieuw.")],
+    gesloten: [t("De stemming is gesloten"), t("Stemmen is niet meer mogelijk.")],
+    ongeldig: [t("Deze link werkt niet"), t("Gebruik de link uit je meest recente uitnodiging. Lukt het niet, neem dan contact op met de OR.")],
   };
   if (teksten[data?.fout]) return geenStem(...teksten[data.fout]);
-  if (data?.fout === "gegevens") return bericht("Vul je naam en een geldig e-mailadres in.", true);
-  bericht("Kies een kandidaat of onthouden.", true);
+  if (data?.fout === "gegevens") return bericht(t("Vul je naam en een geldig e-mailadres in."), true);
+  bericht(t("Kies een kandidaat of onthouden."), true);
 });
 
 function startVoorbeeld() {
-  document.title = "Voorbeeld stempagina";
+  document.title = t("Voorbeeld stempagina");
   $("#voorbeeld-balk").hidden = false;
   if (!window.opener) {
-    return geenStem("Voorbeeld niet beschikbaar", "Open het voorbeeld via de knop \"Voorbeeld stempagina\" in het beheerscherm.");
+    return geenStem(t("Voorbeeld niet beschikbaar"), t("Open het voorbeeld via de knop \"Voorbeeld stempagina\" in het beheerscherm."));
   }
   window.addEventListener("message", (e) => {
     if (e.origin !== location.origin || e.source !== window.opener || e.data?.soort !== "voorbeeld-biljet") return;
@@ -158,11 +158,11 @@ async function start() {
   if (voorbeeld) return startVoorbeeld();
   laadHuisstijl().catch(() => {});
   if (!/^[0-9a-f]{64}$/.test(token)) {
-    return geenStem("Deze link werkt niet", "Open de stempagina via de knop in je uitnodigingsmail. Kopieer je de link, neem dan de hele link mee.");
+    return geenStem(t("Deze link werkt niet"), t("Open de stempagina via de knop in je uitnodigingsmail. Kopieer je de link, neem dan de hele link mee."));
   }
   const { data, error } = await db.rpc("stembiljet", { p_token: token });
-  if (error) return geenStem("Er ging iets mis", "Het stembiljet kon niet worden geladen. Probeer het over een paar minuten opnieuw.");
-  if (data?.fout) return geenStem("Deze link werkt niet", "Gebruik de link uit je meest recente uitnodiging. Lukt het niet, neem dan contact op met de OR.");
+  if (error) return geenStem(t("Er ging iets mis"), t("Het stembiljet kon niet worden geladen. Probeer het over een paar minuten opnieuw."));
+  if (data?.fout) return geenStem(t("Deze link werkt niet"), t("Gebruik de link uit je meest recente uitnodiging. Lukt het niet, neem dan contact op met de OR."));
   toonBiljet(data);
 }
 

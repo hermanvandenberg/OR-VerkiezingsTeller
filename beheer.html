@@ -8,8 +8,10 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Beheer · OR-VerkiezingsTeller</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700&display=swap">
-  <link rel="stylesheet" href="css/stijl.css">
-  <script src="js/modus.js"></script>
+  <link rel="stylesheet" href="css/stijl.css?v=20261116b">
+  <script src="js/modus.js?v=20261116b"></script>
+  <script defer src="js/vertalingen.js?v=20261116b"></script>
+  <script defer src="js/taal.js?v=20261116b"></script>
 </head>
 <body>
   <main class="wrap" id="pagina" hidden>
@@ -19,6 +21,7 @@
         <div><strong>Beheer</strong><small id="wie"></small></div>
       </div>
       <div class="rij">
+        <div data-taal></div>
         <div data-weergave></div>
         <a href="dashboard.html" class="knop licht klein">Kiescommissie</a>
         <button class="knop licht klein" id="uitloggen" type="button">Uitloggen</button>
@@ -156,7 +159,7 @@
             <li><b>Download de lijst</b> met persoonlijke links.</li>
             <li>In Word: <b>Verzendlijsten &gt; Adressen selecteren &gt; Bestaande lijst gebruiken</b> en kies de lijst. Vraagt Word om een scheidingsteken, kies dan de puntkomma (;).</li>
             <li>Klik <b>Voorbeeld van resultaten</b> om te controleren. Stuur eerst een test naar jezelf via <b>Adressenlijst bewerken</b>.</li>
-            <li><b>Voltooien en samenvoegen &gt; E-mailberichten verzenden</b>: Aan = <code>email</code>, vul een onderwerp in, indeling HTML.</li>
+            <li><b>Voltooien en samenvoegen &gt; E-mailberichten verzenden</b>: Aan = <code data-niet-vertalen>email</code>, vul een onderwerp in, indeling HTML.</li>
           </ol>
           <div class="rij">
             <b>Uitnodiging:</b>
@@ -263,6 +266,6 @@
     </form>
   </dialog>
 
-  <script type="module" src="js/beheer.js"></script>
+  <script type="module" src="js/beheer.js?v=20261116b"></script>
 </body>
 </html>

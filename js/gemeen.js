@@ -1,12 +1,16 @@
 // Gedeelde hulpfuncties voor alle pagina's.
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm";
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
-import { pasThemaToe } from "./thema.js";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js?v=20261116b";
+import { pasThemaToe } from "./thema.js?v=20261116b";
 
 // Sessie alleen in dit tabblad bewaren: sluit je de browser, dan ben je uitgelogd.
 export const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: { persistSession: true, storage: window.sessionStorage },
 });
+
+// Vertalen (zie js/taal.js). Teksten die gebruikers zelf invullen gaan hier niet doorheen.
+export const t = (tekst, waarden) => (window.OR_TAAL ? window.OR_TAAL.t(tekst, waarden) : tekst);
+export const locale = () => (window.OR_TAAL ? window.OR_TAAL.locale() : "nl-NL");
 
 export const $ = (sel, root = document) => root.querySelector(sel);
 export const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -28,17 +32,17 @@ export function el(tag, props = {}, ...kinderen) {
   return e;
 }
 
-const datumTijd = new Intl.DateTimeFormat("nl-NL", {
+const datumTijd = new Intl.DateTimeFormat(locale(), {
   weekday: "long", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit",
   timeZone: "Europe/Amsterdam",
 });
-const kortFmt = new Intl.DateTimeFormat("nl-NL", {
+const kortFmt = new Intl.DateTimeFormat(locale(), {
   day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Amsterdam",
 });
 export const fmtDatum = (iso) => (iso ? datumTijd.format(new Date(iso)) : "");
 export const fmtKort = (iso) => (iso ? kortFmt.format(new Date(iso)) : "");
 // Alleen een dag, bv. "15 februari 2027" (voor "2027-02-15").
-const dagFmt = new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "long", year: "numeric" });
+const dagFmt = new Intl.DateTimeFormat(locale(), { day: "numeric", month: "long", year: "numeric" });
 export const fmtDag = (d) => (d ? dagFmt.format(new Date(`${String(d).slice(0, 10)}T12:00:00`)) : "");
 
 // <input type="datetime-local"> <-> ISO, in de tijdzone van de browser.
@@ -59,21 +63,21 @@ export function initialen(naam) {
 }
 
 export function fotoOf(naam, url, index, extraClass = "") {
-  if (url) return el("img", { class: `foto ${extraClass}`, src: url, alt: `Foto van ${naam}` });
+  if (url) return el("img", { class: `foto ${extraClass}`, src: url, alt: t("Foto van {naam}", { naam }) });
   return el("div", { class: `foto c${index % 4} ${extraClass}`, "aria-hidden": "true" }, initialen(naam));
 }
 
 export function foutTekst(fout) {
-  const m = fout?.message || String(fout || "Onbekende fout");
-  if (/JWT|permission denied|Geen toegang/i.test(m)) return "Je hebt hier geen toegang toe. Log opnieuw in.";
-  return m;
+  const m = fout?.message || String(fout || t("Onbekende fout"));
+  if (/JWT|permission denied|Geen toegang/i.test(m)) return t("Je hebt hier geen toegang toe. Log opnieuw in.");
+  return t(m);
 }
 
 export async function laadHuisstijl() {
   const { data } = await db.from("app_instellingen").select("*").eq("id", 1).maybeSingle();
   if (data?.thema) pasThemaToe(data.thema);
   for (const img of $$("img.logo")) {
-    if (data?.logo_url) { img.src = data.logo_url; img.alt = data.organisatie || "Logo"; img.hidden = false; }
+    if (data?.logo_url) { img.src = data.logo_url; img.alt = data.organisatie || t("Logo"); img.hidden = false; }
     else img.hidden = true;
   }
   return data || {};

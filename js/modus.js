@@ -21,7 +21,7 @@
       else localStorage.setItem(SLEUTEL, modus);
     } catch (e) { /* privévenster: dan alleen voor deze pagina */ }
     document.dispatchEvent(new CustomEvent("weergave-gewijzigd"));
-    var knoppen = document.querySelectorAll(".weergave button");
+    var knoppen = document.querySelectorAll(".weergave button[data-modus]");
     for (var i = 0; i < knoppen.length; i++) {
       knoppen[i].setAttribute("aria-checked", knoppen[i].getAttribute("data-modus") === modus ? "true" : "false");
     }
@@ -32,20 +32,22 @@
 
   // Schakelaar in elk element met data-weergave.
   function bouw() {
+    var T = window.OR_TAAL ? window.OR_TAAL.t : function (x) { return x; };
     var plekken = document.querySelectorAll("[data-weergave]");
-    var keuzes = [["licht", "Licht"], ["donker", "Donker"], ["auto", "Auto"]];
+    var keuzes = [["licht", T("Licht"), T("Lichte weergave")], ["donker", T("Donker"), T("Donkere weergave")],
+                  ["auto", T("Auto"), T("Automatisch, zoals je apparaat is ingesteld")]];
     for (var p = 0; p < plekken.length; p++) {
       var groep = document.createElement("div");
       groep.className = "weergave";
       groep.setAttribute("role", "radiogroup");
-      groep.setAttribute("aria-label", "Weergave");
+      groep.setAttribute("aria-label", T("Weergave"));
       for (var k = 0; k < keuzes.length; k++) {
         var b = document.createElement("button");
         b.type = "button";
         b.setAttribute("role", "radio");
         b.setAttribute("data-modus", keuzes[k][0]);
         b.setAttribute("aria-checked", keuzes[k][0] === lees() ? "true" : "false");
-        b.title = keuzes[k][0] === "auto" ? "Automatisch, zoals je apparaat is ingesteld" : keuzes[k][1] + "e weergave";
+        b.title = keuzes[k][2];
         b.textContent = keuzes[k][1];
         b.addEventListener("click", function () { zet(this.getAttribute("data-modus")); });
         groep.appendChild(b);
