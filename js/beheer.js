@@ -2,10 +2,10 @@
 import {
   db, $, $$, el, fmtDatum, fmtKort, fmtDag, naarLokaal, vanLokaal, fotoOf, laadHuisstijl,
   vereisLogin, uitloggen, foutTekst, download, csvRegel, t,
-} from "./gemeen.js?v=20261116c";
-import { parseCsv, uitTabel, uitOutlook, opschonen } from "./lijst-inlezen.js?v=20261116c";
-import { maakWordSjabloon, laadAlsPng } from "./word-sjabloon.js?v=20261116c";
-import { STANDAARD, LETTERTYPEN, pasThemaToe, themaVariabelen } from "./thema.js?v=20261116c";
+} from "./gemeen.js?v=20261116d";
+import { parseCsv, uitTabel, uitOutlook, opschonen } from "./lijst-inlezen.js?v=20261116d";
+import { maakWordSjabloon, laadAlsPng } from "./word-sjabloon.js?v=20261116d";
+import { STANDAARD, LETTERTYPEN, pasThemaToe, themaVariabelen } from "./thema.js?v=20261116d";
 
 let verkiezingen = [];
 let huidig = null;          // de gekozen verkiezing (object) of null bij een nieuwe
