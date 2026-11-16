@@ -119,6 +119,57 @@ $("#nu-vernietigen").addEventListener("click", async () => {
   meld("#verkiezing-ok", "Stemmen vernietigd");
 });
 
+/* ---------------- Tabbladen ---------------- */
+
+const TAB_SLEUTEL = "or-beheer-tab";
+const tabKnoppen = $$(".tabs [role=tab]");
+// Kandidaten, e-maillijst en versturen kunnen pas als er een verkiezing is opgeslagen.
+const tabNodigVerkiezing = (naam) => ["kandidaten", "kiezers", "versturen"].includes(naam);
+
+function toonTab(naam, focus = false) {
+  if (tabNodigVerkiezing(naam) && $("#na-opslaan").hidden) naam = "verkiezing";
+  for (const k of tabKnoppen) {
+    const aan = k.dataset.tab === naam;
+    k.setAttribute("aria-selected", aan ? "true" : "false");
+    k.tabIndex = aan ? 0 : -1;
+    if (aan && focus) k.focus();
+  }
+  for (const sec of $$(".tab-inhoud section[data-tab]")) sec.classList.toggle("actief", sec.dataset.tab === naam);
+  try { localStorage.setItem(TAB_SLEUTEL, naam); } catch { /* geen opslag beschikbaar */ }
+  window.scrollTo({ top: 0 });
+}
+
+function werkTabsBij() {
+  const zonder = $("#na-opslaan").hidden;
+  for (const k of tabKnoppen) {
+    const uit = zonder && tabNodigVerkiezing(k.dataset.tab);
+    k.setAttribute("aria-disabled", uit ? "true" : "false");
+    k.title = uit ? "Sla eerst de verkiezing op" : "";
+  }
+  const actief = tabKnoppen.find((k) => k.getAttribute("aria-selected") === "true");
+  if (actief && actief.getAttribute("aria-disabled") === "true") toonTab("verkiezing");
+}
+
+for (const k of tabKnoppen) {
+  k.addEventListener("click", () => {
+    if (k.getAttribute("aria-disabled") === "true") return toonFout("Sla eerst de verkiezing op. Daarna kun je kandidaten en de e-maillijst toevoegen.");
+    wisFout();
+    toonTab(k.dataset.tab);
+  });
+  // Pijltjestoetsen tussen de tabbladen.
+  k.addEventListener("keydown", (e) => {
+    const stap = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key];
+    if (!stap) return;
+    e.preventDefault();
+    const bruikbaar = tabKnoppen.filter((t) => t.getAttribute("aria-disabled") !== "true");
+    const i = bruikbaar.indexOf(k);
+    toonTab(bruikbaar[(i + stap + bruikbaar.length) % bruikbaar.length].dataset.tab, true);
+  });
+}
+new MutationObserver(werkTabsBij).observe($("#na-opslaan"), { attributes: true, attributeFilter: ["hidden"] });
+const bewaardeTab = (() => { try { return localStorage.getItem(TAB_SLEUTEL); } catch { return null; } })();
+toonTab("verkiezing");
+
 function vulFormulier(v) {
   $("#v-titel").value = v?.titel ?? "";
   $("#v-toelichting").value = v?.toelichting ?? "";
@@ -161,7 +212,7 @@ $("#verkiezing-starten").addEventListener("click", async () => {
   if (error) return toonFout(error);
   await laadVerkiezingen(huidig.id);
   meld("#verzend-ok", "De verkiezing is gestart. Verstuur nu de uitnodigingen.");
-  $("#verzend-ok").closest("section").scrollIntoView({ behavior: "smooth", block: "start" });
+  toonTab("versturen");
 });
 
 function nieuweVerkiezing() {
@@ -757,4 +808,6 @@ $("#uitloggen").addEventListener("click", uitloggen);
   // Verlopen bewaartermijnen afhandelen (gebeurt ook elke nacht via de planner).
   await db.rpc("vernietigen_verlopen").then(() => {}, () => {});
   await Promise.all([laadVerkiezingen(), laadCommissie()]);
+  werkTabsBij();
+  toonTab(tabKnoppen.some((k) => k.dataset.tab === bewaardeTab) ? bewaardeTab : "verkiezing");
 })();
