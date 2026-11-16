@@ -1,6 +1,6 @@
 // Stempagina: één kandidaat (of onthouden) kiezen, gegevens invullen, bevestigen.
-import { db, $, $$, el, fmtDatum, fotoOf, laadHuisstijl } from "./gemeen.js";
-import { pasThemaToe } from "./thema.js";
+import { db, $, $$, el, fmtDatum, fotoOf, laadHuisstijl } from "./gemeen.js?v=20261116a";
+import { pasThemaToe } from "./thema.js?v=20261116a";
 
 const token = location.hash.replace(/^#/, "").trim().toLowerCase();
 // Voorbeeld vanuit het beheerscherm: gegevens komen van dat venster, er wordt niets verstuurd.

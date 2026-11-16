@@ -163,6 +163,8 @@ Extra beveiliging (aanbevolen): verifieer de domeinnaam in je GitHub-profiel ond
 
 ## Bestanden
 
+Na een wijziging in `css/` of `js/`: verhoog het versienummer `?v=...` in alle HTML-bestanden en `import`-regels (overal hetzelfde), zodat browsers niet de oude versie uit hun cache gebruiken.
+
 ```
 index.html, stem.html, dashboard.html, beheer.html   de pagina's
 css/stijl.css                                         opmaak
