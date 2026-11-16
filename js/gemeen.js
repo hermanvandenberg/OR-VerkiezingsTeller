@@ -37,6 +37,9 @@ const kortFmt = new Intl.DateTimeFormat("nl-NL", {
 });
 export const fmtDatum = (iso) => (iso ? datumTijd.format(new Date(iso)) : "");
 export const fmtKort = (iso) => (iso ? kortFmt.format(new Date(iso)) : "");
+// Alleen een dag, bv. "15 februari 2027" (voor "2027-02-15").
+const dagFmt = new Intl.DateTimeFormat("nl-NL", { day: "numeric", month: "long", year: "numeric" });
+export const fmtDag = (d) => (d ? dagFmt.format(new Date(`${String(d).slice(0, 10)}T12:00:00`)) : "");
 
 // <input type="datetime-local"> <-> ISO, in de tijdzone van de browser.
 export function naarLokaal(iso) {
