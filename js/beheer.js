@@ -2,10 +2,10 @@
 import {
   db, $, $$, el, fmtDatum, fmtKort, fmtDag, naarLokaal, vanLokaal, fotoOf, laadHuisstijl,
   vereisLogin, uitloggen, foutTekst, download, csvRegel, t,
-} from "./gemeen.js?v=20261116b";
-import { parseCsv, uitTabel, uitOutlook, opschonen } from "./lijst-inlezen.js?v=20261116b";
-import { maakWordSjabloon, laadAlsPng } from "./word-sjabloon.js?v=20261116b";
-import { STANDAARD, LETTERTYPEN, pasThemaToe, themaVariabelen } from "./thema.js?v=20261116b";
+} from "./gemeen.js?v=20261116c";
+import { parseCsv, uitTabel, uitOutlook, opschonen } from "./lijst-inlezen.js?v=20261116c";
+import { maakWordSjabloon, laadAlsPng } from "./word-sjabloon.js?v=20261116c";
+import { STANDAARD, LETTERTYPEN, pasThemaToe, themaVariabelen } from "./thema.js?v=20261116c";
 
 let verkiezingen = [];
 let huidig = null;          // de gekozen verkiezing (object) of null bij een nieuwe
@@ -262,6 +262,8 @@ $("#verkiezing-form").addEventListener("submit", async (e) => {
   if (new Date(rij.eind_at) <= new Date(rij.start_at)) return toonFout(t("Het eindmoment moet na de start liggen."));
   const buiten = rij.herinneringen.filter((h) => h <= rij.start_at || h >= rij.eind_at);
   if (buiten.length) return toonFout(t("Herinneringen moeten tussen de start en het eindmoment liggen."));
+  // Een nieuwe verkiezing moet in de toekomst starten, anders liggen de kandidaten meteen vast.
+  if (!begonnen() && new Date(rij.start_at) <= Date.now()) return toonFout(t("Het startmoment ligt nu of in het verleden. Kies een moment in de toekomst, bijvoorbeeld morgen. Zo kun je eerst de kandidaten en de e-maillijst toevoegen. Wil je eerder beginnen, gebruik dan daarna de knop Verkiezing nu starten."));
   if (begonnen()) { delete rij.start_at; delete rij.uitslag_zichtbaar; }
   if (bewaarKolom()) {
     rij.vernietigen_op = $("#v-vernietigen").value || null;
@@ -326,7 +328,10 @@ async function laadKandidaten() {
   const vast = begonnen();
   $("#kandidaat-erbij").hidden = vast;
   $("#kandidaten").replaceChildren(...data.map((k, i) => kandidaatKaart(k, i, vast)));
-  if (!data.length) $("#kandidaten").append(el("p", { class: "hint", text: t("Nog geen kandidaten. Voeg ze hieronder toe.") }));
+  if (!data.length && vast) {
+    // Begonnen zonder kandidaten (startmoment lag al in het verleden): uitleggen hoe het verder kan.
+    $("#kandidaten").append(el("p", { class: "notitie warn", text: t("Deze verkiezing is al begonnen op {datum}, daarom kun je geen kandidaten meer toevoegen. Verwijder deze verkiezing in de tab Verkiezing (knop Verwijderen) en maak een nieuwe aan met een startmoment in de toekomst.", { datum: fmtDatum(huidig.start_at) }) }));
+  } else if (!data.length) $("#kandidaten").append(el("p", { class: "hint", text: t("Nog geen kandidaten. Voeg ze hieronder toe.") }));
 }
 
 function kandidaatKaart(k, i, vast) {
