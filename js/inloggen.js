@@ -1,8 +1,11 @@
 // Inloggen, registreren, wachtwoord herstellen en tweestapsverificatie.
-import { db, $, $$, t, laadHuisstijl } from "./gemeen.js?v=20261116f";
+import { db, $, $$, t, laadHuisstijl } from "./gemeen.js?v=20261116g";
 
 const VIEWS = ["inloggen", "registreren", "vergeten", "nieuw", "mfa-instellen", "mfa-code"];
 let herstelModus = false;
+// Via de uitnodigingsmail binnengekomen? Dan eerst een wachtwoord kiezen.
+// (Vastleggen voordat Supabase het adres opschoont.)
+const uitnodiging = /type=invite/.test(location.hash);
 
 function toon(naam) {
   for (const v of VIEWS) $(`#v-${v}`).hidden = v !== naam;
@@ -133,8 +136,17 @@ $("#v-mfa-instellen").addEventListener("submit", (e) => { e.preventDefault(); ve
 $("#v-mfa-code").addEventListener("submit", (e) => { e.preventDefault(); verifieer("mfa-code", "#mfa-code2"); });
 $("#mfa-annuleer").addEventListener("click", async () => { await db.auth.signOut(); toon("inloggen"); });
 
+function welkom() {
+  herstelModus = true;
+  $("#nieuw-kop").textContent = t("Welkom bij de kiescommissie");
+  $("#nieuw-uitleg").textContent = t("Kies een wachtwoord om je account af te maken. Daarna stel je tweestapsverificatie in.");
+  $("#nieuw-uitleg").hidden = false;
+  toon("nieuw");
+}
+
 db.auth.onAuthStateChange((event) => {
   if (event === "PASSWORD_RECOVERY") { herstelModus = true; toon("nieuw"); }
+  if (event === "SIGNED_IN" && uitnodiging && !herstelModus) welkom();
 });
 
 window.addEventListener("hashchange", viaHash);
@@ -142,6 +154,7 @@ window.addEventListener("hashchange", viaHash);
 (async function start() {
   laadHuisstijl().catch(() => {});
   viaHash();
+  if (uitnodiging) welkom();
   const { data: { session } } = await db.auth.getSession();
   if (session && !herstelModus && !location.hash.includes("type=recovery")) naInloggen();
 })();

@@ -1,0 +1,12 @@
+<!-- Plak dit in Supabase: Authentication > Emails > Invite user > Message body.
+     Onderwerp (Subject): Uitnodiging kiescommissie OR-verkiezing -->
+<div style="font-family: Arial, Helvetica, sans-serif; font-size: 15px; line-height: 1.5; color: #1b2430; max-width: 560px;">
+  <p>Beste {{ .Data.naam }},</p>
+  <p>Je bent toegevoegd aan de kiescommissie voor de OR-verkiezing. Als lid van de kiescommissie volg je de opkomst, handel je meldingen af en zie je na sluiting de uitslag.</p>
+  <p>Klik op de knop om je account aan te maken. Je kiest dan een wachtwoord en stelt tweestapsverificatie in met een app op je telefoon, bijvoorbeeld Microsoft Authenticator.</p>
+  <p style="margin: 24px 0;">
+    <a href="{{ .ConfirmationURL }}" style="background: #007aba; color: #ffffff; padding: 12px 22px; border-radius: 6px; text-decoration: none; font-weight: bold;">Account aanmaken</a>
+  </p>
+  <p style="color: #5b6574; font-size: 13px;">Deze link is persoonlijk en werkt één keer. Stuur hem niet door. Verloopt de link, vraag de voorzitter dan om een nieuwe uitnodiging.</p>
+  <p>Met vriendelijke groet,<br>De ondernemingsraad</p>
+</div>

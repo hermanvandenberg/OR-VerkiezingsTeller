@@ -47,7 +47,7 @@ In Supabase onder **Authentication**:
 1. **Sign In / Providers > Email**: laat "Confirm email" aan. Zet de minimale wachtwoordlengte op 12.
 2. **URL Configuration**: zet de *Site URL* op het adres van je website (stap 4), bijvoorbeeld `https://hermanvandenberg.github.io/OR-VerkiezingsTeller/index.html`, en voeg hetzelfde adres toe bij *Redirect URLs*. Gebruik je een eigen domeinnaam, zie dan "Eigen domeinnaam".
 3. **Multi-Factor**: controleer dat TOTP (authenticator-app) aan staat.
-4. Tip: de standaard mailserver van Supabase verstuurt maar een paar mails per uur. Voor 5 commissieleden is dat genoeg; anders stel je onder **SMTP Settings** je eigen mailserver in.
+4. De standaard mailserver van Supabase verstuurt maar een paar mails per uur, vanaf een Supabase-adres. Stel liever een eigen afzender in, zie "Commissieleden uitnodigen per mail".
 
 ### 3. Website koppelen aan Supabase
 Zet in [`js/config.js`](js/config.js) de **Project URL** en de **anon public key** (Supabase > Project Settings > API). Die sleutel mag openbaar zijn. Zet hier **nooit** de `service_role` sleutel.
@@ -177,8 +177,35 @@ Iedere collega krijgt een eigen, persoonlijke stemlink. Daarom kun je de stemmai
 Heeft IT de app-registratie voor "Outlook automatisch" al gemaakt (zie stap 7B)? Dan kan de app verzamelmails ook zelf opzoeken. IT voegt daarvoor eenmalig toe:
 1. API-machtigingen **Microsoft Graph > Application > GroupMember.Read.All** en **User.ReadBasic.All**, met **admin consent**. Deze machtigingen geven alleen leesrecht.
 2. In Supabase: **Edge Functions > Deploy a new function > Via editor**, naam `groep-leden`, plak [`supabase/functions/groep-leden/index.ts`](supabase/functions/groep-leden/index.ts). Laat **Verify JWT** aan staan. De functie gebruikt dezelfde geheimen `MS_TENANT_ID`, `MS_CLIENT_ID` en `MS_CLIENT_SECRET`.
+supabase/functions/commissie-uitnodigen/index.ts     uitnodigingsmail voor commissieleden
+supabase/mail-sjablonen/                              Nederlandse mailtekst voor Supabase
 
 Daarna typ je in **E-maillijst > Of zoek een verzamelmail in Microsoft 365** een deel van de naam, klik je op de juiste verzamelmail en controleer je het voorbeeld. Je kunt meerdere verzamelmails na elkaar ophalen en daarna in één keer toevoegen. Alleen jij als beheerder kunt deze functie gebruiken. Leden van groepen binnen de verzamelmail worden meegenomen. Dynamische distributiegroepen worden niet ondersteund; kopieer die uit Outlook.
+
+## Commissieleden uitnodigen per mail
+
+Voeg je in de tab **Kiescommissie** iemand toe, dan krijgt diegene direct een uitnodigingsmail. Met de link in die mail kiest het lid een wachtwoord en stelt het tweestapsverificatie in. Daarna staat er **Actief** bij het lid. Bij wie nog **Uitgenodigd** staat, kun je met **Uitnodiging opnieuw mailen** een nieuwe mail sturen. Alleen jij als beheerder kunt uitnodigen, en alleen adressen die in de lijst van de kiescommissie staan.
+
+**Eenmalig instellen in Supabase (ongeveer 10 minuten):**
+1. **SQL Editor**: plak [`supabase/updates/004-commissie-uitnodigen.sql`](supabase/updates/004-commissie-uitnodigen.sql) en klik **Run**.
+2. **Edge Functions > Deploy a new function > Via editor**, naam `commissie-uitnodigen`. Plak [`supabase/functions/commissie-uitnodigen/index.ts`](supabase/functions/commissie-uitnodigen/index.ts), laat **Verify JWT** aan staan en klik **Deploy**. Geheimen zijn niet nodig.
+3. **Authentication > Emails > Invite user**: zet het onderwerp op `Uitnodiging kiescommissie OR-verkiezing` en plak bij *Message body* de tekst uit [`supabase/mail-sjablonen/uitnodiging-commissie.html`](supabase/mail-sjablonen/uitnodiging-commissie.html). Klik **Save**.
+4. **Authentication > URL Configuration**: controleer dat bij *Redirect URLs* `https://or-verkiezingen.com/index.html` staat (of `https://or-verkiezingen.com/**`).
+5. Vul in de app bij **Huisstijl en website** het adres `https://or-verkiezingen.com` in, als dat er nog niet staat.
+
+**Eigen afzender: noreply@or-verkiezingen.com**
+
+Standaard komen de mails van een adres van Supabase, en Supabase verstuurt er maar een paar per uur. Netter en betrouwbaarder is een eigen afzender via een mailservice in Europa, bijvoorbeeld [Brevo](https://www.brevo.com) (gratis tot 300 mails per dag):
+1. Maak een gratis account bij Brevo.
+2. Ga naar **Senders, Domains & Dedicated IPs > Domains > Add a domain** en vul `or-verkiezingen.com` in. Kies voor zelf de DNS-records toevoegen. Brevo toont nu een paar records: een TXT-record met een `brevo-code`, een DKIM-record en een DMARC-record.
+3. Log in bij TransIP, ga naar **Domeinen > or-verkiezingen.com > DNS** en voeg elk record toe zoals Brevo het toont (type, naam en waarde precies overnemen). Klik op **Opslaan**.
+4. Klik in Brevo op **Authenticate this domain**. Dit kan tot een paar uur duren; daarna staat het domein op groen.
+5. Voeg bij **Senders** de afzender `noreply@or-verkiezingen.com` toe, met als naam bijvoorbeeld `OR-verkiezing`.
+6. Ga in Brevo naar **SMTP & API > SMTP** en maak een **SMTP key** aan. Noteer de *SMTP server* (`smtp-relay.brevo.com`), de *poort* (`587`), de *login* en de *key*.
+7. In Supabase: **Authentication > Emails > SMTP Settings** > zet **Enable custom SMTP** aan en vul in: afzender `noreply@or-verkiezingen.com`, naam `OR-verkiezing`, host `smtp-relay.brevo.com`, poort `587`, gebruikersnaam = de login van Brevo, wachtwoord = de SMTP key. Klik **Save**.
+8. Zet onder **Authentication > Rate Limits** het aantal mails per uur op bijvoorbeeld 30.
+
+Vanaf dan komen ook de bevestigingsmails en de mails voor "Wachtwoord vergeten" van `noreply@or-verkiezingen.com`.
 
 ## Talen
 

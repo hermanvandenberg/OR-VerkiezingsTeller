@@ -839,8 +839,26 @@ begin
   if (select count(*) from public.toegang where rol = 'commissie') >= 5 then
     raise exception 'De kiescommissie heeft al 5 leden';
   end if;
-  insert into public.toegang (email, naam, rol) values (v_email, trim(p_naam), 'commissie');
+  -- Bestaat er al een account (bijv. eerder uit de commissie gehaald)? Dan meteen koppelen.
+  insert into public.toegang (email, naam, rol, user_id)
+  values (v_email, trim(p_naam), 'commissie', (select id from auth.users where lower(email) = v_email limit 1));
   perform private.log('commissielid uitgenodigd', jsonb_build_object('email', v_email), null);
+end $$;
+
+-- De kiescommissie met per lid of het account al actief is (e-mail bevestigd en wachtwoord gekozen).
+create function public.commissie_lijst()
+returns table (email text, naam text, rol text, uitgenodigd_at timestamptz, actief boolean)
+language plpgsql stable security definer set search_path = '' as $$
+begin
+  if not public.is_beheerder() then
+    raise exception 'Geen toegang';
+  end if;
+  return query
+    select t.email, t.naam, t.rol, t.uitgenodigd_at,
+           coalesce(u.email_confirmed_at is not null and coalesce(u.encrypted_password, '') <> '', false)
+    from public.toegang t
+    left join auth.users u on u.id = t.user_id
+    order by t.rol, t.naam;
 end $$;
 
 create function public.commissie_verwijderen(p_email text) returns void
@@ -1017,7 +1035,8 @@ grant execute on function public.dashboard(uuid), public.melding_afhandelen(bigi
                           public.meldingen_lijst(uuid),
                           public.kiezers_toevoegen(uuid, jsonb), public.kiezer_verwijderen(uuid),
                           public.samenvoeglijst(uuid, text), public.mail_inplannen(uuid, text),
-                          public.commissie_uitnodigen(text, text), public.commissie_verwijderen(text)
+                          public.commissie_uitnodigen(text, text), public.commissie_verwijderen(text),
+                          public.commissie_lijst()
                           to authenticated;
 
 grant execute on function public.stemmen_vernietigen(uuid), public.vernietigen_verlopen() to authenticated;
