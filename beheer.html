@@ -9,6 +9,7 @@
   <title>Beheer · OR-VerkiezingsTeller</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700&display=swap">
   <link rel="stylesheet" href="css/stijl.css">
+  <script src="js/modus.js"></script>
 </head>
 <body>
   <main class="wrap" id="pagina" hidden>
@@ -18,61 +19,25 @@
         <div><strong>Beheer</strong><small id="wie"></small></div>
       </div>
       <div class="rij">
+        <div data-weergave></div>
         <a href="dashboard.html" class="knop licht klein">Kiescommissie</a>
         <button class="knop licht klein" id="uitloggen" type="button">Uitloggen</button>
       </div>
     </header>
     <p id="fout" class="fout" role="alert" hidden></p>
 
-    <!-- Huisstijl -->
-    <section class="kaart">
-      <h2>Huisstijl en website</h2>
-      <p class="hint">Stel dit eenmalig in. Het thema geldt voor de stempagina, de schermen van de commissie, de mails en het Word-sjabloon.</p>
-      <form id="huisstijl-form" class="stapel" novalidate>
-        <div class="velden">
-          <label class="veld" for="h-org">Naam van de OR<input id="h-org" placeholder="Ondernemingsraad"></label>
-          <label class="veld" for="h-site">Adres van deze website <span class="uitleg">nodig voor de stemlinks</span><input id="h-site" type="url" placeholder="https://jouw-domein.nl"><span id="h-site-let-op" class="uitleg" hidden></span></label>
-        </div>
-        <div class="rij">
-          <img id="h-logo-voorbeeld" class="logo-voorbeeld" alt="Huidig logo" hidden>
-          <label class="veld" for="h-logo">Logo <span class="uitleg">PNG, JPG of WebP, max. 5 MB</span><input id="h-logo" type="file" accept="image/png,image/jpeg,image/webp"></label>
-        </div>
-        <div class="stapel krap">
-          <h3>Thema</h3>
-          <p class="hint">Vul de website van je bedrijf in. De app stelt dan kleuren, een lettertype en een logo voor. Je kunt alles daarna zelf aanpassen.</p>
-          <div class="velden">
-            <label class="veld" for="h-bedrijf">Website van je bedrijf<input id="h-bedrijf" type="url" inputmode="url" placeholder="https://www.bedrijf.nl"></label>
-            <div class="rij"><button type="button" class="knop licht" id="thema-ophalen">Thema ophalen</button></div>
-          </div>
-          <p id="thema-status" class="hint" role="status"></p>
-          <div id="thema-voorstel" class="stapel krap" hidden>
-            <span class="veld"><b>Gevonden kleuren</b> <span class="hint">Klik op een kleur om die te gebruiken als</span></span>
-            <div class="rij">
-              <label class="rij" for="doel-primair"><input type="radio" name="kleurdoel" id="doel-primair" value="primair" checked> hoofdkleur</label>
-              <label class="rij" for="doel-accent"><input type="radio" name="kleurdoel" id="doel-accent" value="accent"> accentkleur</label>
-            </div>
-            <div id="thema-kleuren" class="stalen"></div>
-            <span class="veld" id="thema-logos-kop"><b>Gevonden logo's</b> <span class="hint">Klik op het logo dat je wilt gebruiken</span></span>
-            <div id="thema-logos" class="rij"></div>
-          </div>
-          <div class="velden">
-            <label class="veld" for="h-primair">Hoofdkleur <span class="uitleg">knoppen en links</span><input id="h-primair" type="color" value="#0d5f63"></label>
-            <label class="veld" for="h-accent">Accentkleur <span class="uitleg">gekozen kandidaat</span><input id="h-accent" type="color" value="#c4302b"></label>
-            <label class="veld" for="h-font">Lettertype<select id="h-font"></select></label>
-          </div>
-          <div class="thema-voorbeeld" aria-label="Voorbeeld van het thema">
-            <span class="knop">Stem versturen</span>
-            <span class="tegel" aria-checked="true"><span class="vink" aria-hidden="true"></span><b>Gekozen kandidaat</b></span>
-            <a href="#thema-voorbeeld">Een link</a>
-            <button type="button" class="knop licht klein" id="thema-standaard">Standaardkleuren</button>
-          </div>
-        </div>
-        <div class="rij"><button type="submit" class="knop">Huisstijl opslaan</button><button type="button" class="knop licht voorbeeld-stem">Voorbeeld stempagina</button><span id="huisstijl-ok" class="melding-ok" role="status"></span></div>
-      </form>
-    </section>
-
+    <div class="indeling">
+      <nav class="tabs" role="tablist" aria-label="Onderdelen" aria-orientation="vertical">
+        <button type="button" role="tab" id="knop-verkiezing" data-tab="verkiezing" aria-controls="tab-verkiezing"><span class="nr">1</span>Verkiezing</button>
+        <button type="button" role="tab" id="knop-kandidaten" data-tab="kandidaten" aria-controls="tab-kandidaten"><span class="nr">2</span>Kandidaten</button>
+        <button type="button" role="tab" id="knop-kiezers" data-tab="kiezers" aria-controls="tab-kiezers"><span class="nr">3</span>E-maillijst</button>
+        <button type="button" role="tab" id="knop-versturen" data-tab="versturen" aria-controls="tab-versturen"><span class="nr">4</span>Versturen</button>
+        <button type="button" role="tab" id="knop-commissie" data-tab="commissie" aria-controls="tab-commissie"><span class="nr">5</span>Kiescommissie</button>
+        <button type="button" role="tab" id="knop-huisstijl" data-tab="huisstijl" aria-controls="tab-huisstijl"><span class="nr">6</span>Huisstijl</button>
+      </nav>
+      <div class="tab-inhoud">
     <!-- 1. Verkiezing -->
-    <section class="kaart">
+    <section class="kaart" id="tab-verkiezing" data-tab="verkiezing" role="tabpanel" aria-labelledby="knop-verkiezing">
       <div class="kop">
         <h2>Verkiezing</h2>
         <div class="rij">
@@ -138,14 +103,14 @@
 
     <div id="na-opslaan" class="stapel" hidden>
       <!-- 2. Kandidaten -->
-      <section class="kaart">
+      <section class="kaart" id="tab-kandidaten" data-tab="kandidaten" role="tabpanel" aria-labelledby="knop-kandidaten">
         <h2>Kandidaten</h2>
         <div id="kandidaten" class="kolommen"></div>
         <div class="rij"><button type="button" class="knop licht" id="kandidaat-erbij">Kandidaat toevoegen</button><button type="button" class="knop licht voorbeeld-stem">Voorbeeld stempagina</button></div>
       </section>
 
       <!-- 3. Kiezers -->
-      <section class="kaart">
+      <section class="kaart" id="tab-kiezers" data-tab="kiezers" role="tabpanel" aria-labelledby="knop-kiezers">
         <div class="kop"><h2>E-maillijst</h2><span id="kiezers-aantal" class="chip"></span></div>
         <div class="kolommen">
           <div class="stapel krap">
@@ -182,7 +147,7 @@
       </section>
 
       <!-- 4. Versturen -->
-      <section class="kaart">
+      <section class="kaart" id="tab-versturen" data-tab="versturen" role="tabpanel" aria-labelledby="knop-versturen">
         <h2>Uitnodigingen en herinneringen</h2>
         <div id="verzend-samenvoegen" class="stapel krap" hidden>
           <p>Je verstuurt de mails zelf vanuit je eigen Outlook met <b>Word-afdruk samenvoegen</b>. Het Word-sjabloon heeft al de opmaak met logo, kandidaten en een knop met de persoonlijke link.</p>
@@ -219,7 +184,7 @@
     </div>
 
     <!-- 5. Kiescommissie -->
-    <section class="kaart">
+    <section class="kaart" id="tab-commissie" data-tab="commissie" role="tabpanel" aria-labelledby="knop-commissie">
       <h2>Kiescommissie</h2>
       <p class="hint">Maximaal 5 leden. Een uitgenodigd lid maakt zelf een account aan via de link hieronder, met het e-mailadres dat je hier invult, en stelt tweestapsverificatie in.</p>
       <div id="commissie" class="tabel"></div>
@@ -232,6 +197,54 @@
       <p id="commissie-ok" class="melding-ok" role="status"></p>
     </section>
 
+    <!-- Huisstijl -->
+    <section class="kaart" id="tab-huisstijl" data-tab="huisstijl" role="tabpanel" aria-labelledby="knop-huisstijl">
+      <h2>Huisstijl en website</h2>
+      <p class="hint">Stel dit eenmalig in. Het thema geldt voor de stempagina, de schermen van de commissie, de mails en het Word-sjabloon.</p>
+      <form id="huisstijl-form" class="stapel" novalidate>
+        <div class="velden">
+          <label class="veld" for="h-org">Naam van de OR<input id="h-org" placeholder="Ondernemingsraad"></label>
+          <label class="veld" for="h-site">Adres van deze website <span class="uitleg">nodig voor de stemlinks</span><input id="h-site" type="url" placeholder="https://jouw-domein.nl"><span id="h-site-let-op" class="uitleg" hidden></span></label>
+        </div>
+        <div class="rij">
+          <img id="h-logo-voorbeeld" class="logo-voorbeeld" alt="Huidig logo" hidden>
+          <label class="veld" for="h-logo">Logo <span class="uitleg">PNG, JPG of WebP, max. 5 MB</span><input id="h-logo" type="file" accept="image/png,image/jpeg,image/webp"></label>
+        </div>
+        <div class="stapel krap">
+          <h3>Thema</h3>
+          <p class="hint">Vul de website van je bedrijf in. De app stelt dan kleuren, een lettertype en een logo voor. Je kunt alles daarna zelf aanpassen.</p>
+          <div class="velden">
+            <label class="veld" for="h-bedrijf">Website van je bedrijf<input id="h-bedrijf" type="url" inputmode="url" placeholder="https://www.bedrijf.nl"></label>
+            <div class="rij"><button type="button" class="knop licht" id="thema-ophalen">Thema ophalen</button></div>
+          </div>
+          <p id="thema-status" class="hint" role="status"></p>
+          <div id="thema-voorstel" class="stapel krap" hidden>
+            <span class="veld"><b>Gevonden kleuren</b> <span class="hint">Klik op een kleur om die te gebruiken als</span></span>
+            <div class="rij">
+              <label class="rij" for="doel-primair"><input type="radio" name="kleurdoel" id="doel-primair" value="primair" checked> hoofdkleur</label>
+              <label class="rij" for="doel-accent"><input type="radio" name="kleurdoel" id="doel-accent" value="accent"> accentkleur</label>
+            </div>
+            <div id="thema-kleuren" class="stalen"></div>
+            <span class="veld" id="thema-logos-kop"><b>Gevonden logo's</b> <span class="hint">Klik op het logo dat je wilt gebruiken</span></span>
+            <div id="thema-logos" class="rij"></div>
+          </div>
+          <div class="velden">
+            <label class="veld" for="h-primair">Hoofdkleur <span class="uitleg">knoppen en links</span><input id="h-primair" type="color" value="#0d5f63"></label>
+            <label class="veld" for="h-accent">Accentkleur <span class="uitleg">gekozen kandidaat</span><input id="h-accent" type="color" value="#c4302b"></label>
+            <label class="veld" for="h-font">Lettertype<select id="h-font"></select></label>
+          </div>
+          <div class="thema-voorbeeld" aria-label="Voorbeeld van het thema">
+            <span class="knop">Stem versturen</span>
+            <span class="tegel" aria-checked="true"><span class="vink" aria-hidden="true"></span><b>Gekozen kandidaat</b></span>
+            <a href="#thema-voorbeeld">Een link</a>
+            <button type="button" class="knop licht klein" id="thema-standaard">Standaardkleuren</button>
+          </div>
+        </div>
+        <div class="rij"><button type="submit" class="knop">Huisstijl opslaan</button><button type="button" class="knop licht voorbeeld-stem">Voorbeeld stempagina</button><span id="huisstijl-ok" class="melding-ok" role="status"></span></div>
+      </form>
+    </section>
+      </div>
+    </div>
   </main>
   <dialog id="verwijder-venster" aria-labelledby="verwijder-kop">
     <form class="venster" id="verwijder-form" method="dialog" novalidate>

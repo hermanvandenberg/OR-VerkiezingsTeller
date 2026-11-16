@@ -61,15 +61,28 @@ export function themaVariabelen(thema, donker) {
   };
 }
 
-let mq;
-export function pasThemaToe(thema) {
+// Donker als de gebruiker dat koos, of bij "auto" als het apparaat donker staat.
+export function isDonker() {
+  const modus = document.documentElement.getAttribute("data-modus");
+  if (modus === "donker") return true;
+  if (modus === "licht") return false;
+  return !!window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+}
+
+let huidigThema = null;
+let luistert = false;
+function zetKleuren() {
   const root = document.documentElement;
-  const zet = () => {
-    const donker = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
-    for (const [k, v] of Object.entries(themaVariabelen(thema, donker))) root.style.setProperty(k, v);
-  };
-  zet();
-  if (!mq && window.matchMedia) { mq = window.matchMedia("(prefers-color-scheme: dark)"); mq.addEventListener("change", zet); }
+  for (const [k, v] of Object.entries(themaVariabelen(huidigThema, isDonker()))) root.style.setProperty(k, v);
+}
+export function pasThemaToe(thema) {
+  huidigThema = thema;
+  zetKleuren();
+  if (!luistert) {
+    luistert = true;
+    window.matchMedia?.("(prefers-color-scheme: dark)").addEventListener("change", zetKleuren);
+    document.addEventListener("weergave-gewijzigd", zetKleuren);
+  }
   laadLettertype(thema?.lettertype);
 }
 

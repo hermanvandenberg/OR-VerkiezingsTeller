@@ -59,6 +59,8 @@ In deze repository: **Settings > Pages > Deploy from a branch > main / (root)**.
 Ga naar `.../index.html#registreren`, maak een account met het adres uit stap 1, bevestig via de mail, log in en scan de QR-code met Microsoft Authenticator of Google Authenticator. Je komt op het beheerscherm.
 
 ### 6. In het beheerscherm
+Het beheerscherm heeft links tabbladen (op een telefoon bovenaan): Verkiezing, Kandidaten, E-maillijst, Versturen, Kiescommissie en Huisstijl. Het laatst gekozen tabblad wordt onthouden. Rechtsboven (en onderaan de stempagina) kies je de weergave: **Licht**, **Donker** of **Auto** (volgt de instelling van je apparaat).
+
 1. **Huisstijl en website**: vul de naam van de OR en het websiteadres in en upload het logo (PNG, JPG of WebP). Bij **Thema** kun je de website van je bedrijf invullen en op **Thema ophalen** klikken: de app stelt dan kleuren, een lettertype en een logo voor (zie "Thema uit de bedrijfswebsite"). Je kunt de kleuren en het lettertype ook zelf kiezen. Het thema geldt voor alle pagina's, de mails en het Word-sjabloon.
 2. **Verkiezing**: titel, toelichting, start en einde (datum en tijd), wanneer de uitslag zichtbaar is, verzendwijze, herinneringsmomenten en de datum waarop de stemmen worden vernietigd (zie "Bewaartermijn").
 3. **Kandidaten**: naam, functie, tekst en foto.
