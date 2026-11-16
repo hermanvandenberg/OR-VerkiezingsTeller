@@ -1,7 +1,7 @@
 // Gedeelde hulpfuncties voor alle pagina's.
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm";
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js?v=20261116e";
-import { pasThemaToe } from "./thema.js?v=20261116e";
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js?v=20261116f";
+import { pasThemaToe } from "./thema.js?v=20261116f";
 
 // Sessie alleen in dit tabblad bewaren: sluit je de browser, dan ben je uitgelogd.
 export const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
@@ -80,6 +80,8 @@ export async function laadHuisstijl() {
     if (data?.logo_url) { img.src = data.logo_url; img.alt = data.organisatie || t("Logo"); img.hidden = false; }
     else img.hidden = true;
   }
+  // Op de stempagina: het vaste OR-icoon tonen als er geen logo is ingesteld.
+  for (const icoon of $$(".or-icoon[data-reserve]")) icoon.hidden = !!data?.logo_url;
   return data || {};
 }
 

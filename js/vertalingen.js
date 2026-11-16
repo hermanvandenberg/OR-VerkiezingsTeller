@@ -503,4 +503,5 @@ window.OR_VERTALINGEN = {
   "Leden van {naam} worden opgehaald…": ["Fetching members of {naam}…", "Mitglieder von {naam} werden abgerufen…"],
   "{n} leden van {naam} staan in het voorbeeld hieronder. Zoek eventueel nog een verzamelmail, of klik op Toevoegen aan de verkiezing.": ["{n} members of {naam} are in the preview below. Search for another distribution list if needed, or click Add to the election.", "{n} Mitglieder von {naam} stehen in der Vorschau unten. Suchen Sie bei Bedarf eine weitere Verteilerliste oder klicken Sie auf Zur Wahl hinzufügen."],
   "{n} leden zonder e-mailadres zijn overgeslagen.": ["{n} members without an email address were skipped.", "{n} Mitglieder ohne E-Mail-Adresse wurden übersprungen."],
+  "alleen op de stempagina en in de mails · PNG, JPG of WebP, max. 5 MB": ["only on the voting page and in the emails · PNG, JPG or WebP, max. 5 MB", "nur auf der Abstimmungsseite und in den E-Mails · PNG, JPG oder WebP, max. 5 MB"],
 };
