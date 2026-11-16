@@ -1,5 +1,5 @@
 // Inloggen, registreren, wachtwoord herstellen en tweestapsverificatie.
-import { db, $, $$, t, laadHuisstijl } from "./gemeen.js?v=20261116e";
+import { db, $, $$, t, laadHuisstijl } from "./gemeen.js?v=20261116f";
 
 const VIEWS = ["inloggen", "registreren", "vergeten", "nieuw", "mfa-instellen", "mfa-code"];
 let herstelModus = false;
