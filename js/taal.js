@@ -75,6 +75,31 @@
     location.reload();
   }
 
+  // Kleine vlaggen als SVG (emoji-vlaggen werken niet op Windows).
+  var VLAGGEN = {
+    nl: [["rect", { width: 9, height: 6, fill: "#21468b" }], ["rect", { width: 9, height: 4, fill: "#fff" }], ["rect", { width: 9, height: 2, fill: "#ae1c28" }]],
+    de: [["rect", { width: 9, height: 6, fill: "#ffce00" }], ["rect", { width: 9, height: 4, fill: "#dd0000" }], ["rect", { width: 9, height: 2, fill: "#000" }]],
+    en: [["rect", { width: 9, height: 6, fill: "#012169" }],
+         ["path", { d: "M0,0 9,6 M9,0 0,6", stroke: "#fff", "stroke-width": 1.2 }],
+         ["path", { d: "M0,0 9,6 M9,0 0,6", stroke: "#c8102e", "stroke-width": 0.5 }],
+         ["path", { d: "M4.5,0 V6 M0,3 H9", stroke: "#fff", "stroke-width": 2 }],
+         ["path", { d: "M4.5,0 V6 M0,3 H9", stroke: "#c8102e", "stroke-width": 1.2 }]],
+  };
+  function vlag(code) {
+    var NS = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", "0 0 9 6");
+    svg.setAttribute("class", "vlag");
+    svg.setAttribute("aria-hidden", "true");
+    var delen = VLAGGEN[code];
+    for (var i = 0; i < delen.length; i++) {
+      var e = document.createElementNS(NS, delen[i][0]);
+      for (var k in delen[i][1]) e.setAttribute(k, delen[i][1][k]);
+      svg.appendChild(e);
+    }
+    return svg;
+  }
+
   // Schakelaar in elk element met data-taal.
   function bouw() {
     var plekken = document.querySelectorAll("[data-taal]");
@@ -90,7 +115,8 @@
         b.setAttribute("lang", TALEN[k]);
         b.setAttribute("aria-checked", TALEN[k] === taal ? "true" : "false");
         b.title = VOLUIT[TALEN[k]];
-        b.textContent = NAMEN[TALEN[k]];
+        b.appendChild(vlag(TALEN[k]));
+        b.appendChild(document.createTextNode(NAMEN[TALEN[k]]));
         b.setAttribute("data-code", TALEN[k]);
         b.addEventListener("click", function () {
           var code = this.getAttribute("data-code");
