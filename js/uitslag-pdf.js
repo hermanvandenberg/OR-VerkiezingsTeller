@@ -1,9 +1,9 @@
 // Uitslag als PDF in de huisstijl: logo, kleuren van het thema, uitslag met balken,
 // kerngetallen en ruimte voor handtekeningen van de kiescommissie.
 // jsPDF wordt pas geladen als iemand op de knop klikt.
-import { t, fmtDatum } from "./gemeen.js?v=20261120b";
-import { themaVariabelen, naarRgb } from "./thema.js?v=20261120b";
-import { laadAlsPng } from "./word-sjabloon.js?v=20261120b";
+import { t, fmtDatum } from "./gemeen.js?v=20261120c";
+import { themaVariabelen, naarRgb } from "./thema.js?v=20261120c";
+import { laadAlsPng } from "./word-sjabloon.js?v=20261120c";
 
 const JSPDF_URL = "https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js";
 const JSPDF_SRI = "sha384-en/ztfPSRkGfME4KIm05joYXynqzUgbsG5nMrj/xEFAHXkeZfO3yMK8QQ+mP7p1/";

@@ -408,7 +408,7 @@ window.OR_VERTALINGEN = {
   "Je kunt stemmen vanaf {datum}. Bewaar de mail met je link.": ["You can vote from {datum}. Keep the email with your link.", "Sie können ab {datum} abstimmen. Bewahren Sie die E-Mail mit Ihrem Link auf."],
   "De stemming is gesloten": ["Voting is closed", "Die Abstimmung ist geschlossen"],
   "Stemmen is niet meer mogelijk. De uitslag wordt bekendgemaakt door de OR.": ["Voting is no longer possible. The works council will announce the result.", "Abstimmen ist nicht mehr möglich. Das Ergebnis wird vom Betriebsrat bekannt gegeben."],
-  "Je stem is geheim. Er wordt nergens opgeslagen op wie jij hebt gestemd; alleen dát je gestemd hebt.": ["Your vote is secret. Who you voted for is not stored anywhere; only that you voted.", "Ihre Stimme ist geheim. Nirgends wird gespeichert, wen Sie gewählt haben; nur dass Sie abgestimmt haben."],
+  "Jouw stem is 100% anoniem. Er wordt nergens opgeslagen op wie jij hebt gestemd; alleen dát je gestemd hebt.": ["Your vote is 100% anonymous. Who you voted for is not stored anywhere; only that you voted.", "Ihre Stimme ist 100 % anonym. Es wird nirgends gespeichert, wen Sie gewählt haben; nur, dass Sie gewählt haben."],
   "Je hebt nog geen kandidaat gekozen. Kies een tegel of onthouden.": ["You haven't chosen a candidate yet. Choose a tile or abstain.", "Sie haben noch keinen Kandidaten gewählt. Wählen Sie eine Kachel oder Enthaltung."],
   "Vul je naam in.": ["Enter your name.", "Geben Sie Ihren Namen ein."],
   "Vul een geldig e-mailadres in.": ["Enter a valid email address.", "Geben Sie eine gültige E-Mail-Adresse ein."],
