@@ -8,7 +8,7 @@ Digitaal stemmen voor (tussentijdse) OR-verkiezingen. Iedere collega krijgt een 
 |---|---|---|
 | `stem.html#<link>` | Iedere collega | Kandidaattegels naast elkaar, onthouden, bevestigingsvenster |
 | `index.html` | Commissie en beheerder | Inloggen, account aanmaken (alleen na uitnodiging), tweestapsverificatie |
-| `dashboard.html` | Kiescommissie | Opkomst, uitslag (na sluiting of live), meldingen, logboek |
+| `dashboard.html` | Kiescommissie | Opkomst, uitslag (na sluiting of live, te downloaden als PDF), meldingen, logboek |
 | `beheer.html` | Alleen de beheerder | Verkiezing, data en tijden, herinneringen, kandidaten met foto, e-maillijst, versturen, commissie, logo en huisstijl |
 
 De website zelf staat op GitHub Pages. Stemmen, accounts en logboek staan in **Supabase** (database met inlog), omdat GitHub Pages zelf niets kan opslaan.
@@ -18,7 +18,7 @@ De website zelf staat op GitHub Pages. Stemmen, accounts en logboek staan in **S
 - **Eén stem per persoon.** Elke collega krijgt een eigen link. Die bestaat uit een willekeurige code plus een handtekening met een geheime sleutel in de database; raden is praktisch onmogelijk. Na het stemmen werkt de link niet meer, ook niet als twee pogingen tegelijk binnenkomen.
 - **Meldingen** voor de commissie bij: opnieuw proberen met een gebruikte link, veel ongeldige links in korte tijd, een mail die niet verstuurd kon worden.
 - **Stemmen zijn niet te wijzigen of te verwijderen**, door niemand. Stemmen worden zonder tijdstip opgeslagen.
-- **Logboek**: elke handeling van beheerder en commissie wordt vastgelegd en kan niet worden aangepast.
+- **Logboek**: elke handeling van beheerder en commissie wordt vastgelegd en kan niet worden aangepast. Alleen de beheerder kan het logboek leegmaken na het testen, en alleen zolang er geen verkiezing loopt of afgelopen is (zie "Na het testen: namen en logboek").
 - **Alleen uitgenodigde adressen** kunnen een account maken. Inloggen kan alleen met tweestapsverificatie (code-app op de telefoon). De sessie stopt als je de browser sluit.
 - **Rollen**: alleen de beheerder kan verkiezingen inrichten, lijsten inladen en commissieleden uitnodigen. Commissieleden kunnen kijken en meldingen afhandelen. De kiezerslijst is alleen voor de beheerder zichtbaar.
 - **Vast na de start**: starttijd, zichtbaarheid van de uitslag en kandidaten. Het eindmoment kan nog verlengd worden (en dat staat in het logboek).
@@ -115,6 +115,16 @@ De **uitslag in aantallen** (per kandidaat, onthouden, opkomst) blijft bewaard, 
 Het vernietigen gebeurt elke nacht om 03:15 via de planner van Supabase (pg_cron), en voor de zekerheid ook als iemand het beheer- of commissiescherm opent.
 
 **Al eerder geïnstalleerd?** Plak dan eenmalig [`supabase/updates/002-bewaartermijn.sql`](supabase/updates/002-bewaartermijn.sql) in de **SQL Editor** en klik **Run**. Bestaande verkiezingen krijgen dan de standaarddatum van 3 maanden na sluiting.
+
+## Na het testen: namen en logboek
+
+**Namen aanpassen.** Ga in het beheerscherm naar **Kiescommissie** en klik naast een naam op **Wijzigen**. Dat kan voor jezelf en voor elk commissielid. De wijziging staat in het logboek.
+
+**Logboek leegmaken.** Klaar met testen? Verwijder eerst je testverkiezingen. Klik daarna bij **Kiescommissie** op **Logboek leegmaken**. Dit kan alleen als er geen verkiezing loopt of afgelopen is; een verkiezing die nog moet beginnen mag blijven staan. Er blijft één regel staan dat jij het logboek hebt geleegd. Alleen de beheerder ziet deze knop, en de database staat het ook alleen de beheerder toe.
+
+**Uitslag als PDF.** Na sluiting staat in het dashboard de knop **Uitslag downloaden (PDF)**. De PDF heeft het logo en de kleuren van de huisstijl, de stemmen per kandidaat, de opkomst en ruimte voor de handtekeningen van de kiescommissie.
+
+**Al eerder geïnstalleerd?** Voer dan eenmalig [`supabase/updates/006-namen-en-logboek.sql`](supabase/updates/006-namen-en-logboek.sql) uit in de **SQL Editor**.
 
 ## Een volgende verkiezing
 

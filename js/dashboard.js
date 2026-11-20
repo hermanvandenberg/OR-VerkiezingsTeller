@@ -1,5 +1,6 @@
 // Scherm van de kiescommissie.
-import { db, $, el, t, fmtDatum, fmtKort, fmtDag, laadHuisstijl, vereisLogin, uitloggen, foutTekst, download, csvRegel } from "./gemeen.js?v=20261120a";
+import { db, $, el, t, fmtDatum, fmtKort, fmtDag, laadHuisstijl, vereisLogin, uitloggen, foutTekst } from "./gemeen.js?v=20261120b";
+import { maakUitslagPdf } from "./uitslag-pdf.js?v=20261120b";
 
 const SOORTEN = {
   ander_emailadres: t("Ander e-mailadres ingevuld"),
@@ -16,6 +17,7 @@ const STATUS = { open: [t("Stemming open"), "ok"], nog_niet_open: [t("Nog niet b
 let account;
 let huidig = null;   // verkiezing-id
 let laatsteData = null;
+let instellingen = {}; // huisstijl, voor de PDF
 
 function toonFout(e) {
   const f = $("#fout");
@@ -155,12 +157,22 @@ async function laadLogboek() {
       el("td", {}, t(ACTIES[r.actie] || r.actie), r.details ? el("div", { class: "hint mono", text: Object.entries(r.details).map(([k, v]) => `${t(k)}: ${CODES.includes(k) ? t(v) : /^\d{4}-\d\d-\d\dT/.test(v) ? fmtKort(v) : v && typeof v === "object" ? Object.values(v).filter(Boolean).join(", ") : v}`).join(" · ") }) : null))))));
 }
 
-$("#uitslag-download").addEventListener("click", () => {
+$("#uitslag-download").addEventListener("click", async (e) => {
+  const knop = e.currentTarget;
   const d = laatsteData;
-  const regels = [csvRegel([t("Kandidaat"), t("Stemmen")]), ...d.uitslag.map((r) => csvRegel([r.volgorde === 1000000 ? t(r.naam) : r.naam, r.stemmen])),
-    "", csvRegel([t("Kiezers"), d.kiezers]), csvRegel([t("Gestemd"), d.gestemd]), csvRegel([t("Apart gezet (niet geteld)"), d.apart]),
-    csvRegel([t("Afgekeurd"), d.afgekeurd]), csvRegel([t("Gesloten op"), fmtDatum(d.eind_at)])];
-  download(`uitslag-${d.titel.replace(/[^\w-]+/g, "-")}.csv`, regels.join("\r\n"));
+  knop.disabled = true;
+  try {
+    const blob = await maakUitslagPdf(d, instellingen);
+    const url = URL.createObjectURL(blob);
+    const a = el("a", { href: url, download: `uitslag-${d.titel.replace(/[^\w-]+/g, "-")}.pdf` });
+    document.body.append(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1000);
+  } catch (err) {
+    toonFout(err);
+  } finally {
+    knop.disabled = false;
+  }
 });
 
 $("#verkiezing").addEventListener("change", (e) => { huidig = e.target.value; vernieuw(); });
@@ -171,7 +183,7 @@ $("#uitloggen").addEventListener("click", uitloggen);
   $("#wie").textContent = t("Ingelogd als {naam}", { naam: account.naam });
   $("#naar-beheer").hidden = account.rol !== "beheerder";
   $("#pagina").hidden = false;
-  laadHuisstijl().catch(() => {});
+  laadHuisstijl().then((h) => { instellingen = h; }, () => {});
   await db.rpc("vernietigen_verlopen").then(() => {}, () => {});
   try {
     await laadVerkiezingen();

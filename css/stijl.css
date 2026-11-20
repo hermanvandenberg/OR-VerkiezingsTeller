@@ -191,3 +191,4 @@ input[type="color"] { height: 44px; padding: 4px; cursor: pointer; }
 /* Vast OR-icoon (stembus) in de kop; volgt de hoofdkleur van het thema */
 .or-icoon { width: 44px; height: 44px; flex: none; color: var(--knop); }
 .or-icoon[hidden] { display: none; }
+.logboek-leeg { border-top: 1px solid var(--line); padding-top: 16px; margin-top: 4px; }
