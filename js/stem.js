@@ -1,6 +1,6 @@
 // Stempagina: één kandidaat (of onthouden) kiezen en bevestigen. De persoonlijke link is de controle.
-import { db, $, $$, el, t, fmtDatum, fotoOf, laadHuisstijl } from "./gemeen.js?v=20261120b";
-import { pasThemaToe } from "./thema.js?v=20261120b";
+import { db, $, $$, el, t, fmtDatum, fotoOf, laadHuisstijl } from "./gemeen.js?v=20261120c";
+import { pasThemaToe } from "./thema.js?v=20261120c";
 
 const token = location.hash.replace(/^#/, "").trim().toLowerCase();
 // Voorbeeld vanuit het beheerscherm: gegevens komen van dat venster, er wordt niets verstuurd.
@@ -70,7 +70,7 @@ function toonBiljet(b) {
     volgende.click();
   }));
 
-  $("#geheim-uitleg").textContent = t("Je stem is geheim. Er wordt nergens opgeslagen op wie jij hebt gestemd; alleen dát je gestemd hebt.");
+  $("#geheim-uitleg").textContent = t("Jouw stem is 100% anoniem. Er wordt nergens opgeslagen op wie jij hebt gestemd; alleen dát je gestemd hebt.");
 
   $("#laden").hidden = true;
   $("#biljet").hidden = false;

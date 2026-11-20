@@ -1,6 +1,6 @@
 // Scherm van de kiescommissie.
-import { db, $, el, t, fmtDatum, fmtKort, fmtDag, laadHuisstijl, vereisLogin, uitloggen, foutTekst } from "./gemeen.js?v=20261120b";
-import { maakUitslagPdf } from "./uitslag-pdf.js?v=20261120b";
+import { db, $, el, t, fmtDatum, fmtKort, fmtDag, laadHuisstijl, vereisLogin, uitloggen, foutTekst } from "./gemeen.js?v=20261120c";
+import { maakUitslagPdf } from "./uitslag-pdf.js?v=20261120c";
 
 const SOORTEN = {
   ander_emailadres: t("Ander e-mailadres ingevuld"),
