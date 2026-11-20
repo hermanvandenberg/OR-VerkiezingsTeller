@@ -295,17 +295,16 @@ begin
 end $$;
 
 create function public.stem_uitbrengen(
-  p_token text, p_kandidaat uuid, p_onthouden boolean, p_naam text, p_email text
+  p_token text, p_kandidaat uuid, p_onthouden boolean,
+  -- p_naam en p_email worden niet meer gebruikt. Ze staan er nog zodat een
+  -- oude, nog openstaande stempagina ook blijft werken.
+  p_naam text default null, p_email text default null
 ) returns jsonb
 language plpgsql volatile security definer set search_path = '' as $$
 declare
   v_kiezer uuid;
   k public.kiezers;
   v public.verkiezingen;
-  v_stem uuid;
-  v_status text := 'geldig';
-  v_email text := lower(trim(coalesce(p_email, '')));
-  v_naam text := trim(coalesce(p_naam, ''));
 begin
   v_kiezer := private.kiezer_bij_token(p_token);
   if v_kiezer is null then
@@ -322,10 +321,10 @@ begin
        set aantal = aantal + 1
      where kiezer_id = k.id and soort = 'opnieuw_geprobeerd' and status = 'open';
     if not found then
-      insert into public.meldingen (verkiezing_id, soort, omschrijving, kiezer_id, ingevulde_naam, ingevulde_email)
+      insert into public.meldingen (verkiezing_id, soort, omschrijving, kiezer_id)
       values (v.id, 'opnieuw_geprobeerd',
               'Iemand probeerde opnieuw te stemmen met een link die al gebruikt is. De eerste stem blijft gelden.',
-              k.id, left(v_naam, 200), left(v_email, 200));
+              k.id);
     end if;
     return jsonb_build_object('fout', 'al_gestemd');
   end if;
@@ -343,28 +342,14 @@ begin
        select 1 from public.kandidaten where id = p_kandidaat and verkiezing_id = v.id) then
     return jsonb_build_object('fout', 'geen_keuze');
   end if;
-  if v_naam = '' or v_email !~ '^[^@\s]+@[^@\s]+\.[^@\s]+$' then
-    return jsonb_build_object('fout', 'gegevens');
-  end if;
 
-  if v_email <> k.email then
-    v_status := 'apart';
-  end if;
-
+  -- De persoonlijke link is de controle: de stem telt meteen mee.
   insert into public.stemmen (verkiezing_id, kandidaat_id, status)
-  values (v.id, p_kandidaat, v_status)
-  returning id into v_stem;
+  values (v.id, p_kandidaat, 'geldig');
 
   update public.kiezers set gestemd = true where id = k.id;
 
-  if v_status = 'apart' then
-    insert into public.meldingen (verkiezing_id, soort, omschrijving, kiezer_id, stem_id, ingevulde_naam, ingevulde_email)
-    values (v.id, 'ander_emailadres',
-            'Het ingevulde e-mailadres wijkt af van het adres waar de stemlink naartoe ging. De stem is apart gezet en telt pas mee na goedkeuring.',
-            k.id, v_stem, left(v_naam, 200), left(v_email, 200));
-  end if;
-
-  return jsonb_build_object('ok', true, 'apart', v_status = 'apart');
+  return jsonb_build_object('ok', true, 'apart', false);
 end $$;
 
 -- ---------------------------------------------------------------------
