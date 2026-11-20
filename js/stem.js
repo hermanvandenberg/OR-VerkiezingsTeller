@@ -1,6 +1,6 @@
 // Stempagina: één kandidaat (of onthouden) kiezen en bevestigen. De persoonlijke link is de controle.
-import { db, $, $$, el, t, fmtDatum, fotoOf, laadHuisstijl } from "./gemeen.js?v=20261120a";
-import { pasThemaToe } from "./thema.js?v=20261120a";
+import { db, $, $$, el, t, fmtDatum, fotoOf, laadHuisstijl } from "./gemeen.js?v=20261120b";
+import { pasThemaToe } from "./thema.js?v=20261120b";
 
 const token = location.hash.replace(/^#/, "").trim().toLowerCase();
 // Voorbeeld vanuit het beheerscherm: gegevens komen van dat venster, er wordt niets verstuurd.

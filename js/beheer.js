@@ -2,10 +2,10 @@
 import {
   db, $, $$, el, fmtDatum, fmtKort, fmtDag, naarLokaal, vanLokaal, fotoOf, laadHuisstijl,
   vereisLogin, uitloggen, foutTekst, download, csvRegel, t,
-} from "./gemeen.js?v=20261120a";
-import { parseCsv, uitTabel, uitOutlook, opschonen } from "./lijst-inlezen.js?v=20261120a";
-import { maakWordSjabloon, laadAlsPng } from "./word-sjabloon.js?v=20261120a";
-import { STANDAARD, LETTERTYPEN, pasThemaToe, themaVariabelen } from "./thema.js?v=20261120a";
+} from "./gemeen.js?v=20261120b";
+import { parseCsv, uitTabel, uitOutlook, opschonen } from "./lijst-inlezen.js?v=20261120b";
+import { maakWordSjabloon, laadAlsPng } from "./word-sjabloon.js?v=20261120b";
+import { STANDAARD, LETTERTYPEN, pasThemaToe, themaVariabelen } from "./thema.js?v=20261120b";
 
 let verkiezingen = [];
 let huidig = null;          // de gekozen verkiezing (object) of null bij een nieuwe
@@ -662,7 +662,7 @@ async function laadCommissie() {
   $("#commissie").replaceChildren(el("table", {},
     el("thead", {}, el("tr", {}, el("th", { text: t("Naam") }), el("th", { text: t("E-mail") }), el("th", { text: t("Rol") }), el("th", { text: t("Account") }), el("th"))),
     el("tbody", {}, ...data.map((lid) => el("tr", {},
-      el("td", { text: lid.naam }), el("td", { text: lid.email }), el("td", { text: t(lid.rol) }),
+      naamCel(lid), el("td", { text: lid.email }), el("td", { text: t(lid.rol) }),
       el("td", {}, el("span", { class: `chip ${lid.actief ? "ok" : "warn"}`, text: lid.actief ? t("Actief") : t("Uitgenodigd") })),
       el("td", {}, lid.rol === "beheerder" ? null : el("span", { class: "rij" },
         lid.actief ? null : el("button", { type: "button", class: "knop licht klein", text: t("Uitnodiging opnieuw mailen"), onclick: async (e) => {
@@ -677,6 +677,53 @@ async function laadCommissie() {
           laadCommissie();
         } }))))))));
 }
+
+// Naam met een knopje "Wijzigen"; daarna een invoerveld met Opslaan en Annuleren.
+function naamCel(lid) {
+  const cel = el("td");
+  const toon = () => cel.replaceChildren(el("span", { class: "rij" }, el("span", { text: lid.naam }),
+    el("button", { type: "button", class: "knop licht klein", text: t("Wijzigen"), "aria-label": t("Naam van {naam} wijzigen", { naam: lid.naam }), onclick: bewerk })));
+  function bewerk() {
+    const veld = el("input", { value: lid.naam, maxlength: "100", "aria-label": t("Nieuwe naam"), autocomplete: "off" });
+    const opslaan = async () => {
+      const naam = veld.value.trim();
+      if (!naam) return veld.focus();
+      wisFout();
+      const { error } = await db.rpc("naam_wijzigen", { p_email: lid.email, p_naam: naam });
+      if (error) return toonFout(/naam_wijzigen/.test(error.message || "")
+        ? t("Namen aanpassen werkt pas als update 006 in Supabase is uitgevoerd (zie de README).") : error);
+      if (lid.rol === "beheerder" && account) {
+        account.naam = naam;
+        $("#wie").textContent = t("Ingelogd als {naam} (beheerder)", { naam });
+      }
+      meld("#commissie-ok", t("Naam gewijzigd in {naam}.", { naam }));
+      laadCommissie();
+    };
+    veld.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); opslaan(); }
+      if (e.key === "Escape") toon();
+    });
+    cel.replaceChildren(el("span", { class: "rij" }, veld,
+      el("button", { type: "button", class: "knop klein", text: t("Opslaan"), onclick: opslaan }),
+      el("button", { type: "button", class: "knop licht klein", text: t("Annuleren"), onclick: toon })));
+    veld.focus();
+    veld.select();
+  }
+  toon();
+  return cel;
+}
+
+$("#logboek-leeg").addEventListener("click", async (e) => {
+  if (!confirm(t("Het hele logboek leegmaken? Dit kan niet ongedaan worden gemaakt. Er blijft één regel staan dat jij het logboek hebt geleegd."))) return;
+  wisFout();
+  const knop = e.currentTarget;
+  knop.disabled = true;
+  const { data, error } = await db.rpc("logboek_leegmaken");
+  knop.disabled = false;
+  if (error) return toonFout(/logboek_leegmaken/.test(error.message || "")
+    ? t("Het logboek leegmaken werkt pas als update 006 in Supabase is uitgevoerd (zie de README).") : error);
+  meld("#logboek-ok", t("Logboek geleegd: {n} regels verwijderd.", { n: data }));
+});
 
 // Uitnodigingsmail via de functie commissie-uitnodigen. Lukt dat niet, dan uitleggen
 // hoe het verder kan (de registratielink zelf sturen).

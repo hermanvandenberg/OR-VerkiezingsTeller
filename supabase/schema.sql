@@ -859,6 +859,53 @@ begin
   perform private.log('commissielid verwijderd', jsonb_build_object('email', lower(p_email)), null);
 end $$;
 
+-- Naam van de beheerder of een commissielid aanpassen, en het logboek leegmaken
+-- na het testen (alleen als er geen lopende of afgelopen verkiezing meer is).
+create function public.naam_wijzigen(p_email text, p_naam text) returns void
+language plpgsql volatile security definer set search_path = '' as $$
+declare
+  v_naam text := btrim(coalesce(p_naam, ''));
+  v_oud text;
+begin
+  if not public.is_beheerder() then
+    raise exception 'Geen toegang';
+  end if;
+  if v_naam = '' or length(v_naam) > 100 then
+    raise exception 'Vul een naam in van maximaal 100 tekens.';
+  end if;
+  select naam into v_oud from public.toegang where email = lower(btrim(p_email)) for update;
+  if not found then
+    raise exception 'Niet gevonden in de kiescommissie';
+  end if;
+  if v_oud = v_naam then
+    return;
+  end if;
+  update public.toegang set naam = v_naam where email = lower(btrim(p_email));
+  perform private.log('naam gewijzigd', jsonb_build_object('oud', v_oud, 'nieuw', v_naam), null);
+end $$;
+
+create function public.logboek_leegmaken() returns integer
+language plpgsql volatile security definer set search_path = '' as $$
+declare
+  v_aantal integer;
+begin
+  if not public.is_beheerder() then
+    raise exception 'Geen toegang';
+  end if;
+  -- Eén tegelijk, zodat er niet tussendoor een verkiezing of stem bijkomt.
+  lock table public.verkiezingen, public.stemmen in share mode;
+  -- Alleen verkiezingen die nog moeten beginnen mogen er staan: van een lopende
+  -- of afgelopen verkiezing blijft het logboek altijd bewaard.
+  if exists (select 1 from public.verkiezingen v where private.status_van(v) <> 'nog_niet_open')
+     or exists (select 1 from public.stemmen) then
+    raise exception 'Er staat nog een verkiezing die open is of al gesloten is. Verwijder eerst je testverkiezingen; het logboek van een echte verkiezing blijft bewaard.';
+  end if;
+  delete from public.logboek;
+  get diagnostics v_aantal = row_count;
+  perform private.log('logboek geleegd', jsonb_build_object('regels', v_aantal), null);
+  return v_aantal;
+end $$;
+
 -- ---------------------------------------------------------------------
 -- Bewaking van wijzigingen
 -- ---------------------------------------------------------------------
@@ -1021,7 +1068,8 @@ grant execute on function public.dashboard(uuid), public.melding_afhandelen(bigi
                           public.kiezers_toevoegen(uuid, jsonb), public.kiezer_verwijderen(uuid),
                           public.samenvoeglijst(uuid, text), public.mail_inplannen(uuid, text),
                           public.commissie_uitnodigen(text, text), public.commissie_verwijderen(text),
-                          public.commissie_lijst()
+                          public.commissie_lijst(), public.naam_wijzigen(text, text),
+                          public.logboek_leegmaken()
                           to authenticated;
 
 grant execute on function public.stemmen_vernietigen(uuid), public.vernietigen_verlopen() to authenticated;
