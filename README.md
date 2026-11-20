@@ -1,12 +1,12 @@
 # OR-VerkiezingsTeller
 
-Digitaal stemmen voor (tussentijdse) OR-verkiezingen. Iedere collega krijgt een mail met een persoonlijke stemlink, kiest op de stempagina een kandidaat of "onthouden", vult naam en e-mail in en bevestigt. De kiescommissie volgt de opkomst, handelt meldingen af en ziet de uitslag. De beheerder richt alles in.
+Digitaal stemmen voor (tussentijdse) OR-verkiezingen. Iedere collega krijgt een mail met een persoonlijke stemlink, kiest op de stempagina een kandidaat of "onthouden" en bevestigt. Naam of e-mailadres invullen is niet nodig: de persoonlijke link is genoeg. De kiescommissie volgt de opkomst, handelt meldingen af en ziet de uitslag. De beheerder richt alles in.
 
 ## Wat zit erin
 
 | Pagina | Voor wie | Wat |
 |---|---|---|
-| `stem.html#<link>` | Iedere collega | Kandidaattegels naast elkaar, onthouden, naam en e-mail, bevestigingsvenster |
+| `stem.html#<link>` | Iedere collega | Kandidaattegels naast elkaar, onthouden, bevestigingsvenster |
 | `index.html` | Commissie en beheerder | Inloggen, account aanmaken (alleen na uitnodiging), tweestapsverificatie |
 | `dashboard.html` | Kiescommissie | Opkomst, uitslag (na sluiting of live), meldingen, logboek |
 | `beheer.html` | Alleen de beheerder | Verkiezing, data en tijden, herinneringen, kandidaten met foto, e-maillijst, versturen, commissie, logo en huisstijl |
@@ -16,8 +16,7 @@ De website zelf staat op GitHub Pages. Stemmen, accounts en logboek staan in **S
 ## Zo werkt de beveiliging
 
 - **Eén stem per persoon.** Elke collega krijgt een eigen link. Die bestaat uit een willekeurige code plus een handtekening met een geheime sleutel in de database; raden is praktisch onmogelijk. Na het stemmen werkt de link niet meer, ook niet als twee pogingen tegelijk binnenkomen.
-- **Ander e-mailadres ingevuld?** Dan wordt de stem apart gezet en telt pas mee als de commissie hem goedkeurt. Bij afkeuren vervalt de stem en kan de echte collega opnieuw stemmen met een nieuwe link (stuur een herinnering).
-- **Meldingen** voor de commissie bij: afwijkend e-mailadres, opnieuw proberen met een gebruikte link, veel ongeldige links in korte tijd, een mail die niet verstuurd kon worden.
+- **Meldingen** voor de commissie bij: opnieuw proberen met een gebruikte link, veel ongeldige links in korte tijd, een mail die niet verstuurd kon worden.
 - **Stemmen zijn niet te wijzigen of te verwijderen**, door niemand. Stemmen worden zonder tijdstip opgeslagen.
 - **Logboek**: elke handeling van beheerder en commissie wordt vastgelegd en kan niet worden aangepast.
 - **Alleen uitgenodigde adressen** kunnen een account maken. Inloggen kan alleen met tweestapsverificatie (code-app op de telefoon). De sessie stopt als je de browser sluit.
@@ -28,12 +27,11 @@ De website zelf staat op GitHub Pages. Stemmen, accounts en logboek staan in **S
 
 De stemming is volledig anoniem. Een stem wordt opgeslagen zonder naam, e-mailadres of tijdstip; bij de kiezer wordt alleen bijgehouden *dat* die gestemd heeft. Niemand, ook de beheerder niet, kan terugzien wie op wie heeft gestemd.
 
-Eén uitzondering, alleen zolang het duurt: een stem met een afwijkend e-mailadres wordt apart gezet tot de commissie besluit. Tot dat moment weet de database bij welke melding die stem hoort (de commissie ziet de keuze niet). Zodra de commissie goed- of afkeurt, wordt die verwijzing gewist.
-
 ### Eerlijk over de grenzen
 
 - Wie het Supabase-project beheert, kan technisch gezien in de database kijken, maar vindt daar geen koppeling tussen kiezer en keuze.
 - Bij **Word-afdruk samenvoegen** heeft de beheerder een lijst met alle links in handen. Wie die lijst heeft, kan namens anderen stemmen. Verwijder de lijst na gebruik en ook de verzonden mails uit "Verzonden items". Bij **Outlook automatisch** ziet niemand de links.
+- De stemlink is de enige controle: collega's vullen geen naam of e-mailadres in. Wie zijn link doorstuurt, laat een ander namens zich stemmen. Zet daarom in de uitnodiging dat de link persoonlijk is (dat staat er standaard al in). Al eerder geïnstalleerd? Voer dan eenmalig [`supabase/updates/005-stembiljet-zonder-naam.sql`](supabase/updates/005-stembiljet-zonder-naam.sql) uit in de **SQL Editor**.
 - Bij "uitslag live" kan iemand die de tussenstand vaak ververst en weet wie net gestemd heeft, iets afleiden. Kies daarom bij voorkeur "pas na sluiting".
 
 ## Installatie (eenmalig, ongeveer 30 minuten)

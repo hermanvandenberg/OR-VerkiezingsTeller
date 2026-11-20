@@ -9,10 +9,10 @@
   <title>Stemmen · OR-verkiezing</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700&display=swap">
   <link rel="icon" href="img/icoon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="css/stijl.css?v=20261116h">
-  <script src="js/modus.js?v=20261116h"></script>
-  <script defer src="js/vertalingen.js?v=20261116h"></script>
-  <script defer src="js/taal.js?v=20261116h"></script>
+  <link rel="stylesheet" href="css/stijl.css?v=20261120a">
+  <script src="js/modus.js?v=20261120a"></script>
+  <script defer src="js/vertalingen.js?v=20261120a"></script>
+  <script defer src="js/taal.js?v=20261120a"></script>
 </head>
 <body>
   <main class="wrap smal">
@@ -40,14 +40,6 @@
         <span class="vink" aria-hidden="true"></span>
         <span><b>Onthouden</b> <span class="hint">· ik stem op geen van de kandidaten</span></span>
       </button>
-      <div class="velden">
-        <label class="veld" for="naam">Je naam
-          <input id="naam" name="naam" autocomplete="name" placeholder="Voor- en achternaam" required>
-        </label>
-        <label class="veld" for="email">Je e-mailadres
-          <input id="email" name="email" type="email" autocomplete="email" placeholder="naam@bedrijf.nl" required>
-        </label>
-      </div>
       <div class="rij">
         <button type="submit" id="versturen" class="knop" aria-disabled="true">Stem versturen</button>
         <span id="bericht" class="hint" role="status">Kies eerst een kandidaat of onthouden.</span>
@@ -60,7 +52,6 @@
       <span class="chip ok">Ontvangen</span>
       <h2>Bedankt, je stem is uitgebracht.</h2>
       <p>Je koos: <b id="bedankt-keuze"></b></p>
-      <p id="bedankt-apart" class="notitie warn" hidden>Het e-mailadres dat je invulde is anders dan het adres waarop je deze uitnodiging kreeg. De kiescommissie controleert je stem daarom eerst.</p>
       <p class="hint" id="bedankt-hint">Je stemlink werkt nu niet meer. Je kunt dit venster sluiten.</p>
     </section>
     <footer class="voet"><div data-weergave></div></footer>
@@ -71,7 +62,6 @@
       <h2 id="bevestig-kop">Klopt je keuze?</h2>
       <p>Je stemt op</p>
       <p class="keuze" id="bevestig-keuze"></p>
-      <p class="hint" id="bevestig-gegevens"></p>
       <p class="hint">Na versturen kun je je stem niet meer wijzigen.</p>
       <div class="rij">
         <button type="button" class="knop" id="bevestig-ja">Ja, verstuur mijn stem</button>
@@ -81,6 +71,6 @@
     </div>
   </dialog>
 
-  <script type="module" src="js/stem.js?v=20261116h"></script>
+  <script type="module" src="js/stem.js?v=20261120a"></script>
 </body>
 </html>

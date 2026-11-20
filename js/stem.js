@@ -1,6 +1,6 @@
-// Stempagina: één kandidaat (of onthouden) kiezen, gegevens invullen, bevestigen.
-import { db, $, $$, el, t, fmtDatum, fotoOf, laadHuisstijl } from "./gemeen.js?v=20261116h";
-import { pasThemaToe } from "./thema.js?v=20261116h";
+// Stempagina: één kandidaat (of onthouden) kiezen en bevestigen. De persoonlijke link is de controle.
+import { db, $, $$, el, t, fmtDatum, fotoOf, laadHuisstijl } from "./gemeen.js?v=20261120a";
+import { pasThemaToe } from "./thema.js?v=20261120a";
 
 const token = location.hash.replace(/^#/, "").trim().toLowerCase();
 // Voorbeeld vanuit het beheerscherm: gegevens komen van dat venster, er wordt niets verstuurd.
@@ -79,12 +79,7 @@ function toonBiljet(b) {
 $("#biljet").addEventListener("submit", (e) => {
   e.preventDefault();
   if (!keuze) return bericht(t("Je hebt nog geen kandidaat gekozen. Kies een tegel of onthouden."), true);
-  const naam = $("#naam").value.trim();
-  const email = $("#email").value.trim();
-  if (!naam) { $("#naam").focus(); return bericht(t("Vul je naam in."), true); }
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { $("#email").focus(); return bericht(t("Vul een geldig e-mailadres in."), true); }
   $("#bevestig-keuze").textContent = keuze.naam;
-  $("#bevestig-gegevens").textContent = `${naam} · ${email}`;
   $("#bevestig-fout").hidden = true;
   $("#bevestig").showModal();
 });
@@ -97,7 +92,6 @@ $("#bevestig-ja").addEventListener("click", async () => {
     $("#bevestig").close();
     $("#biljet").hidden = true;
     $("#bedankt-keuze").textContent = keuze.naam;
-    $("#bedankt-apart").hidden = true;
     $("#bedankt-hint").textContent = t("Dit was een voorbeeld: er is geen stem opgeslagen. Je kunt dit venster sluiten.");
     $("#bedankt").hidden = false;
     return;
@@ -108,8 +102,6 @@ $("#bevestig-ja").addEventListener("click", async () => {
     p_token: token,
     p_kandidaat: keuze.id,
     p_onthouden: keuze.id === null,
-    p_naam: $("#naam").value.trim(),
-    p_email: $("#email").value.trim(),
   });
   knop.disabled = false;
   knop.textContent = t("Ja, verstuur mijn stem");
@@ -123,7 +115,6 @@ $("#bevestig-ja").addEventListener("click", async () => {
     $("#bevestig").close();
     $("#biljet").hidden = true;
     $("#bedankt-keuze").textContent = keuze.naam;
-    $("#bedankt-apart").hidden = !data.apart;
     $("#bedankt").hidden = false;
     history.replaceState(null, "", location.pathname);
     return;
@@ -136,7 +127,6 @@ $("#bevestig-ja").addEventListener("click", async () => {
     ongeldig: [t("Deze link werkt niet"), t("Gebruik de link uit je meest recente uitnodiging. Lukt het niet, neem dan contact op met de OR.")],
   };
   if (teksten[data?.fout]) return geenStem(...teksten[data.fout]);
-  if (data?.fout === "gegevens") return bericht(t("Vul je naam en een geldig e-mailadres in."), true);
   bericht(t("Kies een kandidaat of onthouden."), true);
 });
 
