@@ -2,10 +2,10 @@
 import {
   db, $, $$, el, fmtDatum, fmtKort, fmtDag, naarLokaal, vanLokaal, fotoOf, laadHuisstijl,
   vereisLogin, uitloggen, foutTekst, download, csvRegel, t,
-} from "./gemeen.js?v=20261120c";
-import { parseCsv, uitTabel, uitOutlook, opschonen } from "./lijst-inlezen.js?v=20261120c";
-import { maakWordSjabloon, laadAlsPng } from "./word-sjabloon.js?v=20261120c";
-import { STANDAARD, LETTERTYPEN, pasThemaToe, themaVariabelen } from "./thema.js?v=20261120c";
+} from "./gemeen.js?v=20261126a";
+import { parseCsv, uitTabel, uitOutlook, opschonen } from "./lijst-inlezen.js?v=20261126a";
+import { maakWordSjabloon, laadAlsPng } from "./word-sjabloon.js?v=20261126a";
+import { STANDAARD, LETTERTYPEN, pasThemaToe, themaVariabelen } from "./thema.js?v=20261126a";
 
 let verkiezingen = [];
 let huidig = null;          // de gekozen verkiezing (object) of null bij een nieuwe
@@ -409,6 +409,8 @@ async function laadKiezers() {
   alleKiezers = rijen;
   $("#kiezers-aantal").textContent = t("{n} kiezers", { n: rijen.length });
   toonKiezers();
+  // De hele lijst weghalen kan alleen zolang er nog geen links weg zijn en niemand heeft gestemd.
+  $("#kiezers-leeg-rij").hidden = !rijen.length || gesloten() || rijen.some((k) => k.uitgenodigd_at || k.gestemd);
 }
 
 function toonKiezers() {
@@ -429,6 +431,21 @@ function toonKiezers() {
   if (lijst.length > 500) $("#kiezers").append(el("p", { class: "hint", text: t("Eerste 500 van {n} getoond. Gebruik het zoekveld.", { n: lijst.length }) }));
 }
 $("#kiezers-zoek").addEventListener("input", toonKiezers);
+
+$("#kiezers-leeg").addEventListener("click", async (e) => {
+  if (!huidig || !alleKiezers.length) return;
+  if (!confirm(t("Alle {n} kiezers uit de lijst van \"{titel}\" verwijderen? Daarna kun je een nieuwe lijst inladen.", { n: alleKiezers.length, titel: huidig.titel }))) return;
+  wisFout();
+  const knop = e.currentTarget;
+  knop.disabled = true;
+  const { data, error } = await db.rpc("kiezers_leegmaken", { p_verkiezing: huidig.id });
+  knop.disabled = false;
+  if (error) return toonFout(/kiezers_leegmaken/.test(error.message || "")
+    ? t("De hele lijst verwijderen werkt pas als update 007 in Supabase is uitgevoerd (zie de README).") : error);
+  meld("#lijst-ok", t("{n} kiezers verwijderd. Je kunt nu een nieuwe lijst inladen.", { n: data }));
+  await laadKiezers();
+  laadVerzending();
+});
 
 function toonVoorbeeld(resultaat) {
   voorbeeldLijst = resultaat;

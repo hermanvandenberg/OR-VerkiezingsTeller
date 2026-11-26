@@ -524,6 +524,37 @@ begin
   perform private.log('kiezer verwijderd', jsonb_build_object('email', k.email), k.verkiezing_id);
 end $$;
 
+-- Hele kiezerslijst weghalen (bijv. na een import met verkeerde namen), alleen
+-- zolang er nog geen stemlinks zijn verstuurd en niemand heeft gestemd.
+create function public.kiezers_leegmaken(p_verkiezing uuid) returns integer
+language plpgsql volatile security definer set search_path = '' as $$
+declare
+  v_aantal integer;
+begin
+  if not public.is_beheerder() then
+    raise exception 'Geen toegang';
+  end if;
+  -- De verkiezing vastzetten, zodat er niet tussendoor links of stemmen bijkomen.
+  perform 1 from public.verkiezingen where id = p_verkiezing for update;
+  if not found then
+    raise exception 'Verkiezing niet gevonden';
+  end if;
+  if (select eind_at from public.verkiezingen where id = p_verkiezing) <= now() then
+    raise exception 'Deze verkiezing is al gesloten';
+  end if;
+  -- Alleen zolang er nog geen enkele stemlink weg is en niemand heeft gestemd.
+  if exists (select 1 from public.kiezers
+              where verkiezing_id = p_verkiezing and (uitgenodigd_at is not null or gestemd))
+     or exists (select 1 from public.mail_wachtrij where verkiezing_id = p_verkiezing)
+     or exists (select 1 from public.stemmen where verkiezing_id = p_verkiezing) then
+    raise exception 'De stemlinks zijn al (deels) verstuurd of er is al gestemd. De hele lijst kan daarom niet meer worden verwijderd; haal kiezers dan een voor een weg.';
+  end if;
+  delete from public.kiezers where verkiezing_id = p_verkiezing;
+  get diagnostics v_aantal = row_count;
+  perform private.log('kiezerslijst geleegd', jsonb_build_object('kiezers', v_aantal), p_verkiezing);
+  return v_aantal;
+end $$;
+
 -- Lijst voor Word-afdruk samenvoegen: naam, e-mail en persoonlijke link.
 create function public.samenvoeglijst(p_verkiezing uuid, p_soort text)
 returns table (naam text, email text, link text)
@@ -1066,6 +1097,7 @@ grant execute on function public.mijn_rol(), public.is_beheerder(), public.is_co
 grant execute on function public.dashboard(uuid), public.melding_afhandelen(bigint, text),
                           public.meldingen_lijst(uuid),
                           public.kiezers_toevoegen(uuid, jsonb), public.kiezer_verwijderen(uuid),
+                          public.kiezers_leegmaken(uuid),
                           public.samenvoeglijst(uuid, text), public.mail_inplannen(uuid, text),
                           public.commissie_uitnodigen(text, text), public.commissie_verwijderen(text),
                           public.commissie_lijst(), public.naam_wijzigen(text, text),

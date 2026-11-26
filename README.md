@@ -126,6 +126,12 @@ Het vernietigen gebeurt elke nacht om 03:15 via de planner van Supabase (pg_cron
 
 **Al eerder geïnstalleerd?** Voer dan eenmalig [`supabase/updates/006-namen-en-logboek.sql`](supabase/updates/006-namen-en-logboek.sql) uit in de **SQL Editor**.
 
+## Verkeerde kiezerslijst ingeladen?
+
+Ga in het beheerscherm naar **E-maillijst** en klik op **Hele lijst verwijderen**. Na bevestiging zijn alle kiezers van deze verkiezing weg en kun je meteen een nieuwe lijst inladen. Kandidaten en instellingen blijven staan. De knop staat er alleen zolang er nog geen stemlinks zijn verstuurd (ook niet via Word samenvoegen) en niemand heeft gestemd; daarna kun je kiezers alleen nog een voor een weghalen. Alleen de beheerder ziet deze knop, en de database staat het ook alleen de beheerder toe. Het verwijderen komt in het logboek.
+
+**Al eerder geïnstalleerd?** Voer dan eenmalig [`supabase/updates/007-kiezerslijst-leegmaken.sql`](supabase/updates/007-kiezerslijst-leegmaken.sql) uit in de **SQL Editor**.
+
 ## Een volgende verkiezing
 
 Klik in het beheerscherm op **Nieuwe verkiezing**. Oude verkiezingen blijven als archief bewaard, met hun uitslag en logboek. Een verkiezing kan ook meer dan twee kandidaten hebben.
