@@ -1,0 +1,66 @@
+/* Verkoopwebsite or-verkiezingen.com · gedeelde basis (demo, kopen, overzicht) */
+:root {
+  --bg: #f3f5f8; --surface: #ffffff; --sunk: #e8ecf2; --line: #d3dae4;
+  --ink: #16202c; --muted: #5a6676; --petrol: #0d5f63; --petrol-soft: #dcefef; --on-petrol: #ffffff;
+  --rood: #c4302b; --rood-soft: #fbe4e2; --warn: #a86a00; --warn-soft: #fdf0d5; --ok: #1f7a45; --ok-soft: #dff2e6;
+  --display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --body: "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --r: 12px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10161d; --surface: #18212b; --sunk: #0c1117; --line: #2b3644;
+    --ink: #e6ebf1; --muted: #9aa6b5; --petrol: #5cc1c4; --petrol-soft: #16383b; --on-petrol: #0c1117;
+    --rood: #ff6b62; --rood-soft: #3d1a19; --warn: #f0b74a; --warn-soft: #3a2c10; --ok: #5fd18f; --ok-soft: #14321f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10161d; --surface: #18212b; --sunk: #0c1117; --line: #2b3644;
+  --ink: #e6ebf1; --muted: #9aa6b5; --petrol: #5cc1c4; --petrol-soft: #16383b; --on-petrol: #0c1117;
+  --rood: #ff6b62; --rood-soft: #3d1a19; --warn: #f0b74a; --warn-soft: #3a2c10; --ok: #5fd18f; --ok-soft: #14321f;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.6 var(--body); }
+h1, h2, h3 { font-family: var(--display); line-height: 1.15; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(26px, 4vw, 36px); font-weight: 800; }
+h2 { font-size: 21px; font-weight: 800; }
+h3 { font-size: 16px; font-weight: 600; }
+p { margin: 0; }
+a { color: var(--petrol); }
+[hidden] { display: none !important; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+.stapel { display: grid; gap: 20px; }
+.kaart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; gap: 14px; min-width: 0; }
+.rij { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.velden { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 12px; }
+label.veld { display: grid; gap: 4px; font-size: 13px; font-weight: 600; }
+label.veld .uitleg { font-weight: 400; color: var(--muted); }
+input, select, textarea { font: 15px var(--body); padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); width: 100%; }
+textarea { min-height: 100px; resize: vertical; }
+input[type="checkbox"], input[type="radio"] { width: auto; accent-color: var(--petrol); }
+:focus-visible { outline: 3px solid var(--petrol); outline-offset: 2px; }
+.knop { font: 700 15px var(--body); border: 0; border-radius: 8px; padding: 11px 18px; background: var(--petrol); color: var(--on-petrol); cursor: pointer; text-decoration: none; display: inline-block; }
+.knop.licht { background: transparent; border: 1px solid var(--line); color: var(--ink); }
+.knop.klein { padding: 6px 10px; font-size: 13px; }
+.hint { font-size: 13px; color: var(--muted); }
+.chip { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--sunk); color: var(--muted); white-space: nowrap; }
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.notitie { border-left: 4px solid var(--petrol); background: var(--petrol-soft); padding: 12px 14px; border-radius: 0 var(--r) var(--r) 0; display: grid; gap: 4px; font-size: 14px; }
+.notitie.warn { border-color: var(--warn); background: var(--warn-soft); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.tabel { overflow-x: auto; }
+
+/* Kop van de demo- en koopomgeving */
+.topbalk { background: var(--surface); border-bottom: 1px solid var(--line); }
+.topbalk .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 64px; flex-wrap: wrap; }
+.merk { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font-family: var(--display); font-weight: 800; font-size: 18px; }
+.merk svg { width: 34px; height: 34px; color: var(--petrol); flex: none; }
+.demoband { background: var(--warn-soft); color: var(--ink); border-bottom: 1px solid var(--line); font-size: 14px; }
+.demoband .wrap { padding-top: 8px; padding-bottom: 8px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: space-between; }
+.prototype { position: fixed; right: 12px; bottom: 12px; z-index: 50; background: var(--ink); color: var(--bg); font-size: 12px; font-weight: 700; padding: 6px 10px; border-radius: 999px; opacity: .85; }

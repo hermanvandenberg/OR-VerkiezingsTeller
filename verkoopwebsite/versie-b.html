@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OR-verkiezingen · Versie B</title>
+<meta name="description" content="Van eerste stap tot nieuwe OR: de hele OR-verkiezing volgens de WOR in één app.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="basis.css">
+<style>
+  :root { --nacht: #0f2233; --nacht-2: #17324a; --oranje: #f08a24; --oranje-soft: #fdebd8; --op-nacht: #eef3f8; --op-nacht-muted: #a9bccd; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --nacht: #0a1724; --nacht-2: #13283c; --oranje-soft: #3b2614; } }
+  :root[data-theme="dark"] { --nacht: #0a1724; --nacht-2: #13283c; --oranje-soft: #3b2614; }
+  .donker { background: var(--nacht); color: var(--op-nacht); }
+  .nav .wrap { display: flex; align-items: center; justify-content: space-between; min-height: 72px; gap: 12px; }
+  .nav .merk { color: var(--op-nacht); }
+  .nav .merk svg { color: var(--oranje); }
+  .knop.oranje { background: var(--oranje); color: #1b1006; }
+  .knop.rand { background: transparent; color: var(--op-nacht); border: 1px solid #3a5670; }
+  .hero { padding: 48px 0 96px; position: relative; overflow: hidden; }
+  .hero h1 { font-size: clamp(38px, 7vw, 76px); letter-spacing: -0.02em; max-width: 12ch; }
+  .hero h1 em { font-style: normal; color: var(--oranje); }
+  .hero p { font-size: 19px; color: var(--op-nacht-muted); max-width: 36em; margin-top: 20px; }
+  .hero .rij { margin-top: 30px; }
+  .cijfers { display: grid; grid-template-columns: repeat(3, auto); gap: 36px; margin-top: 48px; justify-content: start; }
+  @media (max-width: 640px) { .cijfers { grid-template-columns: 1fr 1fr; gap: 20px; } }
+  .cijfers strong { display: block; font-family: var(--display); font-size: 34px; color: var(--op-nacht); }
+  .cijfers span { color: var(--op-nacht-muted); font-size: 14px; }
+  .stempel { position: absolute; right: max(16px, calc(50% - 520px)); top: 90px; width: 220px; height: 220px; border-radius: 50%; border: 3px dashed var(--oranje); display: grid; place-items: center; text-align: center; transform: rotate(-12deg); font-family: var(--display); font-weight: 800; color: var(--oranje); font-size: 26px; line-height: 1.1; }
+  @media (max-width: 960px) { .stempel { display: none; } }
+  section { padding: 64px 0; }
+  .sectiekop { display: grid; gap: 8px; margin-bottom: 32px; max-width: 680px; }
+  .sectiekop h2 { font-size: clamp(26px, 3.4vw, 38px); }
+  .sectiekop p { color: var(--muted); font-size: 17px; }
+  .label { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--oranje); }
+  /* tijdlijn */
+  .tijdlijn { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0; position: relative; }
+  .tijdlijn::before { content: ""; position: absolute; left: 0; right: 0; top: 17px; height: 4px; background: var(--line); border-radius: 2px; }
+  .tijdlijn .stap { position: relative; padding-right: 14px; display: grid; gap: 6px; align-content: start; }
+  .tijdlijn .bol { width: 38px; height: 38px; border-radius: 50%; background: var(--surface); border: 4px solid var(--oranje); display: grid; place-items: center; font-weight: 800; font-size: 14px; position: relative; }
+  .tijdlijn .stap.klaar .bol { background: var(--oranje); color: #1b1006; }
+  .tijdlijn small { color: var(--muted); font-size: 13px; }
+  .tijdlijn .wanneer { font-size: 12px; font-weight: 700; color: var(--oranje); }
+  @media (max-width: 800px) {
+    .tijdlijn { grid-template-columns: 1fr; gap: 18px; }
+    .tijdlijn::before { left: 17px; right: auto; top: 0; bottom: 0; width: 4px; height: auto; }
+    .tijdlijn .stap { grid-template-columns: 38px 1fr; column-gap: 14px; }
+    .tijdlijn .stap > :not(.bol) { grid-column: 2; }
+    .tijdlijn .bol { grid-row: span 3; }
+  }
+  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 800px) { .duo { grid-template-columns: 1fr; } }
+  .groot { padding: 28px; border-radius: 18px; display: grid; gap: 12px; }
+  .groot h3 { font-size: 24px; font-family: var(--display); font-weight: 800; }
+  .groot.oranjevlak { background: var(--oranje-soft); }
+  .groot.nachtvlak { background: var(--nacht-2); color: var(--op-nacht); }
+  .groot.nachtvlak p { color: var(--op-nacht-muted); }
+  .groot ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+  .demo-stroom { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 800px) { .demo-stroom { grid-template-columns: 1fr; } }
+  .demo-stroom .kaart { border-top: 6px solid var(--oranje); }
+  .demo-stroom .nr { font-family: var(--display); font-weight: 800; font-size: 40px; color: var(--oranje); line-height: 1; }
+  .prijsband { display: flex; gap: 24px; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+  .prijsband .prijs { font-family: var(--display); font-weight: 800; font-size: 54px; }
+  .pakketten { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+  .pakketten span { border: 1px solid #3a5670; border-radius: 999px; padding: 6px 14px; font-size: 14px; color: var(--op-nacht-muted); }
+  footer { padding: 32px 0 56px; font-size: 13px; color: var(--op-nacht-muted); }
+</style>
+</head>
+<body>
+<div class="donker">
+  <header class="nav"><div class="wrap">
+    <a class="merk" href="#"><svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="11" fill="currentColor"/><g transform="rotate(-8 24 15)"><rect x="15.5" y="5" width="17" height="20" rx="2" fill="#fff"/><path d="M19.5 15.5l3 3 6-6.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g><rect x="9" y="22" width="30" height="19" rx="3" fill="#fff"/><rect x="16" y="22" width="16" height="2.6" rx="1.3" fill="currentColor"/><text x="24" y="37" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="10" fill="currentColor">OR</text></svg>OR-verkiezingen</a>
+    <div class="rij"><a class="knop rand klein" href="#prijs">Prijzen</a><a class="knop oranje klein" href="demo.html">Demo</a></div>
+  </div></header>
+  <div class="hero"><div class="wrap">
+    <span class="label">Voor ondernemingsraden en kiescommissies</span>
+    <h1 style="margin-top:14px">Van eerste stap tot <em>nieuwe OR.</em></h1>
+    <p>De hele verkiezing volgens de WOR in één app: tijdlijn, kandidaatstelling, stemmen en uitslag. Stemmen is 100% anoniem, zwart op wit.</p>
+    <div class="rij"><a class="knop oranje" href="demo.html">Speel met de demo</a><a class="knop rand" href="#hoe">Zo werkt het</a></div>
+    <div class="cijfers">
+      <div><strong>1 middag</strong><span>om alles klaar te zetten</span></div>
+      <div><strong>100%</strong><span>anoniem stemmen</span></div>
+      <div><strong>0</strong><span>installaties nodig</span></div>
+    </div>
+    <div class="stempel" aria-hidden="true">100%<br>anoniem<br>gestemd</div>
+  </div></div>
+</div>
+
+<main>
+  <section id="hoe"><div class="wrap">
+    <div class="sectiekop"><span class="label">De tijdlijn</span><h2>Jij kiest de stemdag. De app rekent terug.</h2><p>Alle termijnen uit de WOR en je kiesreglement staan op één tijdlijn. Je ziet altijd wat er nu moet gebeuren, en wat daarna komt.</p></div>
+    <div class="tijdlijn">
+      <div class="stap klaar"><span class="bol">✓</span><strong>Aankondigen</strong><span class="wanneer">13 weken vooraf</span><small>Bekendmaking en kiesreglement</small></div>
+      <div class="stap klaar"><span class="bol">✓</span><strong>Kandidaatstelling</strong><span class="wanneer">8 weken vooraf</span><small>Collega's melden zich online aan</small></div>
+      <div class="stap"><span class="bol">3</span><strong>Kandidatenlijst</strong><span class="wanneer">4 weken vooraf</span><small>Vaststellen en bekendmaken</small></div>
+      <div class="stap"><span class="bol">4</span><strong>Stemmen</strong><span class="wanneer">stemweek</span><small>Persoonlijke link per collega</small></div>
+      <div class="stap"><span class="bol">5</span><strong>Uitslag</strong><span class="wanneer">na sluiting</span><small>Pdf voor het proces-verbaal</small></div>
+    </div>
+  </div></section>
+
+  <section style="padding-top:0"><div class="wrap duo">
+    <div class="groot nachtvlak">
+      <span class="label">Het belangrijkste</span>
+      <h3>Niemand kan zien wat jij stemt</h3>
+      <p>Stemmen worden opgeslagen zonder naam, e-mailadres of tijdstip. Er bestaat geen koppeling tussen wie er gestemd heeft en wat er gestemd is. Ook de beheerder en de kiescommissie kunnen dat niet zien.</p>
+    </div>
+    <div class="groot oranjevlak">
+      <span class="label">Voor de commissie</span>
+      <h3>Gemaakt door iemand die het zelf deed</h3>
+      <ul><li>Tot vijf persoonlijke logins met tweestapsverificatie</li><li>Kiezerslijst uit Excel, CSV of Outlook</li><li>Eigen logo en kleuren</li><li>Mailen automatisch of via Word-samenvoegen</li><li>Stembiljet in NL, EN en DE</li></ul>
+    </div>
+  </div></section>
+
+  <section style="background:var(--surface);border-block:1px solid var(--line)"><div class="wrap">
+    <div class="sectiekop"><span class="label">Eerst proberen</span><h2>Wat je in de demo doet, hoef je niet over te doen</h2></div>
+    <div class="demo-stroom">
+      <div class="kaart"><span class="nr">1</span><h3>Probeer</h3><p class="hint">Open de demo zonder account. Zet een verkiezing klaar met kandidaten en een paar proefkiezers.</p></div>
+      <div class="kaart"><span class="nr">2</span><h3>Stem zelf</h3><p class="hint">Breng een proefstem uit zoals je collega's dat straks doen, en bekijk de uitslag als commissie.</p></div>
+      <div class="kaart"><span class="nr">3</span><h3>Koop en ga door</h3><p class="hint">Na betaling komt je licentie direct vrij. Je instellingen, kandidaten en kiezerslijst blijven staan.</p></div>
+    </div>
+  </div></section>
+
+  <section id="prijs" class="donker"><div class="wrap prijsband">
+    <div>
+      <span class="label">Prijs</span>
+      <h2 style="font-size:clamp(26px,3.4vw,38px);margin-top:8px">Per verkiezing, geen abonnement</h2>
+      <div class="pakketten"><span>Klein · tot 100 kiezers</span><span>Middel · tot 300</span><span>Groot · tot 1.000</span></div>
+    </div>
+    <div style="display:grid;gap:10px;justify-items:start">
+      <span style="color:var(--op-nacht-muted)">vanaf</span>
+      <span class="prijs">€395</span>
+      <a class="knop oranje" href="kopen.html">Bestel je licentie</a>
+    </div>
+  </div></section>
+</main>
+<footer class="donker"><div class="wrap">© 2026 OR-verkiezingen.com · Privacy · Voorwaarden · Contact</div></footer>
+<span class="prototype">Ontwerp B · prototype</span>
+</body>
+</html>
