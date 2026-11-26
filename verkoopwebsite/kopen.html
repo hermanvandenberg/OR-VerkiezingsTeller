@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Licentie kopen · OR-verkiezingen</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="basis.css">
+<style>
+  .indeling { display: grid; grid-template-columns: 1fr 340px; gap: 24px; padding: 28px 16px 64px; align-items: start; }
+  @media (max-width: 860px) { .indeling { grid-template-columns: 1fr; } }
+  .pakket { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; cursor: pointer; }
+  .pakket:has(input:checked) { border-color: var(--petrol); background: var(--petrol-soft); }
+  .pakket small { display: block; color: var(--muted); }
+  .pakket strong.p { font-family: var(--display); font-size: 20px; }
+  .betaal { display: flex; gap: 10px; flex-wrap: wrap; }
+  .betaal label { border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; font-weight: 600; font-size: 14px; display: flex; gap: 8px; align-items: center; cursor: pointer; }
+  .betaal label:has(input:checked) { border-color: var(--petrol); background: var(--petrol-soft); }
+  .som { display: grid; gap: 6px; font-size: 14px; }
+  .som div { display: flex; justify-content: space-between; }
+  .som .totaal { font-weight: 800; font-size: 17px; border-top: 1px solid var(--line); padding-top: 8px; }
+  .meenemen { display: grid; gap: 6px; font-size: 14px; }
+  .meenemen li { list-style: none; }
+  .meenemen ul { margin: 0; padding: 0; display: grid; gap: 4px; }
+  .sleutel { font: 700 22px ui-monospace, Menlo, Consolas, monospace; letter-spacing: .08em; background: var(--sunk); padding: 12px 16px; border-radius: 8px; width: fit-content; }
+  .gelukt { text-align: left; }
+  .gelukt .vink { width: 56px; height: 56px; border-radius: 50%; background: var(--ok); color: #fff; display: grid; place-items: center; font-size: 30px; font-weight: 800; }
+</style>
+</head>
+<body>
+<div class="topbalk"><div class="wrap">
+  <a class="merk" href="versie-d.html" data-terug><svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="11" fill="currentColor"/><g transform="rotate(-8 24 15)"><rect x="15.5" y="5" width="17" height="20" rx="2" fill="#fff"/><path d="M19.5 15.5l3 3 6-6.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g><rect x="9" y="22" width="30" height="19" rx="3" fill="#fff"/><rect x="16" y="22" width="16" height="2.6" rx="1.3" fill="currentColor"/><text x="24" y="37" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="10" fill="currentColor">OR</text></svg>OR-verkiezingen</a>
+  <a class="knop licht klein" href="demo.html">Terug naar de demo</a>
+</div></div>
+
+<div class="wrap indeling" id="bestellen">
+  <form class="stapel" id="form">
+    <h1>Licentie kopen</h1>
+    <section class="kaart">
+      <h2>1. Kies je pakket</h2>
+      <label class="pakket"><input type="radio" name="pakket" value="klein" data-prijs="395"><div><strong>Klein</strong><small>Tot 100 kiezers · 2 commissieleden</small></div><strong class="p">€395</strong></label>
+      <label class="pakket"><input type="radio" name="pakket" value="middel" data-prijs="595" checked><div><strong>Middel</strong><small>Tot 300 kiezers · 5 commissieleden · automatisch mailen</small></div><strong class="p">€595</strong></label>
+      <label class="pakket"><input type="radio" name="pakket" value="groot" data-prijs="895"><div><strong>Groot</strong><small>Tot 1.000 kiezers · kiesgroepen · hulp bij inrichten</small></div><strong class="p">€895</strong></label>
+    </section>
+    <section class="kaart">
+      <h2>2. Gegevens voor de factuur</h2>
+      <div class="velden">
+        <label class="veld">Organisatie<input id="f-org" required></label>
+        <label class="veld">KvK-nummer <span class="uitleg">(optioneel)</span><input inputmode="numeric"></label>
+        <label class="veld">Naam beheerder<input required></label>
+        <label class="veld">E-mailadres beheerder <span class="uitleg">hierop komt de licentie</span><input type="email" required></label>
+        <label class="veld">Referentie of inkoopnummer <span class="uitleg">(optioneel)</span><input></label>
+      </div>
+    </section>
+    <section class="kaart">
+      <h2>3. Betalen</h2>
+      <div class="betaal">
+        <label><input type="radio" name="betaal" checked> iDEAL</label>
+        <label><input type="radio" name="betaal"> Creditcard</label>
+        <label><input type="radio" name="betaal"> Op factuur (30 dagen)</label>
+      </div>
+      <p class="hint">Je betaalt veilig via Mollie. Op factuur: de licentie komt direct vrij, de stemperiode kan starten zodra de factuur is betaald.</p>
+    </section>
+  </form>
+
+  <aside class="stapel">
+    <div class="kaart">
+      <h2>Overzicht</h2>
+      <div class="som"><div><span id="s-pakket">Pakket Middel</span><span id="s-prijs">€595,00</span></div><div><span>Btw 21%</span><span id="s-btw">€124,95</span></div><div class="totaal"><span>Totaal</span><span id="s-totaal">€719,95</span></div></div>
+    </div>
+    <div class="kaart" id="mee">
+      <h2>Uit je demo</h2>
+      <div class="meenemen"><ul id="mee-lijst"></ul></div>
+      <label class="rij" style="gap:8px;font-size:14px;font-weight:600"><input type="checkbox" id="mee-ja" checked> Neem mijn demogegevens mee</label>
+      <p class="hint">Proefstemmen worden altijd gewist. De stemperiode start pas als jij hem opent.</p>
+    </div>
+    <button class="knop" form="form" type="submit" style="width:100%">Betalen en licentie vrijgeven</button>
+    <p class="hint">Prototype: er wordt niets afgerekend.</p>
+  </aside>
+</div>
+
+<div class="wrap" id="klaar" hidden style="padding:40px 16px 64px;max-width:720px">
+  <div class="kaart gelukt stapel">
+    <span class="vink">✓</span>
+    <h1>Betaling gelukt. Je licentie is vrijgegeven.</h1>
+    <p>Je licentiecode staat hieronder en is ook gemaild naar de beheerder.</p>
+    <div class="sleutel" id="code"></div>
+    <div class="notitie" id="klaar-mee"></div>
+    <div class="rij"><a class="knop" href="demo.html">Ga naar je verkiezing</a><a class="knop licht" href="#">Factuur downloaden</a></div>
+  </div>
+</div>
+<span class="prototype">Kopen · prototype</span>
+
+<script src="demo-opslag.js"></script>
+<script>
+  const d = laadDemo();
+  const $ = id => document.getElementById(id);
+  const euro = n => "€" + n.toFixed(2).replace(".", ",");
+  const p = new URLSearchParams(location.search).get("pakket");
+  if (p) document.querySelectorAll("input[name=pakket]").forEach(r => r.checked = r.value === p);
+  function reken() {
+    const r = document.querySelector("input[name=pakket]:checked"), prijs = +r.dataset.prijs;
+    $("s-pakket").textContent = "Pakket " + r.value[0].toUpperCase() + r.value.slice(1);
+    $("s-prijs").textContent = euro(prijs); $("s-btw").textContent = euro(prijs * .21); $("s-totaal").textContent = euro(prijs * 1.21);
+  }
+  document.querySelectorAll("input[name=pakket]").forEach(r => r.addEventListener("change", reken)); reken();
+
+  const heeftDemo = d.verkiezing.titel || d.kandidaten.length || d.kiezers.length;
+  if (!heeftDemo) $("mee").hidden = true;
+  const items = [
+    ["Verkiezing", d.verkiezing.titel ? d.verkiezing.titel + (d.verkiezing.org ? " · " + d.verkiezing.org : "") : "niet ingevuld"],
+    ["Kandidaten", d.kandidaten.length], ["Kiezers", d.kiezers.length], ["Instellingen en huisstijl", "ja"], ["Proefstemmen", d.proefstemmen.length + " (worden gewist)"]
+  ];
+  items.forEach(([k, v]) => { const li = document.createElement("li"); li.textContent = "✓ " + k + ": " + v; $("mee-lijst").append(li); });
+  if (d.verkiezing.org) $("f-org").value = d.verkiezing.org;
+
+  $("form").addEventListener("submit", e => {
+    e.preventDefault();
+    const blok = () => Math.random().toString(36).slice(2, 6).toUpperCase().padEnd(4, "X");
+    $("code").textContent = "ORV-" + blok() + "-" + blok() + "-" + blok();
+    $("klaar-mee").innerHTML = heeftDemo && $("mee-ja").checked
+      ? "<strong>Je demogegevens zijn overgezet.</strong><span></span>"
+      : "<strong>Je begint met een lege verkiezing.</strong><span>Je demo blijft nog 30 dagen bewaard.</span>";
+    if (heeftDemo && $("mee-ja").checked) $("klaar-mee").querySelector("span").textContent = samenvatting(d).replace("staan klaar om mee te nemen", "staan klaar") + " Proefstemmen zijn gewist.";
+    try { localStorage.setItem("or-licentie", $("code").textContent); } catch (err) {}
+    $("bestellen").hidden = true; $("klaar").hidden = false; scrollTo(0, 0);
+  });
+</script>
+<script src="preview.js"></script>
+</body>
+</html>

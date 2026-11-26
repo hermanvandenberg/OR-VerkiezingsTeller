@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OR-verkiezingen · Versie A</title>
+<meta name="description" content="Een OR-verkiezing digitaal, 100% anoniem en volgens de WOR. Probeer het gratis uit.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="basis.css">
+<style>
+  .nav { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .nav .wrap { display: flex; align-items: center; justify-content: space-between; min-height: 64px; gap: 12px; }
+  .nav nav { display: flex; gap: 22px; font-size: 14px; font-weight: 600; }
+  .nav nav a { color: var(--ink); text-decoration: none; }
+  @media (max-width: 760px) { .nav nav { display: none; } }
+  .hero { padding: 64px 0 56px; }
+  .hero .wrap { display: grid; grid-template-columns: 1.1fr 1fr; gap: 48px; align-items: center; }
+  @media (max-width: 860px) { .hero .wrap { grid-template-columns: 1fr; } }
+  .hero h1 { font-size: clamp(32px, 5vw, 52px); }
+  .hero p.lead { font-size: 18px; color: var(--muted); margin-top: 16px; max-width: 34em; }
+  .hero .rij { margin-top: 26px; }
+  .vinkjes { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 22px; font-size: 14px; color: var(--muted); }
+  .vinkjes span::before { content: "✓ "; color: var(--ok); font-weight: 800; }
+  /* nagemaakt stembiljet */
+  .scherm { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 24px 60px -24px rgb(13 40 60 / .35); overflow: hidden; }
+  .scherm .balk { display: flex; gap: 6px; padding: 10px 12px; background: var(--sunk); }
+  .scherm .balk i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+  .scherm .inhoud { padding: 20px; display: grid; gap: 12px; }
+  .anon { display: flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 700; color: var(--ok); background: var(--ok-soft); padding: 6px 10px; border-radius: 999px; width: fit-content; }
+  .kandidaat { display: flex; gap: 12px; align-items: center; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .kandidaat.gekozen { border-color: var(--petrol); background: var(--petrol-soft); }
+  .kandidaat .foto { width: 38px; height: 38px; border-radius: 50%; flex: none; display: grid; place-items: center; font-weight: 800; color: #fff; font-size: 14px; }
+  .kandidaat small { display: block; color: var(--muted); font-size: 12px; }
+  .kandidaat .rondje { margin-left: auto; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line); }
+  .kandidaat.gekozen .rondje { border: 6px solid var(--petrol); }
+  section { padding: 56px 0; }
+  section.licht { background: var(--surface); border-block: 1px solid var(--line); }
+  .sectiekop { max-width: 640px; margin-bottom: 28px; display: grid; gap: 8px; }
+  .sectiekop h2 { font-size: clamp(24px, 3vw, 32px); }
+  .sectiekop p { color: var(--muted); }
+  .stappen { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 16px; counter-reset: stap; }
+  .stappen .kaart::before { counter-increment: stap; content: counter(stap); width: 34px; height: 34px; border-radius: 50%; background: var(--petrol); color: var(--on-petrol); display: grid; place-items: center; font-weight: 800; }
+  .anoniem { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: center; }
+  @media (max-width: 860px) { .anoniem { grid-template-columns: 1fr; } }
+  .scheiding { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: center; }
+  .scheiding .kaart { text-align: center; }
+  .scheiding .muur { width: 6px; align-self: stretch; background: repeating-linear-gradient(var(--petrol) 0 10px, transparent 10px 16px); border-radius: 3px; }
+  .functies { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; }
+  .functies .kaart p { color: var(--muted); font-size: 14px; }
+  .prijzen { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 16px; align-items: stretch; }
+  .prijs { font-family: var(--display); font-size: 40px; font-weight: 800; }
+  .prijs small { font-size: 14px; font-family: var(--body); font-weight: 400; color: var(--muted); }
+  .prijzen .kaart.uitgelicht { border: 2px solid var(--petrol); }
+  .prijzen ul { margin: 0; padding-left: 18px; font-size: 14px; color: var(--muted); display: grid; gap: 4px; }
+  details { border-bottom: 1px solid var(--line); padding: 14px 0; }
+  summary { font-weight: 700; cursor: pointer; }
+  details p { margin-top: 8px; color: var(--muted); }
+  .slot { text-align: center; display: grid; gap: 16px; justify-items: center; }
+  footer { padding: 28px 0 48px; color: var(--muted); font-size: 13px; }
+  footer .wrap { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<header class="nav">
+  <div class="wrap">
+    <a class="merk" href="#"><svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="11" fill="currentColor"/><g transform="rotate(-8 24 15)"><rect x="15.5" y="5" width="17" height="20" rx="2" fill="#fff"/><path d="M19.5 15.5l3 3 6-6.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g><rect x="9" y="22" width="30" height="19" rx="3" fill="#fff"/><rect x="16" y="22" width="16" height="2.6" rx="1.3" fill="currentColor"/><text x="24" y="37" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="10" fill="currentColor">OR</text></svg>OR-verkiezingen</a>
+    <nav><a href="#hoe">Hoe het werkt</a><a href="#anoniem">Anoniem</a><a href="#prijzen">Prijzen</a><a href="#vragen">Vragen</a></nav>
+    <a class="knop klein" href="demo.html">Probeer gratis</a>
+  </div>
+</header>
+
+<main>
+  <div class="hero"><div class="wrap">
+    <div>
+      <span class="chip ok">Gemaakt door een OR-voorzitter</span>
+      <h1 style="margin-top:14px">Je OR-verkiezing digitaal. Eerlijk, eenvoudig en 100% anoniem.</h1>
+      <p class="lead">Kandidaten, kiezerslijst, stemmen en uitslag op één plek. Collega's stemmen met een persoonlijke link en niemand kan zien wie wat heeft gestemd. Ook jij niet.</p>
+      <div class="rij">
+        <a class="knop" href="demo.html">Probeer de demo, zonder account</a>
+        <a class="knop licht" href="#prijzen">Bekijk prijzen</a>
+      </div>
+      <div class="vinkjes"><span>Volgens de WOR</span><span>Servers in de EU</span><span>Geen installatie</span><span>Demo-gegevens neem je mee</span></div>
+    </div>
+    <div class="scherm" aria-hidden="true">
+      <div class="balk"><i></i><i></i><i></i></div>
+      <div class="inhoud">
+        <span class="anon">🔒 Jouw stem is 100% anoniem</span>
+        <h3>OR-verkiezing 2027</h3>
+        <p class="hint">Kies één kandidaat. Je kunt je stem daarna niet meer wijzigen.</p>
+        <div class="kandidaat"><span class="foto" style="background:#2f6f8f">SJ</span><div>Sanne Jansen<small>Logistiek</small></div><span class="rondje"></span></div>
+        <div class="kandidaat gekozen"><span class="foto" style="background:#8a4f7d">MB</span><div>Mohamed Bakker<small>Klantenservice</small></div><span class="rondje"></span></div>
+        <div class="kandidaat"><span class="foto" style="background:#b0802f">LV</span><div>Lisa de Vries<small>Productie</small></div><span class="rondje"></span></div>
+        <span class="knop" style="text-align:center">Stem uitbrengen</span>
+      </div>
+    </div>
+  </div></div>
+
+  <section class="licht" id="hoe"><div class="wrap">
+    <div class="sectiekop"><h2>In vier stappen naar een nieuwe OR</h2><p>Je zet de verkiezing in een middag klaar. De app rekent de termijnen uit de WOR voor je terug vanaf de stemdag.</p></div>
+    <div class="stappen">
+      <div class="kaart"><h3>Verkiezing aanmaken</h3><p class="hint">Naam, stemperiode, aantal zetels en je eigen logo en kleuren.</p></div>
+      <div class="kaart"><h3>Kandidaten en kiezers</h3><p class="hint">Kandidaten invoeren en de kiezerslijst inlezen uit Excel, CSV of Outlook.</p></div>
+      <div class="kaart"><h3>Uitnodigen</h3><p class="hint">Iedere collega krijgt een eigen, eenmalige stemlink per mail.</p></div>
+      <div class="kaart"><h3>Uitslag</h3><p class="hint">De kiescommissie ziet de uitslag na sluiting en downloadt die als pdf.</p></div>
+    </div>
+  </div></section>
+
+  <section id="anoniem"><div class="wrap anoniem">
+    <div class="stapel">
+      <div class="sectiekop" style="margin:0"><h2>Anoniem, en dat kunnen we laten zien</h2><p>Wie heeft gestemd en wát er is gestemd, staan los van elkaar opgeslagen. Er is geen knop, geen export en geen beheerder die ze aan elkaar kan koppelen.</p></div>
+      <div class="notitie"><strong>Ook in je kiesreglement te zetten</strong>Een stem heeft geen naam, geen e-mailadres en geen tijdstip. Na de bewaartermijn worden de stemmen automatisch vernietigd.</div>
+    </div>
+    <div class="scheiding" aria-hidden="true">
+      <div class="kaart"><h3>Wie heeft gestemd</h3><p class="hint">✓ link gebruikt<br>✓ link gebruikt<br>○ nog niet</p></div>
+      <div class="muur"></div>
+      <div class="kaart"><h3>Wat is gestemd</h3><p class="hint">1 stem: Bakker<br>1 stem: Jansen<br>geen naam, geen tijd</p></div>
+    </div>
+  </div></section>
+
+  <section class="licht"><div class="wrap">
+    <div class="sectiekop"><h2>Alles wat de kiescommissie nodig heeft</h2></div>
+    <div class="functies">
+      <div class="kaart"><h3>Persoonlijke logins</h3><p>Tot vijf commissieleden, elk met een eigen account en verplichte tweestapsverificatie.</p></div>
+      <div class="kaart"><h3>Je eigen huisstijl</h3><p>Upload je logo of haal de kleuren op van je bedrijfswebsite.</p></div>
+      <div class="kaart"><h3>Mailen zoals jij wilt</h3><p>Automatisch versturen, of via Word-samenvoegen vanuit je eigen Outlook.</p></div>
+      <div class="kaart"><h3>Drie talen</h3><p>Stembiljet in het Nederlands, Engels en Duits.</p></div>
+      <div class="kaart"><h3>Logboek</h3><p>Elke handeling van de commissie wordt vastgelegd, zonder stemgedrag.</p></div>
+      <div class="kaart"><h3>Uitslag als pdf</h3><p>Klaar voor het proces-verbaal en de bekendmaking.</p></div>
+    </div>
+  </div></section>
+
+  <section id="prijzen"><div class="wrap">
+    <div class="sectiekop"><h2>Eén prijs per verkiezing</h2><p>Geen abonnement. Je betaalt per verkiezing, inclusief de stemperiode en een jaar toegang tot de uitslag.</p></div>
+    <div class="prijzen">
+      <div class="kaart"><h3>Klein</h3><div class="prijs">€395 <small>excl. btw</small></div><ul><li>Tot 100 kiezers</li><li>2 commissieleden</li><li>Mailen via Word-samenvoegen</li></ul><a class="knop licht" href="kopen.html?pakket=klein">Kies Klein</a></div>
+      <div class="kaart uitgelicht"><span class="chip ok" style="width:fit-content">Meest gekozen</span><h3>Middel</h3><div class="prijs">€595 <small>excl. btw</small></div><ul><li>Tot 300 kiezers</li><li>5 commissieleden</li><li>Automatisch mailen vanaf or-verkiezingen.com</li></ul><a class="knop" href="kopen.html?pakket=middel">Kies Middel</a></div>
+      <div class="kaart"><h3>Groot</h3><div class="prijs">€895 <small>excl. btw</small></div><ul><li>Tot 1.000 kiezers</li><li>5 commissieleden en kiesgroepen</li><li>Hulp bij het inrichten</li></ul><a class="knop licht" href="kopen.html?pakket=groot">Kies Groot</a></div>
+    </div>
+  </div></section>
+
+  <section class="licht" id="vragen"><div class="wrap" style="max-width:760px">
+    <div class="sectiekop"><h2>Veelgestelde vragen</h2></div>
+    <details open><summary>Kan ik het eerst uitproberen?</summary><p>Ja. In de demo zet je zonder account een verkiezing klaar en breng je een proefstem uit. Koop je daarna een licentie, dan neem je alles wat je hebt ingevuld mee.</p></details>
+    <details><summary>Is het echt anoniem?</summary><p>Ja. Een stem wordt opgeslagen zonder naam, e-mailadres of tijdstip. Ook de beheerder kan een stem niet herleiden.</p></details>
+    <details><summary>Waar staan de gegevens?</summary><p>Op servers in de Europese Unie. Na de bewaartermijn worden stemmen automatisch vernietigd.</p></details>
+    <details><summary>Werkt het op een telefoon?</summary><p>Ja. Collega's stemmen op telefoon, tablet of computer, zonder iets te installeren.</p></details>
+  </div></section>
+
+  <section><div class="wrap slot">
+    <h2 style="font-size:clamp(24px,3vw,32px)">Zie zelf hoe het werkt</h2>
+    <p class="hint" style="font-size:15px">Vijf minuten, geen account, geen betaalgegevens.</p>
+    <a class="knop" href="demo.html">Start de demo</a>
+  </div></section>
+</main>
+<footer><div class="wrap"><span>© 2026 OR-verkiezingen.com</span><span>Privacy · Voorwaarden · Contact</span></div></footer>
+<span class="prototype">Ontwerp A · prototype</span>
+<script src="preview.js"></script>
+</body>
+</html>
