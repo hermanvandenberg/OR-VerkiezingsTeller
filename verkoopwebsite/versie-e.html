@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OR-verkiezingen · Versie E</title>
+<meta name="description" content="Digitale OR-verkiezingen met geheime stemming, voor kiescommissies, HR en bestuurders.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="basis.css">
+<style>
+  /* Formeel en institutioneel: diepgroen, papierwit, serif koppen, documentachtige opbouw */
+  :root {
+    --display: "Source Serif 4", Georgia, serif; --body: "Source Sans 3", "Segoe UI", Arial, sans-serif;
+    --groen: #14403a; --groen-2: #1d5850; --goud: #9a7b3a; --papier: #fcfcfa; --vlak: #f3f4f1;
+    --ink: #1b2422; --muted: #57635f; --line: #d9ddd8; --petrol: #14403a; --petrol-soft: #e3ece9; --on-petrol: #ffffff; --r: 4px;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --groen: #0f2f2b; --groen-2: #184a43; --goud: #d4b36b; --papier: #111614; --vlak: #171e1c; --ink: #e5ebe8; --muted: #9eaaa5; --line: #2c3633; --petrol: #8fd0c3; --petrol-soft: #1a332f; --on-petrol: #0d1412; --surface: #1a2220; } }
+  :root[data-theme="dark"] { --groen: #0f2f2b; --groen-2: #184a43; --goud: #d4b36b; --papier: #111614; --vlak: #171e1c; --ink: #e5ebe8; --muted: #9eaaa5; --line: #2c3633; --petrol: #8fd0c3; --petrol-soft: #1a332f; --on-petrol: #0d1412; --surface: #1a2220; }
+  body { background: var(--papier); font-size: 17px; }
+  h1, h2, h3 { font-weight: 600; }
+  .wrap { max-width: 1120px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .knop { border-radius: 2px; font-weight: 600; padding: 12px 22px; }
+  header { background: var(--groen); color: #fff; }
+  header .wrap { display: flex; justify-content: space-between; align-items: center; min-height: 76px; gap: 16px; }
+  header .merk { color: #fff; font-family: var(--display); font-weight: 600; font-size: 20px; }
+  header .merk svg { color: var(--groen-2); background: #fff; border-radius: 10px; }
+  header nav { display: flex; gap: 28px; font-size: 15px; align-items: center; }
+  header nav a { color: #e4eeeb; text-decoration: none; }
+  header .knop { background: #fff; color: #14403a; }
+  @media (max-width: 820px) { header nav a:not(.knop) { display: none; } }
+  .hero { background: var(--groen); color: #fff; padding: 56px 0 0; }
+  .hero .wrap { display: grid; grid-template-columns: 1fr 440px; gap: 64px; align-items: end; }
+  @media (max-width: 960px) { .hero .wrap { grid-template-columns: 1fr; gap: 40px; } }
+  .hero .tekst { padding-bottom: 72px; }
+  .hero .boven { font-size: 14px; letter-spacing: .12em; text-transform: uppercase; color: #c9d9d4; border-top: 1px solid #3c6b63; padding-top: 14px; width: fit-content; }
+  .hero h1 { font-size: clamp(34px, 4.4vw, 54px); line-height: 1.1; margin-top: 22px; font-weight: 500; }
+  .hero p { color: #d3e1dd; font-size: 19px; margin-top: 20px; max-width: 32em; }
+  .hero .rij { margin-top: 32px; }
+  .hero .knop.wit { background: #fff; color: #14403a; }
+  .hero .knop.lijn { background: transparent; color: #fff; border: 1px solid #5f8b83; }
+  /* proces-verbaal document */
+  .document { background: #fcfcfa; color: #1b2422; border-radius: 2px 2px 0 0; padding: 32px 32px 28px; box-shadow: 0 -20px 50px -20px rgb(0 0 0 / .45); font-size: 14px; display: grid; gap: 14px; }
+  .document .dkop { display: flex; justify-content: space-between; gap: 10px; border-bottom: 2px solid #1b2422; padding-bottom: 12px; }
+  .document h3 { font-family: var(--display); font-size: 20px; color: #1b2422; }
+  .document small { color: #5b6662; }
+  .document table { font-size: 14px; }
+  .document td, .document th { border-bottom: 1px solid #dcdfda; padding: 7px 4px; color: #1b2422; }
+  .document td:last-child, .document th:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+  .document .handtekening { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 10px; }
+  .document .handtekening div { border-top: 1px solid #1b2422; padding-top: 6px; font-size: 12px; color: #5b6662; }
+  .zegel { width: 64px; height: 64px; border-radius: 50%; border: 2px solid #9a7b3a; color: #9a7b3a; display: grid; place-items: center; font: 600 10px/1.15 var(--body); text-align: center; letter-spacing: .06em; text-transform: uppercase; flex: none; }
+  section { padding: 96px 0; }
+  .sectie-kop { display: grid; grid-template-columns: 280px 1fr; gap: 48px; margin-bottom: 48px; }
+  @media (max-width: 860px) { .sectie-kop { grid-template-columns: 1fr; gap: 12px; } }
+  .sectie-kop .nr { font-size: 14px; letter-spacing: .12em; text-transform: uppercase; color: var(--goud); border-top: 1px solid var(--line); padding-top: 12px; }
+  .sectie-kop h2 { font-size: clamp(28px, 3.4vw, 40px); font-weight: 500; line-height: 1.15; }
+  .sectie-kop p { color: var(--muted); margin-top: 14px; max-width: 38em; }
+  .waarborgen { display: grid; grid-template-columns: repeat(4, 1fr); border-top: 2px solid var(--ink); }
+  @media (max-width: 900px) { .waarborgen { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 520px) { .waarborgen { grid-template-columns: 1fr; } }
+  .waarborgen > div { padding: 24px 24px 24px 0; display: grid; gap: 10px; align-content: start; border-bottom: 1px solid var(--line); }
+  .waarborgen h3 { font-family: var(--display); font-size: 22px; font-weight: 500; }
+  .waarborgen p { color: var(--muted); font-size: 16px; }
+  .vlak { background: var(--vlak); border-block: 1px solid var(--line); }
+  .procedure { display: grid; gap: 0; counter-reset: p; border-top: 1px solid var(--line); }
+  .procedure li { list-style: none; display: grid; grid-template-columns: 280px 1fr 200px; gap: 48px; padding: 22px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+  @media (max-width: 860px) { .procedure li { grid-template-columns: 1fr; gap: 6px; } }
+  .procedure li::before { counter-increment: p; content: "Stap " counter(p); display: none; }
+  .procedure b { font-family: var(--display); font-weight: 500; font-size: 21px; }
+  .procedure span { color: var(--muted); }
+  .procedure em { font-style: normal; font-size: 14px; color: var(--goud); font-weight: 600; text-align: right; }
+  @media (max-width: 860px) { .procedure em { text-align: left; } }
+  ol.procedure { padding: 0; margin: 0; }
+  .wie { border: 1px solid var(--line); background: var(--surface); }
+  .wie table { font-size: 16px; min-width: 640px; }
+  .wie th, .wie td { padding: 14px 18px; }
+  .wie thead th { background: var(--vlak); font-weight: 600; border-bottom: 2px solid var(--ink); }
+  .wie td:not(:first-child), .wie th:not(:first-child) { text-align: center; }
+  .wie .ja { color: var(--ok); font-weight: 700; } .wie .nee { color: var(--muted); }
+  .documenten { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  @media (max-width: 860px) { .documenten { grid-template-columns: 1fr; } }
+  .doc { border: 1px solid var(--line); background: var(--surface); padding: 24px; display: grid; gap: 10px; align-content: start; border-top: 3px solid var(--groen-2); }
+  .doc h3 { font-family: var(--display); font-weight: 500; font-size: 20px; }
+  .doc p { color: var(--muted); font-size: 15px; }
+  .doc span { font-size: 13px; color: var(--goud); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; }
+  .tarief { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
+  @media (max-width: 860px) { .tarief { grid-template-columns: 1fr; gap: 32px; } }
+  .tarief table { font-size: 17px; }
+  .tarief td { padding: 16px 0; }
+  .tarief td:last-child { text-align: right; font-family: var(--display); font-size: 22px; font-variant-numeric: tabular-nums; }
+  .tarief td small { display: block; color: var(--muted); font-size: 14px; }
+  .aanvraag { background: var(--surface); border: 1px solid var(--line); padding: 28px; display: grid; gap: 14px; }
+  .aanvraag h3 { font-family: var(--display); font-weight: 500; font-size: 24px; }
+  footer { background: var(--groen); color: #c9d9d4; padding: 48px 0; font-size: 15px; }
+  footer .wrap { display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  footer a { color: #fff; }
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <a class="merk" href="#"><svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="11" fill="currentColor"/><g transform="rotate(-8 24 15)"><rect x="15.5" y="5" width="17" height="20" rx="2" fill="#fff"/><path d="M19.5 15.5l3 3 6-6.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g><rect x="9" y="22" width="30" height="19" rx="3" fill="#fff"/><rect x="16" y="22" width="16" height="2.6" rx="1.3" fill="currentColor"/><text x="24" y="37" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="10" fill="currentColor">OR</text></svg>OR-verkiezingen</a>
+  <nav><a href="#waarborgen">Waarborgen</a><a href="#procedure">Procedure</a><a href="#documenten">Documentatie</a><a href="#tarieven">Tarieven</a><a class="knop" href="demo.html">Demo aanvragen</a></nav>
+</div></header>
+
+<div class="hero"><div class="wrap">
+  <div class="tekst">
+    <div class="boven">Voor kiescommissies, HR en bestuurders</div>
+    <h1>Digitale OR-verkiezingen met een gewaarborgd stemgeheim</h1>
+    <p>Een zorgvuldig ingerichte verkiezing, van kiezerslijst tot proces-verbaal. Zo dat de uitslag voor iedereen in de organisatie boven twijfel staat.</p>
+    <div class="rij"><a class="knop wit" href="demo.html">Bekijk de demo-omgeving</a><a class="knop lijn" href="#documenten">Lees de waarborgen</a></div>
+  </div>
+  <div class="document" aria-hidden="true">
+    <div class="dkop"><div><h3>Proces-verbaal van de uitslag</h3><small>OR-verkiezing 2027 · stemperiode 8 t/m 12 maart</small></div><span class="zegel">Geheime<br>stemming</span></div>
+    <table><thead><tr><th>Kandidaat</th><th>Stemmen</th></tr></thead><tbody>
+      <tr><td>M. Bakker</td><td>58</td></tr><tr><td>S. Jansen</td><td>42</td></tr><tr><td>L. de Vries</td><td>34</td></tr><tr><td>Blanco</td><td>3</td></tr>
+      <tr><td><b>Uitgebrachte stemmen</b></td><td><b>137</b></td></tr><tr><td>Opkomst</td><td>64%</td></tr>
+    </tbody></table>
+    <div class="handtekening"><div>Voorzitter kiescommissie</div><div>Secretaris kiescommissie</div></div>
+  </div>
+</div></div>
+
+<main>
+  <section id="waarborgen"><div class="wrap">
+    <div class="sectie-kop"><div class="nr">Waarborgen</div><div><h2>Vier zaken die een kiescommissie moet kunnen uitleggen</h2><p>Een OR-verkiezing vraagt om vertrouwen van alle medewerkers. Daarom is het systeem op deze vier punten ingericht, en kunnen we per punt laten zien hoe.</p></div></div>
+    <div class="waarborgen">
+      <div><h3>Geheimhouding</h3><p>Stem en kiezer worden apart opgeslagen. Er is geen koppeling, ook niet voor de beheerder.</p></div>
+      <div><h3>Eén persoon, één stem</h3><p>Elke kiezer krijgt een ondertekende stemlink die precies één keer werkt.</p></div>
+      <div><h3>Controleerbaarheid</h3><p>Elke handeling van beheer en commissie staat in het logboek, zonder stemgedrag.</p></div>
+      <div><h3>Privacy</h3><p>Gegevens in de EU, verwerkersovereenkomst, en automatische vernietiging na de bewaartermijn.</p></div>
+    </div>
+  </div></section>
+
+  <section class="vlak" id="procedure"><div class="wrap">
+    <div class="sectie-kop"><div class="nr">Procedure</div><div><h2>Het verloop van de verkiezing</h2><p>De volgorde volgt de WOR en uw kiesreglement. De termijnen rekent het systeem terug vanaf de stemdag.</p></div></div>
+    <ol class="procedure">
+      <li><b>Voorbereiding</b><span>Kiesreglement, kiescommissie en stemdag vastleggen. Kiezerslijst inlezen.</span><em>circa 13 weken vooraf</em></li>
+      <li><b>Kandidaatstelling</b><span>Medewerkers stellen zich kandidaat. De commissie toetst en stelt de lijst vast.</span><em>circa 8 weken vooraf</em></li>
+      <li><b>Bekendmaking</b><span>De kandidatenlijst wordt bekendgemaakt aan alle kiezers.</span><em>circa 4 weken vooraf</em></li>
+      <li><b>Stemming</b><span>Iedere kiezer ontvangt een persoonlijke stemlink en stemt anoniem.</span><em>stemperiode</em></li>
+      <li><b>Uitslag</b><span>Na sluiting stelt de commissie de uitslag vast en downloadt het proces-verbaal.</span><em>direct na sluiting</em></li>
+    </ol>
+  </div></section>
+
+  <section><div class="wrap">
+    <div class="sectie-kop"><div class="nr">Bevoegdheden</div><div><h2>Wie ziet wat</h2><p>De rechten per rol liggen vast in de database. Ze zijn niet door een instelling te omzeilen.</p></div></div>
+    <div class="tabel wie"><table>
+      <thead><tr><th>Gegeven</th><th>Beheerder</th><th>Kiescommissie</th><th>Kiezer</th></tr></thead>
+      <tbody>
+        <tr><td>Kiezerslijst</td><td class="ja">✓</td><td class="ja">✓</td><td class="nee">–</td></tr>
+        <tr><td>Opkomst tijdens stemperiode</td><td class="ja">✓</td><td class="ja">✓</td><td class="nee">–</td></tr>
+        <tr><td>Uitslag na sluiting</td><td class="ja">✓</td><td class="ja">✓</td><td class="nee">–</td></tr>
+        <tr><td>Logboek</td><td class="ja">✓</td><td class="ja">✓</td><td class="nee">–</td></tr>
+        <tr><td>Wie op wie heeft gestemd</td><td class="nee">nooit</td><td class="nee">nooit</td><td class="nee">nooit</td></tr>
+      </tbody>
+    </table></div>
+  </div></section>
+
+  <section class="vlak" id="documenten"><div class="wrap">
+    <div class="sectie-kop"><div class="nr">Documentatie</div><div><h2>Stukken voor uw dossier</h2><p>Voor de ondernemingsraad, de bestuurder en uw privacy officer.</p></div></div>
+    <div class="documenten">
+      <div class="doc"><span>Pdf</span><h3>Beveiligingsbeschrijving</h3><p>Hoe het stemgeheim technisch is geborgd, in begrijpelijke taal.</p><a href="#">Downloaden</a></div>
+      <div class="doc"><span>Model</span><h3>Tekst voor het kiesreglement</h3><p>Een artikel over digitaal stemmen dat u in uw eigen reglement kunt opnemen.</p><a href="#">Downloaden</a></div>
+      <div class="doc"><span>Overeenkomst</span><h3>Verwerkersovereenkomst</h3><p>Sluit u af bij de aankoop. Vooraf inzien is mogelijk.</p><a href="#">Inzien</a></div>
+    </div>
+  </div></section>
+
+  <section id="tarieven"><div class="wrap tarief">
+    <div>
+      <div class="sectie-kop" style="grid-template-columns:1fr;margin-bottom:24px"><div class="nr">Tarieven</div><div><h2>Een vast bedrag per verkiezing</h2><p>Inclusief stemperiode, proces-verbaal en twaalf maanden toegang. Bedragen exclusief btw.</p></div></div>
+      <table><tbody>
+        <tr><td>Tot 100 kiezers<small>2 commissieleden</small></td><td>€ 395</td></tr>
+        <tr><td>Tot 300 kiezers<small>5 commissieleden, automatisch mailen</small></td><td>€ 595</td></tr>
+        <tr><td>Tot 1.000 kiezers<small>kiesgroepen, begeleiding bij inrichting</small></td><td>€ 895</td></tr>
+        <tr><td>Meer dan 1.000 kiezers<small>op maat</small></td><td>offerte</td></tr>
+      </tbody></table>
+    </div>
+    <form class="aanvraag" onsubmit="event.preventDefault(); this.querySelector('.melding-ok').hidden=false">
+      <h3>Offerte of kennismaking</h3>
+      <p class="hint" style="font-size:15px">Wij nemen binnen twee werkdagen contact op.</p>
+      <label class="veld" for="e-org">Organisatie<input id="e-org" required></label>
+      <div class="velden"><label class="veld" for="e-naam">Naam<input id="e-naam" required></label><label class="veld" for="e-mail">E-mailadres<input id="e-mail" type="email" required></label></div>
+      <label class="veld" for="e-aantal">Aantal kiezers (ongeveer)<input id="e-aantal" inputmode="numeric"></label>
+      <div class="rij"><button class="knop" type="submit">Aanvraag versturen</button><a href="demo.html">of start direct de demo</a></div>
+      <p class="melding-ok" hidden style="color:var(--ok);font-weight:600">Bedankt. Dit is een prototype, er is niets verstuurd.</p>
+    </form>
+  </div></section>
+</main>
+<footer><div class="wrap"><span>© 2026 OR-verkiezingen.com · Gegevens in de EU</span><span><a href="#">Privacyverklaring</a> · <a href="#">Voorwaarden</a> · <a href="#">Contact</a></span></div></footer>
+<span class="prototype">Ontwerp E · prototype</span>
+</body>
+</html>

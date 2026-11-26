@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OR-verkiezingen · Versie F</title>
+<meta name="description" content="Bekijk het product: beheer, stembiljet en uitslag van een anonieme OR-verkiezing.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="basis.css">
+<style>
+  /* Product voorop: grote productweergave in de kop, tabbladen, schema van de anonimiteit */
+  :root {
+    --display: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif; --body: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
+    --bg: #f6f7fb; --surface: #ffffff; --sunk: #eef0f6; --line: #e1e4ee; --ink: #12162b; --muted: #5b6280;
+    --blauw: #2447c9; --blauw-soft: #e6ebff; --petrol: #2447c9; --petrol-soft: #e6ebff; --on-petrol: #ffffff; --r: 14px;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0d1020; --surface: #151a2e; --sunk: #0a0d1a; --line: #262d47; --ink: #e8eaf4; --muted: #9aa1bf; --blauw: #8ea6ff; --blauw-soft: #1c2550; --petrol: #8ea6ff; --petrol-soft: #1c2550; --on-petrol: #0d1020; } }
+  :root[data-theme="dark"] { --bg: #0d1020; --surface: #151a2e; --sunk: #0a0d1a; --line: #262d47; --ink: #e8eaf4; --muted: #9aa1bf; --blauw: #8ea6ff; --blauw-soft: #1c2550; --petrol: #8ea6ff; --petrol-soft: #1c2550; --on-petrol: #0d1020; }
+  body { font-size: 16px; }
+  h1, h2, h3 { letter-spacing: -0.02em; font-weight: 800; }
+  .wrap { max-width: 1180px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .knop { border-radius: 999px; padding: 11px 20px; font-weight: 700; }
+  .nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 72px; }
+  .nav .merk { font-family: var(--body); font-weight: 800; font-size: 17px; }
+  .nav .merk svg { color: var(--blauw); }
+  .nav nav { display: flex; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px; }
+  .nav nav a { color: var(--ink); text-decoration: none; font-size: 14px; font-weight: 600; padding: 7px 14px; border-radius: 999px; }
+  .nav nav a:hover { background: var(--sunk); }
+  @media (max-width: 860px) { .nav nav { display: none; } }
+  .hero { text-align: center; padding: 56px 0 0; }
+  .pil { display: inline-flex; gap: 8px; align-items: center; font-size: 13px; font-weight: 600; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px 6px 8px; }
+  .pil b { background: var(--blauw-soft); color: var(--blauw); border-radius: 999px; padding: 2px 8px; font-size: 12px; }
+  .hero h1 { font-size: clamp(36px, 5.6vw, 66px); line-height: 1.04; max-width: 16ch; margin: 22px auto 0; }
+  .hero p { font-size: 19px; color: var(--muted); max-width: 36em; margin: 20px auto 0; }
+  .hero .rij { justify-content: center; margin-top: 30px; }
+  /* productweergave */
+  .product { margin-top: 56px; display: grid; gap: 16px; justify-items: center; }
+  .tabs { display: inline-flex; gap: 4px; background: var(--sunk); border-radius: 999px; padding: 4px; flex-wrap: wrap; justify-content: center; }
+  .tabs button { font: 600 14px var(--body); border: 0; background: transparent; color: var(--muted); padding: 8px 16px; border-radius: 999px; cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 3px rgb(18 22 43 / .12); }
+  .venster { width: 100%; max-width: 1040px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px 16px 0 0; border-bottom: 0; box-shadow: 0 -8px 60px -20px rgb(36 71 201 / .35); overflow: hidden; text-align: left; min-height: 400px; }
+  .venster .balk { display: flex; gap: 8px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+  .venster .balk i { width: 11px; height: 11px; border-radius: 50%; background: var(--line); }
+  .venster .balk span { margin-left: 12px; font-size: 12px; color: var(--muted); background: var(--sunk); padding: 4px 12px; border-radius: 6px; }
+  .paneel { padding: 24px; display: grid; gap: 18px; }
+  .paneel[hidden] { display: none; }
+  .b-raster { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 720px) { .b-raster { grid-template-columns: 1fr 1fr; } }
+  .stat { border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .stat small { color: var(--muted); font-size: 13px; }
+  .stat b { display: block; font-size: 26px; font-variant-numeric: tabular-nums; }
+  .stat .voortgang { height: 6px; background: var(--sunk); border-radius: 3px; margin-top: 8px; overflow: hidden; }
+  .stat .voortgang i { display: block; height: 100%; background: var(--blauw); border-radius: 3px; }
+  .twee-kol { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; }
+  @media (max-width: 720px) { .twee-kol { grid-template-columns: 1fr; } }
+  .blok { border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+  .blok h3 { font-size: 15px; }
+  .blok table { font-size: 14px; }
+  .blok td { padding: 7px 4px; }
+  .stappen-mini { display: grid; gap: 10px; font-size: 14px; }
+  .stappen-mini div { display: flex; gap: 10px; align-items: center; }
+  .stappen-mini .bol { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 800; background: var(--ok); color: #fff; flex: none; }
+  .stappen-mini .bol.nu { background: var(--blauw); }
+  .stappen-mini .bol.later { background: var(--sunk); color: var(--muted); }
+  .telefoon-rij { display: grid; grid-template-columns: 320px 1fr; gap: 32px; align-items: center; }
+  @media (max-width: 720px) { .telefoon-rij { grid-template-columns: 1fr; } }
+  .telefoon { border: 8px solid var(--ink); border-radius: 32px; padding: 18px 14px; display: grid; gap: 10px; background: var(--bg); max-width: 320px; margin: 0 auto; }
+  .optie { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); font-size: 14px; }
+  .optie.aan { border-color: var(--blauw); background: var(--blauw-soft); }
+  .optie .r { margin-left: auto; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--line); }
+  .optie.aan .r { border: 6px solid var(--blauw); }
+  .uitslag-balk { display: grid; gap: 4px; font-size: 14px; }
+  .uitslag-balk .b { height: 10px; background: var(--sunk); border-radius: 5px; overflow: hidden; }
+  .uitslag-balk .b i { display: block; height: 100%; background: var(--blauw); border-radius: 5px; }
+  section { padding: 96px 0; }
+  .wit { background: var(--surface); border-block: 1px solid var(--line); }
+  .kop2 { text-align: center; max-width: 680px; margin: 0 auto 48px; display: grid; gap: 12px; }
+  .kop2 h2 { font-size: clamp(28px, 3.6vw, 42px); line-height: 1.1; }
+  .kop2 p { color: var(--muted); font-size: 18px; }
+  .schema { max-width: 900px; margin: 0 auto; }
+  .schema svg { width: 100%; height: auto; display: block; }
+  .schema text { font-family: var(--body); }
+  .bento { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
+  .bento > div { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 24px; display: grid; gap: 8px; align-content: start; }
+  .bento p { color: var(--muted); font-size: 15px; }
+  .s2 { grid-column: span 2; } .s3 { grid-column: span 3; } .s4 { grid-column: span 4; }
+  @media (max-width: 860px) { .bento > div { grid-column: span 6; } }
+  .bento .groot-getal { font-size: 44px; font-weight: 800; color: var(--blauw); line-height: 1; }
+  .prijzen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 1000px; margin: 0 auto; }
+  @media (max-width: 860px) { .prijzen { grid-template-columns: 1fr; } }
+  .plan { border: 1px solid var(--line); border-radius: var(--r); padding: 28px; display: grid; gap: 14px; background: var(--bg); align-content: start; }
+  .plan.uit { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .plan.uit .hint, .plan.uit li { color: color-mix(in srgb, var(--bg) 72%, var(--ink)); }
+  .plan.uit .knop { background: var(--bg); color: var(--ink); }
+  .plan .bedrag { font-size: 44px; font-weight: 800; line-height: 1; }
+  .plan ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; font-size: 15px; color: var(--muted); }
+  .plan li::before { content: "✓  "; color: var(--blauw); font-weight: 800; }
+  .plan.uit li::before { color: inherit; }
+  .slot { background: var(--blauw); color: #fff; border-radius: 24px; padding: 56px 32px; text-align: center; display: grid; gap: 16px; justify-items: center; }
+  .slot h2 { font-size: clamp(28px, 3.6vw, 40px); }
+  .slot p { opacity: .85; font-size: 18px; }
+  .slot .knop { background: #fff; color: #2447c9; }
+  footer { padding: 40px 0 56px; color: var(--muted); font-size: 14px; }
+  footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer span:last-child { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+</style>
+</head>
+<body>
+<header class="nav"><div class="wrap">
+  <a class="merk" href="#"><svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="11" fill="currentColor"/><g transform="rotate(-8 24 15)"><rect x="15.5" y="5" width="17" height="20" rx="2" fill="#fff"/><path d="M19.5 15.5l3 3 6-6.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g><rect x="9" y="22" width="30" height="19" rx="3" fill="#fff"/><rect x="16" y="22" width="16" height="2.6" rx="1.3" fill="currentColor"/><text x="24" y="37" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="10" fill="currentColor">OR</text></svg>OR-verkiezingen</a>
+  <nav><a href="#product">Product</a><a href="#anoniem">Anonimiteit</a><a href="#functies">Functies</a><a href="#prijzen">Prijzen</a></nav>
+  <a class="knop" href="demo.html">Probeer gratis</a>
+</div></header>
+
+<main>
+  <div class="hero" id="product"><div class="wrap">
+    <span class="pil"><b>Binnenkort</b> Kandidaatstelling en WOR-tijdlijn</span>
+    <h1>OR-verkiezingen zonder gedoe en zonder twijfel</h1>
+    <p>Richt je verkiezing in, nodig collega's uit en ontvang de uitslag als pdf. Elke stem is anoniem, ook voor de beheerder.</p>
+    <div class="rij"><a class="knop" href="demo.html">Start de demo</a><a class="knop licht" href="#prijzen">Prijzen</a></div>
+
+    <div class="product">
+      <div class="tabs" role="tablist">
+        <button role="tab" aria-selected="true" data-tab="beheer">Beheer</button>
+        <button role="tab" aria-selected="false" data-tab="stem">Stembiljet</button>
+        <button role="tab" aria-selected="false" data-tab="uitslag">Uitslag</button>
+      </div>
+      <div class="venster">
+        <div class="balk"><i></i><i></i><i></i><span>app.or-verkiezingen.com</span></div>
+        <div class="paneel" data-paneel="beheer">
+          <div class="rij" style="justify-content:space-between"><h3 style="font-size:20px">OR-verkiezing 2027</h3><span class="chip ok">Stemperiode open · sluit vrijdag 17:00</span></div>
+          <div class="b-raster">
+            <div class="stat"><small>Kiezers</small><b>214</b></div>
+            <div class="stat"><small>Gestemd</small><b>146</b><div class="voortgang"><i style="width:68%"></i></div></div>
+            <div class="stat"><small>Kandidaten</small><b>9</b></div>
+            <div class="stat"><small>Zetels</small><b>7</b></div>
+          </div>
+          <div class="twee-kol">
+            <div class="blok"><h3>Logboek</h3><table><tbody>
+              <tr><td>Uitnodigingen verstuurd aan 214 kiezers</td><td class="hint">ma 08:05</td></tr>
+              <tr><td>Commissielid ingelogd</td><td class="hint">di 16:12</td></tr>
+              <tr><td>Stemperiode geopend</td><td class="hint">ma 08:00</td></tr>
+            </tbody></table></div>
+            <div class="blok"><h3>Tijdlijn</h3><div class="stappen-mini">
+              <div><span class="bol">✓</span>Kandidatenlijst vastgesteld</div>
+              <div><span class="bol">✓</span>Uitnodigingen verstuurd</div>
+              <div><span class="bol nu">4</span><b>Stemmen</b></div>
+              <div><span class="bol later">5</span>Uitslag vaststellen</div>
+            </div></div>
+          </div>
+        </div>
+        <div class="paneel" data-paneel="stem" hidden>
+          <div class="telefoon-rij">
+            <div class="telefoon">
+              <span class="chip ok" style="width:fit-content">🔒 Jouw stem is 100% anoniem</span>
+              <strong>Kies één kandidaat</strong>
+              <div class="optie">Sanne Jansen<span class="r"></span></div>
+              <div class="optie aan">Mohamed Bakker<span class="r"></span></div>
+              <div class="optie">Lisa de Vries<span class="r"></span></div>
+              <div class="optie">Blanco<span class="r"></span></div>
+              <span class="knop" style="text-align:center">Stem uitbrengen</span>
+            </div>
+            <div class="stapel">
+              <h3 style="font-size:24px">Stemmen in een minuut</h3>
+              <p class="hint" style="font-size:16px">Collega's openen hun persoonlijke link op telefoon of computer. Geen account, geen app. Het stembiljet toont jullie logo en kleuren, in het Nederlands, Engels of Duits.</p>
+              <p class="hint" style="font-size:16px">Na een bevestiging is de stem definitief. De link werkt daarna niet meer.</p>
+            </div>
+          </div>
+        </div>
+        <div class="paneel" data-paneel="uitslag" hidden>
+          <div class="rij" style="justify-content:space-between"><h3 style="font-size:20px">Uitslag OR-verkiezing 2027</h3><span class="knop licht klein">Download pdf</span></div>
+          <div class="twee-kol">
+            <div class="blok" style="gap:14px">
+              <div class="uitslag-balk"><div class="rij" style="justify-content:space-between"><span>Mohamed Bakker</span><b>58</b></div><div class="b"><i style="width:100%"></i></div></div>
+              <div class="uitslag-balk"><div class="rij" style="justify-content:space-between"><span>Sanne Jansen</span><b>42</b></div><div class="b"><i style="width:72%"></i></div></div>
+              <div class="uitslag-balk"><div class="rij" style="justify-content:space-between"><span>Lisa de Vries</span><b>34</b></div><div class="b"><i style="width:59%"></i></div></div>
+              <div class="uitslag-balk"><div class="rij" style="justify-content:space-between"><span>Blanco</span><b>3</b></div><div class="b"><i style="width:5%"></i></div></div>
+            </div>
+            <div class="blok"><h3>Samenvatting</h3><table><tbody>
+              <tr><td>Uitgebrachte stemmen</td><td><b>137</b></td></tr><tr><td>Opkomst</td><td><b>64%</b></td></tr><tr><td>Vernietiging stemmen</td><td>over 3 maanden</td></tr>
+            </tbody></table></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+
+  <section class="wit" id="anoniem"><div class="wrap">
+    <div class="kop2"><h2>Zo blijft elke stem anoniem</h2><p>Op het moment van stemmen wordt alleen bijgehouden dát iemand gestemd heeft. De stem zelf gaat zonder naam, adres of tijdstip in een aparte bak.</p></div>
+    <div class="schema" role="img" aria-label="Schema: de kiezer gebruikt een stemlink. Daarna gaat 'heeft gestemd' naar de kiezerslijst en de stem zonder naam naar de stembus. Tussen beide is geen koppeling.">
+      <svg viewBox="0 0 900 260">
+        <rect x="10" y="95" width="170" height="70" rx="14" fill="var(--sunk)" stroke="var(--line)"/>
+        <text x="95" y="125" text-anchor="middle" font-size="16" font-weight="700" fill="var(--ink)">Kiezer</text>
+        <text x="95" y="146" text-anchor="middle" font-size="13" fill="var(--muted)">persoonlijke link</text>
+        <path d="M180 130 H300" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#pijl)"/>
+        <rect x="300" y="95" width="180" height="70" rx="14" fill="var(--blauw)"/>
+        <text x="390" y="125" text-anchor="middle" font-size="16" font-weight="700" fill="var(--on-petrol)">Stem uitbrengen</text>
+        <text x="390" y="146" text-anchor="middle" font-size="13" fill="var(--on-petrol)" opacity=".85">link wordt ongeldig</text>
+        <path d="M480 115 C540 115 540 50 610 50" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#pijl)"/>
+        <path d="M480 145 C540 145 540 210 610 210" stroke="var(--muted)" stroke-width="2" fill="none" marker-end="url(#pijl)"/>
+        <rect x="610" y="15" width="280" height="70" rx="14" fill="var(--surface)" stroke="var(--line)"/>
+        <text x="750" y="45" text-anchor="middle" font-size="16" font-weight="700" fill="var(--ink)">Kiezerslijst</text>
+        <text x="750" y="66" text-anchor="middle" font-size="13" fill="var(--muted)">alleen: heeft gestemd ✓</text>
+        <rect x="610" y="175" width="280" height="70" rx="14" fill="var(--surface)" stroke="var(--line)"/>
+        <text x="750" y="205" text-anchor="middle" font-size="16" font-weight="700" fill="var(--ink)">Stembus</text>
+        <text x="750" y="226" text-anchor="middle" font-size="13" fill="var(--muted)">alleen: de keuze, geen naam of tijd</text>
+        <path d="M750 92 V168" stroke="var(--rood)" stroke-width="2.5" stroke-dasharray="6 6"/>
+        <rect x="690" y="116" width="120" height="28" rx="14" fill="var(--rood-soft)"/>
+        <text x="750" y="135" text-anchor="middle" font-size="13" font-weight="700" fill="var(--rood)">geen koppeling</text>
+        <defs><marker id="pijl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="var(--muted)"/></marker></defs>
+      </svg>
+    </div>
+  </div></section>
+
+  <section id="functies"><div class="wrap">
+    <div class="kop2"><h2>Alles voor de kiescommissie</h2><p>Gebouwd door een OR-voorzitter, getest in een echte verkiezing.</p></div>
+    <div class="bento">
+      <div class="s4"><h3>Kiezerslijst in één keer</h3><p>Plak adressen uit Outlook of lees een Excel- of CSV-bestand in. Dubbele en ongeldige adressen worden eruit gehaald.</p></div>
+      <div class="s2"><span class="groot-getal">3</span><h3>talen</h3><p>Nederlands, Engels en Duits.</p></div>
+      <div class="s2"><span class="groot-getal">2FA</span><h3>voor iedere login</h3><p>Tot vijf persoonlijke commissieaccounts.</p></div>
+      <div class="s4"><h3>Uitnodigen zoals het bij jullie past</h3><p>Automatisch versturen vanaf or-verkiezingen.com, of via Word-samenvoegen vanuit je eigen Outlook als IT dat liever heeft.</p></div>
+      <div class="s3"><h3>Jullie huisstijl</h3><p>Logo uploaden of de kleuren van de bedrijfswebsite ophalen.</p></div>
+      <div class="s3"><h3>Proces-verbaal als pdf</h3><p>Direct na sluiting, met opkomst en stemmen per kandidaat.</p></div>
+    </div>
+  </div></section>
+
+  <section class="wit" id="prijzen"><div class="wrap">
+    <div class="kop2"><h2>Eén prijs per verkiezing</h2><p>Geen abonnement. Excl. btw. Begin gratis in de demo en neem alles mee.</p></div>
+    <div class="prijzen">
+      <div class="plan"><h3>Klein</h3><span class="bedrag">€395</span><span class="hint">tot 100 kiezers</span><ul><li>2 commissieleden</li><li>Word-samenvoegen</li><li>Uitslag als pdf</li></ul><a class="knop licht" href="kopen.html?pakket=klein">Kies Klein</a></div>
+      <div class="plan uit"><h3>Middel</h3><span class="bedrag">€595</span><span class="hint">tot 300 kiezers</span><ul><li>5 commissieleden</li><li>Automatisch mailen</li><li>Uitslag als pdf</li></ul><a class="knop" href="kopen.html?pakket=middel">Kies Middel</a></div>
+      <div class="plan"><h3>Groot</h3><span class="bedrag">€895</span><span class="hint">tot 1.000 kiezers</span><ul><li>Kiesgroepen</li><li>Hulp bij inrichten</li><li>Alles uit Middel</li></ul><a class="knop licht" href="kopen.html?pakket=groot">Kies Groot</a></div>
+    </div>
+  </div></section>
+
+  <section><div class="wrap">
+    <div class="slot"><h2>Zie het zelf in vijf minuten</h2><p>Geen account nodig. Wat je invult, staat klaar als je koopt.</p><a class="knop" href="demo.html">Start de demo</a></div>
+  </div></section>
+</main>
+<footer><div class="wrap"><span>© 2026 OR-verkiezingen.com</span><span><a href="#">Privacy</a><a href="#">Voorwaarden</a><a href="#">Verwerkersovereenkomst</a><a href="#">Contact</a></span></div></footer>
+<span class="prototype">Ontwerp F · prototype</span>
+<script>
+  const tabs = document.querySelectorAll("[data-tab]");
+  tabs.forEach(t => t.addEventListener("click", () => {
+    tabs.forEach(x => x.setAttribute("aria-selected", x === t));
+    document.querySelectorAll("[data-paneel]").forEach(p => p.hidden = p.dataset.paneel !== t.dataset.tab);
+  }));
+</script>
+</body>
+</html>
