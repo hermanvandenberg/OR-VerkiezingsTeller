@@ -29,7 +29,7 @@
 </head>
 <body>
 <div class="topbalk"><div class="wrap">
-  <a class="merk" href="versie-a.html"><svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="11" fill="currentColor"/><g transform="rotate(-8 24 15)"><rect x="15.5" y="5" width="17" height="20" rx="2" fill="#fff"/><path d="M19.5 15.5l3 3 6-6.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g><rect x="9" y="22" width="30" height="19" rx="3" fill="#fff"/><rect x="16" y="22" width="16" height="2.6" rx="1.3" fill="currentColor"/><text x="24" y="37" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="10" fill="currentColor">OR</text></svg>OR-verkiezingen</a>
+  <a class="merk" href="versie-d.html" data-terug><svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="11" fill="currentColor"/><g transform="rotate(-8 24 15)"><rect x="15.5" y="5" width="17" height="20" rx="2" fill="#fff"/><path d="M19.5 15.5l3 3 6-6.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></g><rect x="9" y="22" width="30" height="19" rx="3" fill="#fff"/><rect x="16" y="22" width="16" height="2.6" rx="1.3" fill="currentColor"/><text x="24" y="37" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="10" fill="currentColor">OR</text></svg>OR-verkiezingen</a>
   <a class="knop licht klein" href="demo.html">Terug naar de demo</a>
 </div></div>
 
@@ -86,7 +86,7 @@
     <p>Je licentiecode staat hieronder en is ook gemaild naar de beheerder.</p>
     <div class="sleutel" id="code"></div>
     <div class="notitie" id="klaar-mee"></div>
-    <div class="rij"><a class="knop" href="#">Ga naar je verkiezing</a><a class="knop licht" href="#">Factuur downloaden</a></div>
+    <div class="rij"><a class="knop" href="demo.html">Ga naar je verkiezing</a><a class="knop licht" href="#">Factuur downloaden</a></div>
   </div>
 </div>
 <span class="prototype">Kopen · prototype</span>
@@ -122,8 +122,10 @@
       ? "<strong>Je demogegevens zijn overgezet.</strong><span></span>"
       : "<strong>Je begint met een lege verkiezing.</strong><span>Je demo blijft nog 30 dagen bewaard.</span>";
     if (heeftDemo && $("mee-ja").checked) $("klaar-mee").querySelector("span").textContent = samenvatting(d).replace("staan klaar om mee te nemen", "staan klaar") + " Proefstemmen zijn gewist.";
+    try { localStorage.setItem("or-licentie", $("code").textContent); } catch (err) {}
     $("bestellen").hidden = true; $("klaar").hidden = false; scrollTo(0, 0);
   });
 </script>
+<script src="preview.js"></script>
 </body>
 </html>

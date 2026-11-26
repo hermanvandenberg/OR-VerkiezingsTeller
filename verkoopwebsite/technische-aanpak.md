@@ -16,6 +16,7 @@ Status: voorwerk (26-11-2026). Niets hiervan staat live. De huidige app blijft o
 | `versie-e.html` | Ontwerp E "Formeel en institutioneel": diepgroen met serif, proces-verbaal in de kop, waarborgen, procedure, wie ziet wat, offerteformulier. |
 | `versie-f.html` | Ontwerp F "Product voorop": productvenster met tabbladen, schema van de anonimiteit, prijzen. |
 | `index.html` | Overzicht van alle ontwerpen. |
+| `preview.js` | Previewbalk onderaan elke pagina (wisselen tussen ontwerpen, demo en kopen). Bij livegang de regel `<script src="preview.js">` uit elke pagina halen. |
 
 De drie landingspagina's delen dezelfde demo en koopflow. De prijzen (€395 / €595 / €895 excl. btw) zijn een voorstel op basis van het marktonderzoek van 16-11.
 
